@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-10T11:11:30.854Z",
+  "updatedAt": "2026-10-10T11:22:05.816Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -264,15 +264,15 @@
       "type": "in",
       "date": "۱۴۰۵/۰۷/۱۵",
       "time": "۰۹:۵۴",
-      "notes": "وزن صنوبر 14995\nباسکول5029\nشکر نیشابور",
+      "notes": "وزن صنوبر 14995\nباسکول5029\nدهقان\nشکر نیشابور",
       "invoiceNumber": "210454",
       "product": "شکر",
       "quantity": "15005",
       "unit": "kg",
       "totalWeight": "15005",
       "party": "نیشابور",
-      "driver": "",
-      "updatedAt": 1791630064060,
+      "driver": "متفرقه",
+      "updatedAt": 1791631281285,
       "deleted": false
     },
     {
@@ -674,6 +674,86 @@
       "driver": "رحیمی",
       "updatedAt": 1791630227196,
       "deleted": false
+    },
+    {
+      "id": 1791631224430,
+      "type": "in",
+      "date": "۱۴۰۵/۰۷/۱۲",
+      "time": "۱۴:۴۹",
+      "notes": "ب 5014\nوزن صنوبر 25005\nراننده مظلوم",
+      "invoiceNumber": "5548513",
+      "product": "شکر",
+      "quantity": "25010",
+      "unit": "kg",
+      "totalWeight": "25010",
+      "party": "شهرکرد",
+      "driver": "متفرقه",
+      "updatedAt": 1791631224431,
+      "deleted": false
+    },
+    {
+      "id": 1791631094655,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۲",
+      "time": "۱۴:۴۷",
+      "notes": "",
+      "invoiceNumber": "",
+      "product": "شکر",
+      "quantity": "40",
+      "unit": "kg",
+      "totalWeight": "40",
+      "party": "حاج اقا",
+      "driver": "حاج آقا",
+      "updatedAt": 1791631094655,
+      "deleted": false
+    },
+    {
+      "id": 1791631057261,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۲",
+      "time": "۱۴:۴۴",
+      "notes": "باسکول 5013\nراننده محمدی\nتماس 09360918312\nماشین تریلی 151ن51 هرات",
+      "invoiceNumber": "",
+      "product": "قند شکسته",
+      "quantity": "21000",
+      "unit": "kg",
+      "totalWeight": "21000",
+      "party": "افغانستان",
+      "driver": "متفرقه",
+      "updatedAt": 1791631057261,
+      "deleted": false
+    },
+    {
+      "id": 1791630890231,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۲",
+      "time": "۱۴:۴۴",
+      "notes": "شکر جوین",
+      "invoiceNumber": "",
+      "product": "شکر",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "قنادی",
+      "driver": "رحیمی",
+      "updatedAt": 1791630890231,
+      "deleted": false
+    },
+    {
+      "id": 1791630846963,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۲",
+      "time": "۱۴:۴۲",
+      "notes": "شکر کوهرنگ",
+      "invoiceNumber": "",
+      "product": "شکر",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "قنادی",
+      "driver": "رحیمی",
+      "updatedAt": 1791630846963,
+      "deleted": false
     }
   ],
   "products": [
@@ -727,7 +807,8 @@
     "خاورینیا",
     "متفرقه",
     "احمد شایسته",
-    "جونی"
+    "جونی",
+    "افغانستان"
   ],
   "drivers": [
     "صادق موحدی",
