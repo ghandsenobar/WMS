@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-10T11:40:22.149Z",
+  "updatedAt": "2026-10-10T11:42:53.952Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -946,6 +946,22 @@
       "driver": "متفرقه",
       "updatedAt": 1791632185776,
       "deleted": false
+    },
+    {
+      "id": 1791632564035,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۸",
+      "time": "۱۵:۱۱",
+      "notes": "کارت کشاورزی 500/000 تومان\nتوسط امین",
+      "invoiceNumber": "",
+      "product": "شکر",
+      "quantity": "5",
+      "unit": "kg",
+      "totalWeight": "5",
+      "party": "امین",
+      "driver": "متفرقه",
+      "updatedAt": 1791632564035,
+      "deleted": false
     }
   ],
   "products": [
@@ -1005,7 +1021,8 @@
     "قاسمنژاد",
     "شاهمرادی",
     "آستان قدس",
-    "لطفی(کلات)"
+    "لطفی(کلات)",
+    "امین"
   ],
   "drivers": [
     "صادق موحدی",
