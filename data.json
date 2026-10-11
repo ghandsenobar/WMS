@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-11T05:07:59.541Z",
-  "updatedBy": "امین",
+  "updatedAt": "2026-10-11T06:32:21.523Z",
+  "updatedBy": "unknown",
   "records": [
     {
       "id": 1791615210935,
@@ -2167,6 +2167,25 @@
       "party": "شهرکرد",
       "driver": "متفرقه",
       "updatedAt": 1791695208852,
+      "deleted": false
+    },
+    {
+      "id": 1791700332815,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۹",
+      "time": "۱۰:۰۱",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "150",
+      "unit": "kg",
+      "totalWeight": "150",
+      "party": "ایروانی",
+      "driver": "ایروانی",
+      "updatedAt": 1791700332820,
       "deleted": false
     }
   ],
