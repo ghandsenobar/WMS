@@ -1,0 +1,3511 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>انبار کارخانه قند صنوبر</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#166534">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="انبار صنوبر">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<style>
+:root{
+  --primary:#2563eb; --primary-dark:#1d4ed8; --danger:#dc2626;
+  --success:#16a34a; --warning:#f59e0b;
+  --in-color:#16a34a; --out-color:#ea580c;
+  --bg:#f1f5f9; --card:#fff; --border:#e2e8f0;
+  --text:#1e293b; --muted:#64748b;
+  --input-bg:#fff; --subtle-bg:#f8fafc;
+  --overlay:rgba(15,23,42,.55);
+}
+body.dark{
+  --primary:#3b82f6; --primary-dark:#60a5fa; --danger:#ef4444;
+  --success:#22c55e; --warning:#f59e0b;
+  --in-color:#22c55e; --out-color:#fb923c;
+  --bg:#0f172a; --card:#1e293b; --border:#334155;
+  --text:#e2e8f0; --muted:#94a3b8;
+  --input-bg:#0f172a; --subtle-bg:#0f172a;
+  --overlay:rgba(0,0,0,.75);
+}
+*{box-sizing:border-box;font-family:Tahoma,'Segoe UI',sans-serif;}
+[hidden]{display:none!important;}
+body{margin:0;padding:12px;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s;}
+.container{max-width:1100px;margin:0 auto;}
+
+/* ============ Splash Screen ============ */
+#splashScreen{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:30px 20px;
+  background:linear-gradient(160deg,#166534 0%,#14532d 55%,#052e16 100%);
+  color:#fff;
+  text-align:center;
+  transition:opacity .7s ease-out, visibility .7s ease-out;
+  user-select:none;
+  cursor:pointer;
+}
+#splashScreen.hide{
+  opacity:0;
+  visibility:hidden;
+}
+#splashScreen .splash-logo{
+  width:140px;
+  height:140px;
+  border-radius:32px;
+  background:rgba(255,255,255,.15);
+  border:2px solid rgba(255,255,255,.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:72px;
+  line-height:1;
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+  animation:splashPulse 1.8s ease-in-out infinite;
+  overflow:hidden;
+  position:relative;
+}
+#splashScreen .splash-logo img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:30px;
+  object-fit:cover;
+  display:block;
+}
+#splashScreen .splash-logo .splash-emoji{
+  position:relative;
+  z-index:0;
+}
+@keyframes splashPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.05);}
+}
+#splashScreen .splash-company{
+  font-size:15px;
+  font-weight:bold;
+  color:#bbf7d0;
+  letter-spacing:.3px;
+  margin-top:10px;
+}
+#splashScreen .splash-factory{
+  font-size:13px;
+  color:#86efac;
+  margin-top:2px;
+}
+#splashScreen .splash-title{
+  font-size:20px;
+  font-weight:900;
+  margin-top:14px;
+  color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+#splashScreen .splash-subtitle{
+  font-size:12px;
+  color:#dcfce7;
+  opacity:.85;
+  margin-top:4px;
+}
+#splashScreen .splash-loader{
+  display:flex;
+  gap:7px;
+  margin-top:26px;
+}
+#splashScreen .splash-loader span{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#fff;
+  opacity:.7;
+  animation:splashBounce 1.4s infinite ease-in-out both;
+}
+#splashScreen .splash-loader span:nth-child(1){animation-delay:-.32s;}
+#splashScreen .splash-loader span:nth-child(2){animation-delay:-.16s;}
+#splashScreen .splash-loader span:nth-child(3){animation-delay:0;}
+@keyframes splashBounce{
+  0%,80%,100%{transform:scale(.5);opacity:.5;}
+  40%{transform:scale(1);opacity:1;}
+}
+#splashScreen .splash-version{
+  position:absolute;
+  bottom:24px;
+  left:0;
+  right:0;
+  text-align:center;
+  font-size:11px;
+  color:#bbf7d0;
+  opacity:.7;
+}
+
+.app-header{position:relative;padding:20px 70px;margin-bottom:14px;text-align:center;background:var(--card);border-radius:12px;border:1px solid var(--border);border-bottom:3px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.app-header .company-name{font-size:19px;font-weight:bold;color:var(--primary-dark);margin-bottom:8px;line-height:1.6;}
+.app-header .factory-name{font-size:17px;font-weight:bold;color:var(--text);margin-bottom:10px;line-height:1.6;}
+.app-header .app-title{font-size:15px;color:var(--muted);padding-top:10px;border-top:1px dashed var(--border);}
+.menu-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:10px;background:var(--subtle-bg);border:1px solid var(--border);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--primary-dark);font-family:inherit;}
+.sync-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);padding:10px 14px;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.sync-bar-status{font-size:13px;font-weight:bold;display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.sync-bar-status.synced{color:var(--success);}
+.sync-bar-status.dirty{color:var(--warning);}
+.sync-bar-status.error{color:var(--danger);}
+.sync-bar-status.loading{color:var(--primary);}
+.sync-bar-status.noconfig{color:var(--muted);}
+.sync-bar-status.readonly{color:var(--warning);}
+.sync-bar-actions{display:flex;gap:6px;flex-shrink:0;}
+.sync-btn{padding:8px 14px;border:none;border-radius:8px;font-size:12.5px;font-weight:bold;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
+.sync-btn.pull{background:var(--primary);color:#fff;}
+.sync-btn.push{background:var(--success);color:#fff;}
+.sync-btn:hover:not(:disabled){opacity:.85;}
+.sync-btn:disabled{opacity:.4;cursor:not-allowed;}
+.sync-spin{display:inline-block;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(max-width:520px){
+  .sync-bar{flex-direction:column;align-items:stretch;}
+  .sync-bar-actions{width:100%;}
+  .sync-btn{flex:1;justify-content:center;}
+}
+.space-warning{margin:-6px 0 14px;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:bold;line-height:1.8;border:1px solid;}
+.space-warning.warning{background:rgba(245,158,11,.1);border-color:var(--warning);color:var(--warning);}
+.space-warning.danger{background:rgba(220,38,38,.1);border-color:var(--danger);color:var(--danger);}
+h2{font-size:15px;margin:0 0 12px;border-bottom:2px solid var(--primary);padding-bottom:6px;}
+h3{font-size:14px;margin:0;color:var(--primary-dark);}
+.card{background:var(--card);padding:14px;border-radius:10px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.entry-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:600px){.entry-buttons{grid-template-columns:1fr;}}
+.entry-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 10px;border:2px solid var(--border);background:var(--card);border-radius:12px;cursor:pointer;transition:all .15s;font-family:inherit;min-height:86px;color:var(--text);}
+.entry-btn.active.in-btn{border-color:var(--in-color);background:var(--in-color);color:#fff;}
+.entry-btn.active.out-btn{border-color:var(--out-color);background:var(--out-color);color:#fff;}
+.entry-btn.active .entry-sub{color:rgba(255,255,255,.85);}
+.entry-icon{font-size:26px;line-height:1;}
+.entry-label{font-size:16px;font-weight:bold;}
+.entry-sub{font-size:11px;color:var(--muted);}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:520px){.grid{grid-template-columns:1fr;}}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--input-bg);color:var(--text);}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);}
+input.date-input,input.time-input{background:var(--subtle-bg);cursor:pointer;}
+input.date-input{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><rect x='3' y='4' width='18' height='18' rx='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");background-repeat:no-repeat;background-position:left 10px center;padding-left:34px;}
+input.time-input{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>");background-repeat:no-repeat;background-position:left 10px center;padding-left:34px;}
+.field{margin-bottom:2px;}
+.field-row{display:flex;gap:6px;align-items:stretch;}
+.field-row select,.field-row input{flex:1;}
+.field-row button{padding:0 14px;border:none;border-radius:8px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;min-width:44px;}
+.btn-add{background:var(--success);}
+.btn-remove{background:var(--danger);}
+.btn-refresh{background:var(--muted);}
+.search-wrap{position:relative;}
+.search-wrap input{padding-left:36px;}
+.search-clear{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:none;background:var(--border);color:var(--muted);font-size:13px;font-weight:bold;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0;}
+.search-clear.show{display:flex;}
+.full{grid-column:1/-1;}
+textarea{resize:vertical;min-height:52px;}
+button{cursor:pointer;font-family:inherit;}
+.btn{padding:10px 14px;border:none;border-radius:8px;font-size:13px;font-weight:bold;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-secondary{background:var(--border);color:var(--text);}
+.btn-warning{background:var(--warning);color:#fff;}
+.btn-sm{padding:5px 8px;font-size:11px;}
+.btn-purple{background:#8b5cf6;color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-info{background:#0ea5e9;color:#fff;}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+th,td{padding:7px 6px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
+th{background:var(--subtle-bg);color:var(--muted);font-weight:bold;font-size:12px;}
+tr:hover td{background:var(--subtle-bg);}
+tr.editing td{background:rgba(245,158,11,.15)!important;}
+tr.editing td:first-child{border-right:3px solid var(--warning);}
+.empty{text-align:center;color:var(--muted);padding:16px;font-size:12px;}
+.tbl-wrap{overflow-x:auto;}
+.records-table-scroll{max-height:clamp(320px,55vh,720px);overflow-y:auto;overflow-x:auto;border:1px solid var(--border);border-radius:8px;position:relative;}
+.records-table-scroll table{margin-top:0;border-collapse:separate;border-spacing:0;}
+.records-table-scroll thead th{position:sticky;top:0;z-index:2;background:var(--subtle-bg);box-shadow:inset 0 -1px 0 var(--border);}
+.records-table-scroll thead th:first-child{border-top-right-radius:8px;}
+.records-table-scroll thead th:last-child{border-top-left-radius:8px;}
+.records-table-scroll::-webkit-scrollbar{width:8px;height:8px;}
+.records-table-scroll::-webkit-scrollbar-track{background:var(--subtle-bg);}
+.records-table-scroll::-webkit-scrollbar-thumb{background:var(--muted);border-radius:4px;}
+.records-table-scroll::-webkit-scrollbar-thumb:hover{background:var(--primary);}
+@media(max-width:600px){.records-table-scroll{max-height:clamp(300px,50vh,500px);}}
+.badge{display:inline-block;background:var(--primary);color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;margin-right:6px;}
+.badge-in{background:var(--in-color);}
+.badge-out{background:var(--out-color);}
+.records-filter{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin-bottom:10px;background:var(--subtle-bg);padding:10px;border-radius:10px;border:1px solid var(--border);}
+@media(max-width:700px){.records-filter{grid-template-columns:1fr;}}
+.quick-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+@media(max-width:520px){.quick-buttons{grid-template-columns:repeat(2,1fr);}}
+.quick-buttons button{padding:10px 8px;border:none;border-radius:8px;font-size:12px;font-weight:bold;color:#fff;cursor:pointer;font-family:inherit;}
+.qb-today{background:var(--primary);}
+.qb-week{background:#0ea5e9;}
+.qb-month{background:#8b5cf6;}
+.qb-all{background:#64748b;}
+.records-section{margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);}
+.records-section:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+.records-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.records-head-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.records-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:2px solid var(--primary);padding-bottom:6px;margin-bottom:12px;}
+.records-title-row h2{margin:0;border:none;padding:0;}
+.btn-print-sm{padding:6px 12px;border:1.5px solid var(--primary);background:#fff;color:var(--primary);border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.btn-print-sm:hover{background:var(--primary);color:#fff;}
+.btn-print-sm.green{border-color:var(--success);color:var(--success);}
+.btn-print-sm.green:hover{background:var(--success);color:#fff;}
+.btn-print-sm.orange{border-color:var(--out-color);color:var(--out-color);}
+.btn-print-sm.orange:hover{background:var(--out-color);color:#fff;}
+body.dark .btn-print-sm{background:transparent;}
+.btn-print-main{padding:8px 14px;border:none;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-radius:8px;font-size:12.5px;font-weight:bold;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(37,99,235,.25);}
+.form-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;border-bottom:2px solid var(--primary);padding-bottom:8px;}
+.form-head.in-mode{border-bottom-color:var(--in-color);}
+.form-head.in-mode h2{color:var(--in-color);}
+.form-head.out-mode{border-bottom-color:var(--out-color);}
+.form-head.out-mode h2{color:var(--out-color);}
+.form-head h2{margin:0;border:none;padding:0;}
+.form-head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.edit-banner{background:rgba(245,158,11,.12);border:1px solid var(--warning);color:var(--warning);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:10px;font-weight:bold;}
+.row-btns{display:flex;gap:4px;justify-content:flex-end;}
+.auto-kg-box{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(59,130,246,.04));border:2px solid var(--primary);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px;}
+.auto-kg-box .auto-kg-label{font-size:13px;font-weight:bold;color:var(--primary-dark);display:flex;align-items:center;gap:8px;}
+.auto-kg-box .auto-kg-value{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:1px;}
+.auto-kg-box .auto-kg-unit{font-size:14px;color:var(--muted);font-weight:bold;}
+.auto-kg-box .auto-kg-formula{font-size:11px;color:var(--muted);display:block;margin-top:2px;}
+.auto-kg-box.no-factor{background:rgba(100,116,139,.08);border-color:var(--muted);}
+.auto-kg-box.no-factor .auto-kg-value{color:var(--muted);}
+.auto-kg-box.no-factor .auto-kg-label{color:var(--muted);}
+.cal-popup{position:fixed;background:var(--card);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.3);padding:12px;z-index:1000;display:none;width:290px;border:1px solid var(--border);}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;}
+.cal-header button{background:var(--subtle-bg);border:none;border-radius:8px;padding:6px 12px;font-size:18px;cursor:pointer;color:var(--text);}
+.cal-title{font-weight:bold;font-size:14px;flex:1;text-align:center;color:var(--primary-dark);}
+.cal-weekdays,.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-weekdays div{text-align:center;font-size:11px;color:var(--muted);padding:5px 0;font-weight:bold;}
+.cal-day{text-align:center;padding:8px 0;border-radius:8px;cursor:pointer;font-size:13px;user-select:none;}
+.cal-day:hover{background:rgba(59,130,246,.2);}
+.cal-day.today{background:rgba(245,158,11,.25);font-weight:bold;color:var(--warning);}
+.cal-day.selected{background:var(--primary);color:#fff;}
+.cal-day.empty{visibility:hidden;}
+.cal-footer{display:flex;gap:6px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;}
+.cal-footer button{flex:1;padding:8px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;font-family:inherit;}
+.cal-footer button:first-child{background:var(--primary);color:#fff;}
+.cal-footer button:last-child{background:var(--border);color:var(--text);}
+.time-popup{position:fixed;background:var(--card);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.3);padding:14px;z-index:1000;display:none;width:280px;border:1px solid var(--border);}
+.time-display{text-align:center;font-size:30px;font-weight:bold;color:var(--primary-dark);padding:8px 0 12px;letter-spacing:2px;direction:ltr;}
+.time-presets{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.time-presets button{flex:1;min-width:52px;padding:6px 4px;font-size:11px;font-weight:bold;border:1px solid var(--border);background:var(--subtle-bg);border-radius:6px;color:var(--text);}
+.time-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:180px;position:relative;}
+.time-col{overflow-y:auto;scroll-snap-type:y mandatory;border:1px solid var(--border);border-radius:10px;background:var(--subtle-bg);padding:60px 0;-webkit-overflow-scrolling:touch;}
+.time-col-item{text-align:center;padding:9px 0;font-size:15px;cursor:pointer;scroll-snap-align:center;user-select:none;}
+.time-col-item.selected{background:var(--primary);color:#fff;font-weight:bold;border-radius:8px;margin:0 4px;}
+.time-cols::before{content:'';position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:40px;pointer-events:none;border-top:1px dashed var(--border);border-bottom:1px dashed var(--border);z-index:1;}
+.time-col-label{position:absolute;top:2px;left:0;right:50%;text-align:center;font-size:10px;color:var(--muted);z-index:2;pointer-events:none;}
+.time-col-label.right{left:50%;right:0;}
+.time-footer{display:flex;gap:6px;margin-top:12px;border-top:1px solid var(--border);padding-top:10px;}
+.time-footer button{flex:1;padding:9px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;font-family:inherit;}
+.tf-now{background:var(--success);color:#fff;}
+.tf-confirm{background:var(--primary);color:#fff;}
+.tf-cancel{background:var(--border);color:var(--text);}
+.modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--card);border-radius:14px;padding:20px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);color:var(--text);}
+.modal-msg{font-size:14px;text-align:center;margin-bottom:16px;line-height:1.9;white-space:pre-line;}
+.modal-input{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:16px;text-align:right;direction:rtl;background:var(--input-bg);color:var(--text);}
+.modal-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.modal-btn{flex:1;min-width:100px;padding:10px 16px;border:none;border-radius:8px;font-size:13px;font-weight:bold;font-family:inherit;cursor:pointer;}
+.modal-ok{background:var(--primary);color:#fff;}
+.modal-ok.danger{background:var(--danger);}
+.modal-third{background:var(--warning);color:#fff;}
+.modal-third.danger{background:var(--danger);}
+.modal-cancel{background:var(--border);color:var(--text);}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+.drawer-overlay.show{opacity:1;visibility:visible;}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(440px,94vw);background:var(--card);z-index:1501;box-shadow:-8px 0 32px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s ease-out;display:flex;flex-direction:column;}
+.drawer.show{transform:translateX(0);}
+.drawer-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--primary);color:#fff;flex-shrink:0;}
+.drawer-header h3{margin:0;font-size:15px;color:#fff;}
+.drawer-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:14px;cursor:pointer;}
+.drawer-body{flex:1;overflow-y:auto;padding:16px;}
+.drawer-section{margin-bottom:14px;}
+.drawer-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:bold;color:var(--primary-dark);margin-bottom:0;padding-bottom:6px;border-bottom:2px solid var(--primary);cursor:pointer;user-select:none;}
+.drawer-section-title .title-text{flex:1;}
+.drawer-section-title .toggle-btn{width:26px;height:26px;border-radius:6px;background:var(--subtle-bg);border:1px solid var(--border);color:var(--primary-dark);font-size:16px;font-weight:bold;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;flex-shrink:0;}
+.drawer-section-title .toggle-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.drawer-section-body{transition:max-height .25s ease-out;overflow:hidden;padding-top:10px;}
+.drawer-section-body.collapsed{display:none;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--subtle-bg);padding:12px 14px;border-radius:10px;border:1px solid var(--border);}
+.toggle-row-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:bold;}
+.switch{position:relative;width:48px;height:26px;display:inline-block;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:26px;transition:.2s;}
+.slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.switch input:checked + .slider{background:var(--primary);}
+.switch input:checked + .slider:before{transform:translateX(22px);}
+.backup-desc{font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.7;}
+.backup-actions{display:flex;flex-direction:column;gap:8px;}
+.backup-actions button{width:100%;padding:11px 12px;border:none;border-radius:8px;font-size:12.5px;font-weight:bold;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-backup-save{background:var(--primary);color:#fff;}
+.btn-backup-download{background:var(--success);color:#fff;}
+.btn-backup-restore{background:var(--warning);color:#fff;}
+.btn-backup-wipe{background:var(--danger);color:#fff;}
+.file-info{font-size:11px;color:var(--muted);text-align:center;padding:6px;margin-top:6px;}
+.file-info.success{color:var(--success);font-weight:bold;}
+.file-info.error{color:var(--danger);font-weight:bold;}
+.gh-compact{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(22,163,74,.08);padding:10px 12px;border-radius:8px;border:1px solid var(--success);}
+.gh-compact.readonly{background:rgba(245,158,11,.08);border-color:var(--warning);}
+.gh-compact-status{font-size:12.5px;color:var(--success);font-weight:bold;line-height:1.5;word-break:break-all;}
+.gh-compact.readonly .gh-compact-status{color:var(--warning);}
+.gh-compact .gh-size{display:block;font-size:11px;font-weight:normal;color:var(--muted);margin-top:3px;}
+.btn-gh-edit{padding:6px 12px;border:1px solid var(--primary);background:transparent;color:var(--primary);border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.btn-gh-edit:hover{background:var(--primary);color:#fff;}
+.manage-row{display:grid;gap:6px;margin-bottom:6px;align-items:center;}
+.manage-row input,.manage-row select{padding:8px 10px;font-size:12.5px;width:100%;}
+.manage-row button{border:none;border-radius:8px;background:var(--danger);color:#fff;cursor:pointer;font-size:13px;padding:8px 0;}
+@media(max-width:520px){
+  .app-header{padding:16px 60px;}
+  .app-header .company-name{font-size:16px;}
+  .app-header .factory-name{font-size:14.5px;}
+  .app-header .app-title{font-size:13px;}
+}
+.product-row{display:flex;justify-content:space-between;gap:8px;padding:10px;border-radius:8px;background:var(--subtle-bg);border:1px solid var(--border);margin-bottom:6px;}
+.product-info{flex:1;min-width:0;}
+.product-name{font-size:13px;font-weight:bold;color:var(--text);}
+.product-unit{font-size:10.5px;color:var(--muted);font-weight:normal;margin-right:4px;padding:1px 6px;background:var(--card);border-radius:6px;border:1px solid var(--border);}
+.prod-subs{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;}
+.prod-sub-tag{font-size:10.5px;background:var(--card);color:var(--primary-dark);padding:2px 8px;border-radius:10px;border:1px solid var(--border);font-weight:bold;}
+.prod-subs-empty{font-size:10.5px;color:var(--muted);margin-top:4px;font-style:italic;}
+.product-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.product-actions button{width:32px;height:32px;border:none;border-radius:6px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.product-actions button:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.summary-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.summary-title-row h2{margin:0;border:none;padding:0;font-size:15px;display:flex;align-items:center;gap:6px;}
+.summary-mode-toggle{display:inline-flex;gap:0;background:var(--subtle-bg);border-radius:8px;border:1px solid var(--border);padding:2px;}
+.summary-mode-toggle button{padding:6px 12px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:bold;font-family:inherit;cursor:pointer;border-radius:6px;transition:all .15s;white-space:nowrap;}
+.summary-mode-toggle button.active{background:var(--primary);color:#fff;}
+.summary-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:0;}
+.summary-table th{padding:11px 8px;text-align:center;font-size:12px;color:var(--muted);font-weight:bold;border-bottom:2px solid var(--border);background:transparent;}
+.summary-table th.col-in{color:var(--in-color);}
+.summary-table th.col-out{color:var(--out-color);}
+.summary-table td{padding:12px 8px;text-align:center;border-bottom:1px solid var(--border);font-weight:bold;font-size:14.5px;}
+.summary-table td.num-cell{color:var(--muted);font-weight:normal;font-size:12px;}
+.summary-table td.product-cell{text-align:right;font-size:14px;font-weight:bold;}
+.summary-table td.in-cell{color:var(--in-color);}
+.summary-table td.out-cell{color:var(--out-color);}
+.summary-table tbody tr:hover td{background:var(--subtle-bg);}
+.summary-table tfoot td{padding:14px 8px;font-weight:900;font-size:14.5px;border-top:2px solid var(--border);border-bottom:none;}
+.summary-table tfoot td.foot-label{text-align:right;color:var(--text);}
+.summary-table tfoot td.foot-in{color:var(--in-color);}
+.summary-table tfoot td.foot-out{color:var(--out-color);}
+.summary-empty{text-align:center;color:var(--muted);padding:20px;font-size:13px;}
+@media(max-width:520px){
+  .summary-table th,.summary-table td{padding:9px 5px;font-size:12.5px;}
+  .summary-table td.product-cell{font-size:12.5px;}
+  .summary-table tfoot td{font-size:12.5px;padding:12px 5px;}
+}
+.collapsible-section{margin-bottom:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;background:var(--subtle-bg);transition:background .15s;}
+.collapsible-header:hover{background:rgba(37,99,235,.06);}
+.collapsible-title{font-size:13px;font-weight:bold;color:var(--primary-dark);display:flex;align-items:center;gap:8px;flex:1;}
+.collapsible-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--warning);color:#fff;font-size:11px;font-weight:bold;}
+.collapsible-toggle{width:28px;height:28px;border-radius:6px;background:var(--card);border:1px solid var(--border);color:var(--primary-dark);font-size:16px;font-weight:bold;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;flex-shrink:0;transition:all .15s;}
+.collapsible-toggle:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.collapsible-body{padding:12px 14px;border-top:1px solid var(--border);}
+.collapsible-body.collapsed{display:none;}
+.adv-filter-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;}
+@media(max-width:600px){.adv-filter-grid{grid-template-columns:1fr;}}
+.adv-filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.adv-filter-chips:empty{display:none;}
+.adv-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(37,99,235,.1);color:var(--primary-dark);border:1px solid var(--primary);border-radius:16px;font-size:11.5px;font-weight:bold;}
+.adv-chip .chip-label{opacity:.7;}
+.adv-chip .chip-remove{background:transparent;border:none;color:var(--primary);font-size:14px;line-height:1;cursor:pointer;padding:0;font-weight:bold;font-family:inherit;}
+.adv-chip .chip-remove:hover{color:var(--danger);}
+body.dark .adv-chip{background:rgba(59,130,246,.15);}
+.deleted-toggle{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--subtle-bg);border-radius:10px;border:1px solid var(--border);cursor:pointer;user-select:none;font-size:13px;font-weight:bold;color:var(--text);}
+.deleted-toggle input[type=checkbox]{width:auto;margin:0;cursor:pointer;accent-color:var(--danger);}
+.btn-clear-all-deleted{padding:10px 12px;border:none;border-radius:8px;background:var(--danger);color:#fff;font-size:12.5px;font-weight:bold;font-family:inherit;cursor:pointer;transition:opacity .15s;}
+.btn-clear-all-deleted:hover:not(:disabled){opacity:.85;}
+.btn-clear-all-deleted:disabled{opacity:.4;cursor:not-allowed;}
+tr.deleted-row td{background:rgba(220,38,38,.08) !important;opacity:.6;text-decoration:line-through;text-decoration-color:var(--danger);}
+tr.deleted-row td:first-child{border-right:3px solid var(--danger);}
+tr.deleted-row td:last-child{text-decoration:none;opacity:1;}
+tr.deleted-row:hover td{background:rgba(220,38,38,.12) !important;}
+body.dark tr.deleted-row td{background:rgba(239,68,68,.12) !important;}
+body.dark tr.deleted-row:hover td{background:rgba(239,68,68,.18) !important;}
+
+.qty-badge{font-size:11px;opacity:.7;margin-right:4px;cursor:help;}
+
+.receipt-preview-overlay{position:fixed;inset:0;background:rgba(15,23,42,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:2500;padding:16px;}
+.receipt-preview-overlay.show{display:flex;}
+.receipt-preview-box{background:#fff;border-radius:16px;width:min(500px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.5);overflow:hidden;direction:rtl;}
+.receipt-preview-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;flex-shrink:0;}
+.receipt-preview-title{font-size:14px;font-weight:bold;display:flex;align-items:center;gap:6px;}
+.receipt-preview-close{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.receipt-preview-close:hover{background:rgba(255,255,255,.35);}
+.receipt-preview-body{flex:1;overflow-y:auto;padding:20px;background:#e2e8f0;}
+.receipt-preview-paper{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);border-radius:4px;overflow:hidden;max-width:440px;margin:0 auto;}
+.receipt-preview-actions{padding:12px 16px;display:flex;gap:8px;background:#f8fafc;border-top:1px solid #e2e8f0;flex-shrink:0;}
+.receipt-preview-actions button{flex:1;padding:11px 14px;border:none;border-radius:9px;font-size:13px;font-weight:bold;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s,transform .1s;}
+.receipt-preview-actions button:active{transform:scale(.98);}
+.receipt-btn-print{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 2px 8px rgba(22,163,74,.3);}
+.receipt-btn-print:hover{opacity:.9;}
+.receipt-btn-close{background:#e2e8f0;color:#1e293b;}
+.receipt-btn-close:hover{background:#cbd5e1;}
+
+.p-receipt{width:100%;background:#fff;color:#000;font-family:Tahoma,sans-serif;padding:14px 18px;line-height:1.5;}
+.p-receipt-letterhead{text-align:center;padding-bottom:6px;}
+.p-receipt-company{font-size:13px;font-weight:900;line-height:1.4;letter-spacing:.2px;}
+.p-receipt-factory{font-size:10px;margin-top:2px;color:#333;font-weight:bold;}
+.p-receipt-title{text-align:center;font-size:15px;font-weight:900;letter-spacing:.5px;padding:10px 0 4px;}
+.p-receipt-no{text-align:center;font-size:10px;color:#444;padding-bottom:10px;}
+.p-receipt-hr{border:none;border-top:1.5px solid #000;margin:8px 0;height:0;}
+.p-receipt-hr-dash{border:none;border-top:1px dashed #888;margin:8px 0;height:0;}
+.p-receipt-meta{display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:3px 0;}
+.p-receipt-product-block{text-align:center;padding:8px 0 4px;}
+.p-receipt-product-lbl{font-size:9.5px;color:#666;font-weight:bold;letter-spacing:.3px;margin-bottom:4px;}
+.p-receipt-product-name{font-size:16px;font-weight:900;line-height:1.3;}
+.p-receipt-rows{padding:4px 0;}
+.p-receipt-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:12px;gap:12px;}
+.p-receipt-row .p-receipt-lbl{color:#555;font-weight:bold;font-size:10.5px;flex-shrink:0;}
+.p-receipt-row .p-receipt-val{font-weight:900;font-size:12px;text-align:left;flex:1;border-bottom:1px dotted #ccc;padding-bottom:1px;}
+.p-receipt-qty .p-receipt-val{font-size:14px;border-bottom:none;}
+.p-receipt-notes-block{padding:6px 0;font-size:10.5px;line-height:1.6;}
+.p-receipt-notes-lbl{font-weight:bold;font-size:10px;color:#555;margin-bottom:3px;}
+.p-receipt-signatures{display:flex;gap:30px;margin-top:24px;padding-top:4px;}
+.p-receipt-sig{flex:1;text-align:center;}
+.p-receipt-sig-title{font-size:10px;font-weight:900;margin-bottom:34px;}
+.p-receipt-sig-line{border-top:1px solid #000;padding-top:3px;font-size:7.5px;color:#555;}
+.p-receipt-footer{text-align:center;font-size:8px;color:#666;margin-top:12px;padding-top:6px;border-top:1px dashed #aaa;}
+#printArea{display:none;}
+
+.toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:3000;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:auto;max-width:90vw;}
+.toast{background:var(--card);color:var(--text);padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px;font-weight:bold;display:flex;align-items:center;gap:8px;border-right:4px solid var(--primary);animation:toastIn .3s ease-out;pointer-events:auto;cursor:pointer;min-width:200px;}
+.toast.success{border-right-color:var(--success);}
+.toast.error{border-right-color:var(--danger);}
+.toast.warning{border-right-color:var(--warning);}
+.toast.info{border-right-color:var(--primary);}
+.toast.hiding{animation:toastOut .3s ease-in forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(20px);}}
+
+.p-daily-unit{display:block;font-size:0.82em;font-weight:normal;color:var(--muted);margin-top:1px;}
+body.dark .p-daily-unit{color:#94a3b8;}
+
+@media print{
+  @page{size:A5 portrait;margin:6mm;}
+  html,body{background:#fff!important;padding:0!important;margin:0!important;color:#000!important;font-size:10px!important;}
+  .container{display:none!important;}
+  #splashScreen{display:none!important;}
+  .drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.space-warning,
+  .receipt-preview-overlay,.toast-container{display:none!important;}
+  #printArea{display:block!important;}
+  #printArea *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-shadow:none!important;text-shadow:none!important;color:#000!important;}
+
+  .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
+  .p-company{font-size:12px;font-weight:900;margin-bottom:2px;}
+  .p-factory{font-size:10px;font-weight:bold;}
+  .p-report-title{font-size:11.5px;font-weight:900;margin-top:3px;letter-spacing:.2px;}
+  .p-meta{display:flex;justify-content:space-between;font-size:8.5px;margin-bottom:5px;padding:3px 6px;border:1px solid #000;flex-wrap:wrap;gap:3px;background:#f0f0f0!important;}
+
+  .p-table{width:100%;border-collapse:collapse;margin-top:3px;font-size:8px;table-layout:fixed;border:1.5px solid #000;}
+  .p-table th{padding:3px 2px!important;border:1px solid #000!important;font-size:7.5px;font-weight:900;text-align:center;line-height:1.15;background:#d0d0d0!important;}
+  .p-table td{padding:2px 2px!important;border:1px solid #666!important;text-align:center;font-size:7.5px;line-height:1.15;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;background:#fff!important;}
+  .p-table tbody tr:nth-child(even) td{background:#f0f0f0!important;}
+  .p-table td.notes-cell{font-size:6.5px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;max-width:0;}
+  .p-table tfoot td{background:#c0c0c0!important;font-weight:900;font-size:8.5px!important;border-top:2px solid #000!important;}
+
+  .p-section-title{padding:4px 8px;font-size:10px;font-weight:900;margin:6px 0 4px;text-align:center;border:1.5px solid #000;background:#d8d8d8!important;page-break-after:avoid;}
+  .p-section-gap{height:5px;margin:6px 0;border-top:1px dashed #666;}
+  .p-empty-msg{text-align:center;padding:8px;font-size:9px;border:1px dashed #777;margin:5px 0;}
+
+  .p-signature{margin-top:10px;display:flex;justify-content:space-around;gap:14px;page-break-inside:avoid;}
+  .p-sig-box{flex:1;text-align:center;border-top:1px solid #000;padding-top:4px;min-height:36px;}
+  .p-sig-label{font-size:9px;font-weight:bold;}
+  .p-sig-space{height:28px;}
+  .p-sig-hint{font-size:7.5px;}
+  .p-footer-note{text-align:center;font-size:7.5px;margin-top:6px;padding-top:4px;border-top:1px dashed #888;}
+
+  .p-summary-block{margin-top:10px;page-break-inside:avoid;width:78%;margin-left:auto;margin-right:auto;}
+  .p-summary-title{text-align:center;font-size:9.5px;font-weight:900;padding:4px 6px;margin:0 0 4px;border:1px solid #000;background:#d8d8d8!important;}
+  .p-summary-table{width:100%;border-collapse:collapse;font-size:8.5px;table-layout:fixed;border:1.5px solid #000;}
+  .p-summary-table th{padding:3px 3px!important;border:1px solid #000!important;font-size:8.5px;font-weight:900;text-align:center;background:#d0d0d0!important;line-height:1.2;}
+  .p-summary-table td{padding:2.5px 3px!important;border:1px solid #666!important;text-align:center;font-size:8.5px;font-weight:bold;background:#fff!important;line-height:1.15;}
+  .p-summary-table td.product-cell{text-align:right;font-size:9px;padding-right:6px!important;}
+  .p-summary-table td.num-cell{font-weight:normal;font-size:7.5px;}
+  .p-summary-table tbody tr:nth-child(even) td{background:#f0f0f0!important;}
+  .p-summary-table tfoot td{background:#c0c0c0!important;font-weight:900;font-size:9px!important;padding:4px 3px!important;border-top:2px solid #000!important;}
+  .p-summary-table tfoot td.foot-label{text-align:right;padding-right:6px!important;}
+
+  .p-daily-block{margin-top:12px;width:100%;}
+  .p-daily-block .p-summary-title{
+    text-align:center;font-size:11.5px;font-weight:900;
+    padding:6px 10px;margin:0 0 8px;
+    background:#f0f0f0!important;
+    border:2px solid #000;
+  }
+  .p-daily-table{
+    width:100%;border-collapse:collapse;margin-top:0;
+    table-layout:fixed;
+    border:2.5px solid #000;
+    font-family:Tahoma,sans-serif;
+  }
+  .p-daily-table th,
+  .p-daily-table td{
+    border:1px solid #666;
+    text-align:center;
+    vertical-align:middle;
+    color:#000!important;
+    background:#fff!important;
+    word-break:break-word;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    line-height:1.25;
+    padding:4px 3px;
+  }
+  .p-daily-table th.th-group{
+    background:#e8e8e8!important;
+    font-weight:900;
+    border-top:2.5px solid #000;
+    border-bottom:1.5px solid #000;
+    border-left:1.5px solid #000;
+    border-right:1.5px solid #000;
+    padding:7px 4px;
+    font-size:1.12em;
+    letter-spacing:.3px;
+  }
+  .p-daily-table th.th-io{
+    background:#f0f0f0!important;
+    font-weight:900;
+    border-top:1px solid #666;
+    border-bottom:1.5px solid #000;
+    border-left:1px solid #666;
+    border-right:1px solid #666;
+    padding:5px 3px;
+    font-size:1em;
+  }
+  .p-daily-table th.th-prod{
+    background:#fafafa!important;
+    font-weight:900;
+    border:1px solid #666;
+    border-bottom:2px solid #000;
+    padding:5px 3px;
+    font-size:0.98em;
+  }
+  .p-daily-table th.th-date{
+    background:#e8e8e8!important;
+    font-weight:900;
+    border:2px solid #000;
+    border-bottom:2.5px solid #000;
+    font-size:1.02em;
+    padding:6px 4px;
+  }
+  .p-daily-table td.date-cell{
+    background:#f5f5f5!important;
+    font-weight:900;
+    border:1px solid #666;
+    border-left:2px solid #000;
+    border-right:2px solid #000;
+    white-space:nowrap;
+  }
+  .p-daily-table td{padding:4px 3px;font-weight:bold;}
+  .p-daily-table td.zero{color:#aaa!important;font-weight:normal;}
+  .p-daily-table th.group-sep,
+  .p-daily-table td.group-sep{
+    border-right:3px double #000!important;
+    border-left:3px double #000!important;
+  }
+  .p-daily-table tbody tr:nth-child(even) td{background:#fafafa!important;}
+  .p-daily-table tbody tr:nth-child(even) td.date-cell{background:#ececec!important;}
+  .p-daily-table tfoot td{
+    background:#e8e8e8!important;
+    font-weight:900;
+    border:1px solid #666;
+    border-top:2px solid #000;
+    padding:5px 3px;
+  }
+  .p-daily-table tfoot tr:last-child td{
+    background:#dcdcdc!important;
+    border-top:2px solid #000;
+    border-bottom:2.5px solid #000;
+    font-size:1.02em;
+  }
+  .p-daily-table.daily-sm th,.p-daily-table.daily-sm td{font-size:11px;padding:7px 5px;}
+  .p-daily-table.daily-sm th.th-group{font-size:12.5px;padding:9px 5px;}
+  .p-daily-table.daily-sm td.date-cell{font-size:11px;}
+  .p-daily-table.daily-md th,.p-daily-table.daily-md td{font-size:10px;padding:5px 3px;}
+  .p-daily-table.daily-md th.th-group{font-size:11.5px;padding:8px 4px;}
+  .p-daily-table.daily-md td.date-cell{font-size:10px;}
+  .p-daily-table.daily-lg th,.p-daily-table.daily-lg td{font-size:9px;padding:4px 2px;}
+  .p-daily-table.daily-lg th.th-group{font-size:10.5px;padding:7px 3px;}
+  .p-daily-table.daily-lg td.date-cell{font-size:9px;}
+  .p-daily-table.daily-xl th,.p-daily-table.daily-xl td{font-size:8.5px;padding:3px 1px;line-height:1.2;}
+  .p-daily-table.daily-xl th.th-group{font-size:9.5px;padding:6px 2px;}
+  .p-daily-table.daily-xl th.th-io{font-size:9px;padding:4px 2px;}
+  .p-daily-table.daily-xl td.date-cell{font-size:8.5px;}
+  .p-daily-unit{display:block;font-size:0.85em;font-weight:normal;color:#000!important;margin-top:1px;}
+
+  .p-receipt{width:100%;background:#fff;color:#000;font-family:Tahoma,sans-serif;padding:12px 16px;line-height:1.5;}
+  .p-receipt-company{font-size:12.5px;font-weight:900;}
+  .p-receipt-factory{font-size:9.5px;margin-top:2px;font-weight:bold;}
+  .p-receipt-title{text-align:center;font-size:14.5px;font-weight:900;padding:10px 0 4px;}
+  .p-receipt-no{text-align:center;font-size:9.5px;padding-bottom:8px;}
+  .p-receipt-hr{border:none;border-top:2px solid #000;margin:8px 0;}
+  .p-receipt-hr-dash{border:none;border-top:1px dashed #555;margin:8px 0;}
+  .p-receipt-meta{display:flex;justify-content:space-between;font-size:11px;font-weight:bold;padding:3px 0;}
+  .p-receipt-product-name{font-size:15px;font-weight:900;text-align:center;padding:8px 0 4px;}
+  .p-receipt-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11.5px;gap:12px;}
+  .p-receipt-row .p-receipt-lbl{font-weight:bold;font-size:10px;}
+  .p-receipt-row .p-receipt-val{font-weight:900;font-size:11.5px;border-bottom:1px dotted #888;}
+  .p-receipt-qty .p-receipt-val{font-size:13.5px;border-bottom:none;}
+  .p-receipt-signatures{display:flex;gap:30px;margin-top:22px;}
+  .p-receipt-sig{flex:1;text-align:center;}
+  .p-receipt-sig-title{font-size:10px;font-weight:900;margin-bottom:34px;}
+  .p-receipt-sig-line{border-top:1.5px solid #000;padding-top:3px;font-size:7.5px;}
+  .p-receipt-footer{text-align:center;font-size:8px;margin-top:12px;padding-top:6px;border-top:1px dashed #666;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Splash Screen ============ -->
+<div id="splashScreen">
+  <div class="splash-logo">
+    <span class="splash-emoji">🏭</span>
+    <img
+      src="./icon-512.png"
+      alt="لوگو"
+      id="splashLogoImg"
+      onerror="window.__splashLogoFallback && window.__splashLogoFallback(this);"
+    >
+  </div>
+  <div class="splash-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
+  <div class="splash-factory">کارخانه قند صنوبر</div>
+  <div class="splash-title">📦 سیستم مدیریت انبار</div>
+  <div class="splash-subtitle">مدیریت هوشمند ورود و خروج کالا</div>
+  <div class="splash-loader">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="splash-version">نسخه ۳.۰</div>
+</div>
+
+<script>
+/* ============ Splash Logo Fallback ============ */
+window.__splashLogoFallback = function(imgEl){
+  const stage = imgEl.dataset.fallbackStage || '0';
+  if(stage === '0'){
+    // مرحله ۱: تلاش برای icon-192
+    imgEl.dataset.fallbackStage = '1';
+    imgEl.src = './icon-192.png';
+  } else {
+    // مرحله ۲: حذف تصویر، ایموجی باقی می‌مونه
+    imgEl.remove();
+  }
+};
+/* مخفی کردن تصویر تا وقتی کامل لود شد — اگر خراب باشه، ایموجی زیرش دیده می‌شه */
+(function(){
+  const img = document.getElementById('splashLogoImg');
+  if(!img) return;
+  img.style.opacity = '0';
+  img.style.transition = 'opacity .3s';
+  img.addEventListener('load', ()=>{
+    if(img.naturalWidth > 0){ img.style.opacity = '1'; }
+    else { window.__splashLogoFallback(img); }
+  });
+})();
+</script>
+
+<div class="container">
+
+<div class="app-header">
+  <div class="company-name">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
+  <div class="factory-name">کارخانه قند صنوبر</div>
+  <div class="app-title">📦 سیستم مدیریت انبار</div>
+  <button type="button" class="menu-btn" onclick="openDrawer()" title="تنظیمات">☰</button>
+</div>
+
+<div class="sync-bar" id="syncBar">
+  <div class="sync-bar-status noconfig" id="syncBarStatus">⚪ برای شروع، از منوی ☰ تنظیمات GitHub را وارد کنید</div>
+  <div class="sync-bar-actions">
+    <button type="button" class="sync-btn pull" onclick="syncPull()" id="syncPullBtn">⬇️ دریافت</button>
+    <button type="button" class="sync-btn push" onclick="syncPush()" id="syncPushBtn">⬆️ ذخیره</button>
+  </div>
+</div>
+
+<div class="space-warning" id="spaceWarning" hidden></div>
+
+<div class="entry-buttons">
+  <button type="button" class="entry-btn in-btn" id="btnIn" onclick="switchType('in')">
+    <span class="entry-icon">📥</span>
+    <span class="entry-label">ورود کالا</span>
+    <span class="entry-sub">ثبت ورودی</span>
+  </button>
+  <button type="button" class="entry-btn out-btn" id="btnOut" onclick="switchType('out')">
+    <span class="entry-icon">📤</span>
+    <span class="entry-label">خروج کالا</span>
+    <span class="entry-sub">ثبت خروجی</span>
+  </button>
+</div>
+
+<div class="card" id="formCard" hidden>
+  <div class="form-head" id="formHead">
+    <h2 id="formTitle">ثبت <span id="typeLabel"></span></h2>
+    <div class="form-head-right">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeForm()">✕ بستن فرم</button>
+    </div>
+  </div>
+  <div id="editBanner" class="edit-banner" hidden>✏️ در حال ویرایش رکورد — پس از تغییر، دکمه «ذخیره تغییرات» را بزنید.</div>
+  <div class="grid">
+    <div class="field">
+      <label>تاریخ (شمسی)</label>
+      <div class="field-row">
+        <input id="f_date" type="text" class="date-input" readonly placeholder="انتخاب تاریخ">
+        <button type="button" class="btn-refresh" onclick="setNow()">⟳</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>ساعت</label>
+      <input id="f_time" type="text" class="time-input" readonly placeholder="انتخاب ساعت">
+    </div>
+    <div class="field full">
+      <label>کالا</label>
+      <div class="field-row">
+        <select id="f_product"></select>
+        <button type="button" class="btn-add" onclick="addProduct()">+</button>
+        <button type="button" class="btn-remove" onclick="removeProduct()">−</button>
+      </div>
+    </div>
+    <div class="field full" id="subtypeField" hidden>
+      <label>زیرمجموعه (اختیاری)</label>
+      <select id="f_subtype"></select>
+    </div>
+    <div class="field">
+      <label>تعداد</label>
+      <input id="f_quantity" type="number" step="any" min="0" placeholder="مثلاً: ۱۰۰">
+    </div>
+    <div class="field">
+      <label>واحد</label>
+      <div class="field-row">
+        <select id="f_unit"></select>
+        <button type="button" class="btn-add" onclick="addUnitQuick()" title="افزودن واحد جدید">+</button>
+      </div>
+    </div>
+    <div class="full">
+      <div class="auto-kg-box" id="autoKgBox">
+        <div>
+          <span class="auto-kg-label">⚖️ مجموع وزنی</span>
+          <span class="auto-kg-formula" id="autoKgFormula"></span>
+        </div>
+        <div>
+          <span class="auto-kg-value" id="autoKgValue">۰</span>
+          <span class="auto-kg-unit">kg</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label id="f_party_label">طرف حساب</label>
+      <div class="field-row">
+        <select id="f_party"></select>
+        <button type="button" class="btn-add" onclick="addParty()">+</button>
+        <button type="button" class="btn-remove" onclick="removeParty()">−</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>راننده</label>
+      <div class="field-row">
+        <select id="f_driver"></select>
+        <button type="button" class="btn-add" onclick="addDriver()">+</button>
+        <button type="button" class="btn-remove" onclick="removeDriver()">−</button>
+      </div>
+    </div>
+    <div class="field full">
+      <label>شماره فاکتور</label>
+      <input id="f_invoice" placeholder="مثلاً: ۱۴۰۴۰۷۱۵-۰۰۱">
+    </div>
+    <div class="field">
+      <label>شماره باسکول</label>
+      <input id="f_basil" placeholder="مثلاً: ۱۲۳۴">
+    </div>
+    <div class="field">
+      <label>شماره بارنامه</label>
+      <input id="f_waybill" placeholder="مثلاً: ۵۶۷۸">
+    </div>
+    <div class="field full">
+      <label>توضیحات</label>
+      <textarea id="f_notes" rows="2"></textarea>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" id="saveBtn" onclick="saveRecord()">💾 ثبت اطلاعات</button>
+    <button class="btn btn-secondary" onclick="clearForm()">پاک کردن فرم</button>
+    <button class="btn btn-warning" id="cancelEditBtn" onclick="cancelEdit()" hidden>❌ لغو ویرایش</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="records-title-row">
+    <h2>📋 سوابق ثبت شده</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn-print-main" onclick="printDailySummaryReport()">📅 خلاصه روزانه</button>
+      <button type="button" class="btn-print-main" onclick="printFullReport()">🖨️ گزارش کامل</button>
+    </div>
+  </div>
+
+  <div class="quick-buttons">
+    <button type="button" class="qb-today" onclick="recordsToday()">امروز</button>
+    <button type="button" class="qb-week" onclick="recordsThisWeek()">این هفته</button>
+    <button type="button" class="qb-month" onclick="recordsThisMonth()">این ماه</button>
+    <button type="button" class="qb-all" onclick="recordsAllDays()">همه</button>
+  </div>
+
+  <div class="collapsible-section">
+    <div class="collapsible-header" onclick="toggleCollapsible('searchSection', event)">
+      <span class="collapsible-title">🔍 جستجو و بازه تاریخ</span>
+      <button type="button" class="collapsible-toggle" id="toggleBtnSearchSection" onclick="event.stopPropagation();toggleCollapsible('searchSection')">+</button>
+    </div>
+    <div class="collapsible-body collapsed" id="searchSection">
+      <div class="records-filter" style="margin-bottom:0;">
+        <div class="field">
+          <label>🔍 جستجو</label>
+          <div class="search-wrap">
+            <input id="search" placeholder="جستجو... (مثلاً: کارتن ۳)" oninput="onSearchInput()">
+            <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>📅 از تاریخ</label>
+          <input id="records_from" type="text" class="date-input" readonly placeholder="همه">
+        </div>
+        <div class="field">
+          <label>📅 تا تاریخ</label>
+          <input id="records_to" type="text" class="date-input" readonly placeholder="همه">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-section">
+    <div class="collapsible-header" onclick="toggleCollapsible('advFilterSection', event)">
+      <span class="collapsible-title">⚙️ فیلتر پیشرفته
+        <span class="collapsible-badge" id="advFilterBadge" hidden>۰</span>
+      </span>
+      <button type="button" class="collapsible-toggle" id="toggleBtnAdvFilterSection" onclick="event.stopPropagation();toggleCollapsible('advFilterSection')">+</button>
+    </div>
+    <div class="collapsible-body collapsed" id="advFilterSection">
+      <div class="adv-filter-grid">
+        <div class="field">
+          <label>📦 کالا</label>
+          <select id="adv_product" onchange="onAdvProductChange()"></select>
+        </div>
+        <div class="field">
+          <label>🔀 زیرمجموعه</label>
+          <select id="adv_subtype" onchange="applyAdvFilterChange()"></select>
+        </div>
+        <div class="field">
+          <label>👤 طرف حساب</label>
+          <select id="adv_party" onchange="applyAdvFilterChange()"></select>
+        </div>
+        <div class="field">
+          <label>🚚 راننده</label>
+          <select id="adv_driver" onchange="applyAdvFilterChange()"></select>
+        </div>
+      </div>
+      <div class="adv-filter-chips" id="advFilterChips"></div>
+    </div>
+  </div>
+
+  <div class="collapsible-section">
+    <div class="collapsible-header" onclick="toggleCollapsible('deletedSection', event)">
+      <span class="collapsible-title">🗑️ نمایش رکوردهای حذف‌شده
+        <span class="collapsible-badge" id="deletedCountBadge" hidden>۰</span>
+      </span>
+      <button type="button" class="collapsible-toggle" id="toggleBtnDeletedSection" onclick="event.stopPropagation();toggleCollapsible('deletedSection')">+</button>
+    </div>
+    <div class="collapsible-body collapsed" id="deletedSection">
+      <label class="deleted-toggle">
+        <input type="checkbox" id="showDeletedToggle" onchange="toggleShowDeleted(this.checked)">
+        <span>نمایش رکوردهای حذف‌شده در جدول‌ها</span>
+      </label>
+      <button type="button" class="btn-clear-all-deleted" id="btnClearAllDeleted" onclick="clearAllDeleted()" style="width:100%;margin-top:10px;">🗑️ پاک کردن همه حذف‌شده‌ها</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7;">
+        💡 رکوردهای حذف‌شده هنوز در فایل باقی می‌مونن. با فعال کردن این گزینه می‌تونی ببینیشون، بازگردانی کنی، یا برای همیشه پاک کنی.
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-section">
+    <div class="collapsible-header" onclick="toggleCollapsible('summarySection', event)">
+      <span class="collapsible-title">📊 خلاصه ورود و خروج کالا</span>
+      <button type="button" class="collapsible-toggle" id="toggleBtnSummarySection" onclick="event.stopPropagation();toggleCollapsible('summarySection')">+</button>
+    </div>
+    <div class="collapsible-body collapsed" id="summarySection">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="summary-mode-toggle">
+          <button type="button" id="sumModeGrouped" class="active" onclick="setSummaryMode('grouped')">📦 کلی</button>
+          <button type="button" id="sumModeDetailed" onclick="setSummaryMode('detailed')">🔀 تفکیکی</button>
+        </div>
+        <button type="button" class="btn-print-main" onclick="printSummaryReport()">🖨️ چاپ خلاصه</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th style="width:8%">#</th>
+              <th style="width:42%">کالا</th>
+              <th class="col-in" style="width:25%">📥 مجموع ورود</th>
+              <th class="col-out" style="width:25%">📤 مجموع خروج</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+          <tfoot id="summaryFoot"></tfoot>
+        </table>
+      </div>
+      <div class="summary-empty" id="summaryEmpty">موردی برای نمایش وجود ندارد</div>
+    </div>
+  </div>
+
+  <div class="records-section">
+    <div class="records-head">
+      <h3>📥 سابقه ورود کالا <span class="badge badge-in" id="inBadge">۰</span></h3>
+      <div class="records-head-actions">
+        <button type="button" class="btn-print-sm green" onclick="exportCSV('in')">📊 CSV</button>
+        <button type="button" class="btn-print-sm green" onclick="printInReport()">🖨️ گزارش ورود</button>
+      </div>
+    </div>
+    <div class="records-table-scroll">
+      <table>
+        <thead><tr>
+          <th>تاریخ</th><th>ساعت</th><th>کالا</th><th>تعداد</th><th>واحد</th>
+          <th>وزن (kg)</th><th>فروشنده</th><th>راننده</th><th>شماره فاکتور</th><th>توضیحات</th><th></th>
+        </tr></thead>
+        <tbody id="inBody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="inEmpty">موردی یافت نشد</div>
+  </div>
+
+  <div class="records-section">
+    <div class="records-head">
+      <h3>📤 سابقه خروج کالا <span class="badge badge-out" id="outBadge">۰</span></h3>
+      <div class="records-head-actions">
+        <button type="button" class="btn-print-sm green" onclick="exportCSV('out')">📊 CSV</button>
+        <button type="button" class="btn-print-sm orange" onclick="printOutReport()">🖨️ گزارش خروج</button>
+      </div>
+    </div>
+    <div class="records-table-scroll">
+      <table>
+        <thead><tr>
+          <th>تاریخ</th><th>ساعت</th><th>کالا</th><th>تعداد</th><th>واحد</th>
+          <th>وزن (kg)</th><th>خریدار</th><th>راننده</th><th>شماره فاکتور</th><th>توضیحات</th><th></th>
+        </tr></thead>
+        <tbody id="outBody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="outEmpty">موردی یافت نشد</div>
+  </div>
+</div>
+
+</div>
+
+<div class="cal-popup" id="calPopup"></div>
+<div class="time-popup" id="timePopup">
+  <div class="time-display" id="timeDisplay">۰۰:۰۰</div>
+  <div class="time-presets">
+    <button type="button" onclick="setTimePreset(6,0)">۰۶:۰۰</button>
+    <button type="button" onclick="setTimePreset(8,0)">۰۸:۰۰</button>
+    <button type="button" onclick="setTimePreset(12,0)">۱۲:۰۰</button>
+    <button type="button" onclick="setTimePreset(14,0)">۱۴:۰۰</button>
+    <button type="button" onclick="setTimePreset(18,0)">۱۸:۰۰</button>
+  </div>
+  <div class="time-cols">
+    <div class="time-col-label">ساعت</div>
+    <div class="time-col-label right">دقیقه</div>
+    <div class="time-col" id="hourCol"></div>
+    <div class="time-col" id="minCol"></div>
+  </div>
+  <div class="time-footer">
+    <button type="button" class="tf-now" onclick="timeNow()">الان</button>
+    <button type="button" class="tf-confirm" onclick="timeConfirm()">تأیید</button>
+    <button type="button" class="tf-cancel" onclick="closeTimePicker()">بستن</button>
+  </div>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3>⚙️ تنظیمات</h3>
+    <button type="button" class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">
+      <label class="drawer-section-title">👤 نام کاربری</label>
+      <input id="usernameInput" type="text" placeholder="نام شما" oninput="saveUsername()">
+    </div>
+    <div class="drawer-section">
+      <label class="drawer-section-title">🌓 حالت نمایش</label>
+      <div class="toggle-row">
+        <span class="toggle-row-label">🌙 حالت شب</span>
+        <label class="switch">
+          <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleSection('productsSection', event)">
+        <span class="title-text">📦 کالاها و زیرمجموعه‌ها</span>
+        <button type="button" class="toggle-btn" id="toggleBtnProductsSection" onclick="event.stopPropagation();toggleSection('productsSection')">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="productsSection">
+        <div class="backup-desc" style="text-align:right;margin-bottom:8px;">
+          برای هر کالا می‌تونی زیرمجموعه تعریف کنی (مثل کوهرنگ برای شکر). زیرمجموعه اختیاریه.
+        </div>
+        <div id="manageProducts" style="max-height:400px;overflow-y:auto;"></div>
+        <button type="button" class="btn-backup-save" style="margin-top:8px;" onclick="menuAddProductFull()">➕ افزودن کالای جدید</button>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleSection('unitsSection', event)">
+        <span class="title-text">📏 واحدهای اندازه‌گیری</span>
+        <button type="button" class="toggle-btn" id="toggleBtnUnitsSection" onclick="event.stopPropagation();toggleSection('unitsSection')">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="unitsSection">
+        <div class="backup-desc" style="text-align:right;margin-bottom:8px;">
+          <b>ضریب تبدیل:</b> مقدار کیلوگرم معادل هر ۱ واحد. مثلاً گرم = ۰.۰۰۱. اگر واحد وزنی نیست (مثل عدد)، خالی بگذارید.
+        </div>
+        <div id="manageUnits" style="max-height:320px;overflow-y:auto;"></div>
+        <button type="button" class="btn-backup-save" style="margin-top:8px;" onclick="menuAddUnit()">➕ افزودن واحد جدید</button>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleSection('ghSection', event)">
+        <span class="title-text">☁️ اتصال GitHub</span>
+        <button type="button" class="toggle-btn" id="toggleBtnGhSection" onclick="event.stopPropagation();toggleSection('ghSection')">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="ghSection">
+        <div class="gh-compact" id="ghCompact" hidden>
+          <span class="gh-compact-status" id="ghCompactStatus">✅ متصل</span>
+          <button type="button" class="btn-gh-edit" onclick="toggleGhEdit()">✏️ ویرایش</button>
+        </div>
+        <div id="ghFullFields">
+          <div class="backup-desc">اطلاعات روی GitHub ذخیره می‌شود.</div>
+          <div class="field">
+            <label>GitHub Username</label>
+            <input id="ghOwner" type="text" placeholder="ghandsenobar">
+          </div>
+          <div class="field">
+            <label>Repository Name</label>
+            <input id="ghRepo" type="text" placeholder="Warehouse">
+          </div>
+          <div class="field">
+            <label>Personal Access Token</label>
+            <input id="ghToken" type="password" placeholder="github_pat_...">
+          </div>
+          <div class="backup-desc" style="margin-top:10px;font-size:11px;">
+            💡 برای ذخیره، توکن باید دسترسی <code>Contents: Read and write</code> داشته باشد.
+          </div>
+          <div class="backup-actions" style="margin-top:8px;">
+            <button type="button" class="btn-backup-save" onclick="saveGhConfigFromUI()">💾 ذخیره و تست اتصال</button>
+            <button type="button" class="btn-backup-restore" id="ghCancelBtn" onclick="toggleGhEdit(true)" hidden>✖️ بستن (بدون تغییر)</button>
+          </div>
+        </div>
+        <div class="file-info" id="ghInfo"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleSection('backupSection', event)">
+        <span class="title-text">📁 پشتیبان فایلی</span>
+        <button type="button" class="toggle-btn" id="toggleBtnBackupSection" onclick="event.stopPropagation();toggleSection('backupSection')">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="backupSection">
+        <div class="backup-desc">بکاپ‌گیری از حافظه فعلی روی کامپیوتر.</div>
+        <div class="backup-actions">
+          <button type="button" class="btn-backup-download" onclick="backupDownload()">💾 پشتیبان‌گیری</button>
+          <button type="button" class="btn-backup-restore" onclick="document.getElementById('restoreFileInput').click()">📂 بارگذاری از فایل</button>
+          <input type="file" id="restoreFileInput" accept=".json" onchange="restoreFromFile(event)" style="display:none;">
+        </div>
+        <div class="file-info" id="backupInfo"></div>
+        <div class="file-info" id="restoreInfo"></div>
+
+        <div class="backup-desc" style="margin-top:16px;color:var(--danger);border-top:1px dashed var(--border);padding-top:12px;">
+          <b>⚠️ پاک کردن رکوردهای GitHub:</b> تمام رکوردهای ثبت‌شده روی مخزن GitHub حذف می‌شوند. کالاها، واحدها، راننده‌ها، فروشنده‌ها، خریدارها و تنظیمات حفظ می‌شوند.
+        </div>
+        <div class="backup-actions">
+          <button type="button" class="btn-backup-wipe" style="margin-top:0;" onclick="deleteGhDatabase()">🗑️ پاک کردن رکوردهای GitHub</button>
+        </div>
+        <div class="file-info" id="ghDeleteInfo"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-msg" id="modalMsg"></div>
+    <input type="text" class="modal-input" id="modalInput" hidden>
+    <div class="modal-btns">
+      <button type="button" class="modal-btn modal-cancel" id="modalCancel">لغو</button>
+      <button type="button" class="modal-btn modal-third" id="modalThird" hidden>—</button>
+      <button type="button" class="modal-btn modal-ok" id="modalOk">تأیید</button>
+    </div>
+  </div>
+</div>
+
+<div class="receipt-preview-overlay" id="receiptPreviewOverlay">
+  <div class="receipt-preview-box">
+    <div class="receipt-preview-header">
+      <span class="receipt-preview-title">👁️ پیش‌نمایش رسید</span>
+      <button type="button" class="receipt-preview-close" onclick="closeReceiptPreview()" title="بستن">✕</button>
+    </div>
+    <div class="receipt-preview-body">
+      <div class="receipt-preview-paper" id="receiptPreviewPaper"></div>
+    </div>
+    <div class="receipt-preview-actions">
+      <button type="button" class="receipt-btn-close" onclick="closeReceiptPreview()">بستن</button>
+      <button type="button" class="receipt-btn-print" onclick="printReceiptFromPreview()">🖨️ چاپ رسید</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<div id="printArea"></div>
+<script>
+/* ============ Splash Screen ============ */
+(function(){
+  const SPLASH_DURATION = 3000;
+  const FADE_DURATION   = 700;
+
+  const splash = document.getElementById('splashScreen');
+  if(!splash) return;
+
+  document.body.style.overflow = 'hidden';
+
+  let splashHidden = false;
+  function hideSplash(){
+    if(splashHidden) return;
+    splashHidden = true;
+    splash.classList.add('hide');
+    document.body.style.overflow = '';
+    setTimeout(()=>{ try{ splash.remove(); }catch(e){} }, FADE_DURATION + 100);
+  }
+
+  splash.addEventListener('click', hideSplash);
+  splash.addEventListener('touchstart', hideSplash, {passive:true});
+
+  setTimeout(hideSplash, SPLASH_DURATION);
+})();
+
+/* ============ Custom Modal ============ */
+const modalOverlay=document.getElementById('modalOverlay');
+const modalMsg=document.getElementById('modalMsg');
+const modalInput=document.getElementById('modalInput');
+const modalOk=document.getElementById('modalOk');
+const modalCancel=document.getElementById('modalCancel');
+const modalThird=document.getElementById('modalThird');
+let _modalResolve=null,_modalType=null;
+function _openModal(type,msg,{okText='تأیید',cancelText='لغو',danger=false,inputDefault='',placeholder='',thirdText='',thirdDanger=false,okDanger=false,inputType='text'}={}){
+  return new Promise(resolve=>{
+    _modalResolve=resolve;_modalType=type;modalMsg.textContent=msg;
+    if(type==='prompt'){modalInput.hidden=false;modalInput.type=inputType||'text';modalInput.value=inputDefault||'';modalInput.placeholder=placeholder||'';}
+    else{modalInput.hidden=true;modalInput.type='text';modalInput.value='';}
+    modalOk.textContent=okText;modalOk.classList.toggle('danger',okDanger||danger);modalOk.hidden=false;
+    if(thirdText){modalThird.hidden=false;modalThird.textContent=thirdText;modalThird.classList.toggle('danger',thirdDanger);}
+    else{modalThird.hidden=true;}
+    if(type==='alert'){modalCancel.hidden=true;modalOk.style.flex='0 1 60%';}
+    else{modalCancel.hidden=false;modalCancel.textContent=cancelText;modalOk.style.flex='1';}
+    modalOverlay.classList.add('show');
+    setTimeout(()=>{if(type==='prompt')modalInput.focus();else modalOk.focus();},60);
+  });
+}
+function _closeModal(result){modalOverlay.classList.remove('show');const r=_modalResolve;_modalResolve=null;_modalType=null;if(r)r(result);}
+modalOk.addEventListener('click',()=>{if(_modalType==='prompt'){const v=modalInput.value.trim();_closeModal(v||null);}else _closeModal(true);});
+modalThird.addEventListener('click',()=>_closeModal('third'));
+modalCancel.addEventListener('click',()=>{_closeModal(_modalType==='prompt'?null:false);});
+modalInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();modalOk.click();}});
+modalOverlay.addEventListener('click',e=>{if(e.target===modalOverlay){_closeModal(_modalType==='prompt'?null:false);}});
+function customAlert(m,o={}){return _openModal('alert',m,{okText:o.okText||'باشه',...o});}
+function customConfirm(m,o={}){return _openModal('confirm',m,{okText:o.okText||'تأیید',cancelText:o.cancelText||'لغو',danger:!!o.danger,...o});}
+function customPrompt(m,d='',o={}){return _openModal('prompt',m,{okText:o.okText||'تأیید',cancelText:o.cancelText||'لغو',inputDefault:d,placeholder:o.placeholder||''});}
+function customTriple(m,o={}){return _openModal('triple',m,{okText:o.okText||'تأیید',cancelText:o.cancelText||'لغو',thirdText:o.thirdText||'',thirdDanger:!!o.thirdDanger,okDanger:!!o.okDanger});}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('receiptPreviewOverlay').classList.contains('show')){closeReceiptPreview();return;}
+  if(modalOverlay.classList.contains('show')){_closeModal(_modalType==='prompt'?null:false);return;}
+  const d=document.getElementById('drawer');if(d&&d.classList.contains('show'))closeDrawer();
+});
+
+/* ============ Toast ============ */
+function showToast(msg, type='success', duration=3000){
+  const container = document.getElementById('toastContainer');
+  if(!container) return;
+  const icons = {success:'✅', error:'❌', warning:'⚠️', info:'ℹ️'};
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.innerHTML = `<span>${icons[type]||''}</span><span>${esc(msg)}</span>`;
+  container.appendChild(toast);
+  let removed = false;
+  const remove = () => {
+    if(removed) return;
+    removed = true;
+    toast.classList.add('hiding');
+    setTimeout(() => toast.remove(), 300);
+  };
+  toast.addEventListener('click', remove);
+  setTimeout(remove, duration);
+}
+
+/* ============ ID Generator ============ */
+let lastIdCounter = 0;
+function generateId(){
+  const now = Date.now();
+  if(now > lastIdCounter) lastIdCounter = now;
+  return ++lastIdCounter;
+}
+
+/* ============ Collapsible Sections ============ */
+function toggleCollapsible(sectionId, ev){
+  if(ev && ev.target && ev.target.classList.contains('collapsible-toggle')) return;
+  const body = document.getElementById(sectionId);
+  if(!body) return;
+  const btnId = 'toggleBtn' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+  const btn = document.getElementById(btnId);
+  const isCollapsed = body.classList.contains('collapsed');
+  if(isCollapsed){
+    body.classList.remove('collapsed');
+    if(btn) btn.textContent='−';
+    if(sectionId === 'advFilterSection') buildAdvFilterOptions();
+    if(sectionId === 'searchSection'){
+      setTimeout(()=>{ const s=document.getElementById('search'); if(s) s.focus(); }, 200);
+    }
+  } else {
+    body.classList.add('collapsed');
+    if(btn) btn.textContent='+';
+  }
+}
+
+/* ============ Section Toggle (Drawer) ============ */
+function toggleSection(sectionId, ev){
+  if(ev && ev.target && ev.target.classList.contains('toggle-btn')) return;
+  const body=document.getElementById(sectionId);
+  if(!body)return;
+  const btnId='toggleBtn'+sectionId.charAt(0).toUpperCase()+sectionId.slice(1);
+  const btn=document.getElementById(btnId);
+  const isCollapsed=body.classList.contains('collapsed');
+  if(isCollapsed){body.classList.remove('collapsed');if(btn)btn.textContent='−';}
+  else{body.classList.add('collapsed');if(btn)btn.textContent='+';}
+}
+function collapseAllSections(){
+  ['unitsSection','productsSection','ghSection','backupSection'].forEach(id=>{
+    const body=document.getElementById(id);
+    const btn=document.getElementById('toggleBtn'+id.charAt(0).toUpperCase()+id.slice(1));
+    if(!body||!btn)return;
+    body.classList.add('collapsed');btn.textContent='+';
+  });
+}
+
+/* ============ Jalaali ============ */
+function div(a,b){return ~~(a/b);}
+function mod(a,b){return a-~~(a/b)*b;}
+function jalCal(jy){
+  const breaks=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+  const bl=breaks.length;const gy=jy+621;let leapJ=-14,jp=breaks[0],jm,jump,leap,leapG,march,n;
+  if(jy<jp||jy>=breaks[bl-1])throw new Error('bad');
+  for(let i=1;i<bl;i++){jm=breaks[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm;}
+  n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ+=1;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);if(leap===-1)leap=4;
+  return{leap,gy,march};
+}
+function g2d(gy,gm,gd){let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;return d;}
+function d2g(jdn){let j=4*jdn+139361631;j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;const i=div(mod(j,1461),4)*5+308;const gd=div(mod(i,153),5)+1;const gm=mod(div(i,153),12)+1;const gy=div(j,1461)-100100+div(8-gm,6);return{gy,gm,gd};}
+function j2d(jy,jm,jd){const r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;}
+function d2j(jdn){const gy=d2g(jdn).gy;let jy=gy-621;const r=jalCal(jy);const jdn1f=g2d(gy,3,r.march);let k=jdn-jdn1f;if(k>=0){if(k<=185)return{jy,jm:1+div(k,31),jd:mod(k,31)+1};k-=186;}else{jy--;k+=179;if(r.leap===1)k++;}return{jy,jm:7+div(k,30),jd:mod(k,30)+1};}
+function isLeapYear(jy){return jalCal(jy).leap===0;}
+const FA='۰۱۲۳۴۵۶۷۸۹';
+function toFa(s){return String(s).replace(/\d/g,d=>FA[+d]);}
+function toLatinDigits(s){return String(s).replace(/[۰-۹]/g,d=>FA.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));}
+const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WDAYS=['ش','ی','د','س','چ','پ','ج'];
+function gregToJalaliStr(y,m,d){const j=d2j(g2d(y,m,d));return toFa(`${j.jy}/${String(j.jm).padStart(2,'0')}/${String(j.jd).padStart(2,'0')}`);}
+function todayJalali(){const d=new Date();return gregToJalaliStr(d.getFullYear(),d.getMonth()+1,d.getDate());}
+function nowTime(){const d=new Date();return toFa(`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);}
+function setNow(){document.getElementById('f_date').value=todayJalali();document.getElementById('f_time').value=nowTime();}
+function normalizeDate(s){if(!s)return '';const p=toLatinDigits(s.trim()).split(/[\/\-\.]/);if(p.length!==3)return s.trim();return p.map(x=>x.padStart(2,'0')).join('/');}
+function esc(s){if(s==null)return '';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtQty(q){
+  if(q==null||q==='')return '';
+  const n=parseFloat(toLatinDigits(String(q)));
+  if(isNaN(n))return '';
+  if(Number.isInteger(n))return toFa(n);
+  return toFa(n.toFixed(3).replace(/\.?0+$/,''));
+}
+function fmtKg(kg){
+  if(kg==null||isNaN(kg))return '۰';
+  const n=Number(kg);
+  if(n===0)return '۰';
+  if(Number.isInteger(n))return toFa(n);
+  return toFa(n.toFixed(3).replace(/\.?0+$/,''));
+}
+function productFullName(r){
+  if(!r) return '-';
+  const p = r.product || '';
+  const s = r.subtype || '';
+  return s ? `${p} ${s}` : p;
+}
+
+/* ============ Search ============ */
+function onSearchInput(){const inp=document.getElementById('search');const btn=document.getElementById('searchClear');if(inp.value.length>0)btn.classList.add('show');else btn.classList.remove('show');renderRecords();}
+function clearSearch(){const inp=document.getElementById('search');inp.value='';document.getElementById('searchClear').classList.remove('show');renderRecords();inp.focus();}
+function smartMatch(r, q){
+  if(!q) return true;
+  const tokens = String(q).trim().split(/\s+/).filter(Boolean);
+  if(tokens.length === 0) return true;
+  return tokens.every(t => singleTokenMatch(r, t));
+}
+function singleTokenMatch(r, token){
+  const tokenLatin = toLatinDigits(token);
+  const tokenLower = token.toLowerCase();
+  const tokenLowerLatin = tokenLatin.toLowerCase();
+  const unitTexts = [];
+  if(r.unit){
+    unitTexts.push(String(r.unit));
+    const lbl = unitLabel(r.unit);
+    if(lbl && lbl !== '—') unitTexts.push(String(lbl));
+  }
+  const prod = products.find(x=>x.name===r.product);
+  if(prod && prod.unit && prod.unit !== r.unit){
+    unitTexts.push(String(prod.unit));
+    const lbl2 = unitLabel(prod.unit);
+    if(lbl2 && lbl2 !== '—') unitTexts.push(String(lbl2));
+  }
+  const allTextFields = [
+    r.product, r.subtype, r.party, r.driver,
+    r.invoiceNumber, r.basilNumber, r.waybillNumber,
+    r.notes, r.date, r.time, ...unitTexts
+  ];
+  const isNumeric = /^-?\d+(\.\d+)?$/.test(tokenLatin);
+  if(isNumeric){
+    const qNum = parseFloat(tokenLatin);
+    const numFields = [r.quantity, r.totalWeight];
+    for(const f of numFields){
+      if(f===undefined||f===null||String(f).trim()==='')continue;
+      const n = parseFloat(toLatinDigits(String(f)));
+      if(!isNaN(n) && n===qNum) return true;
+    }
+    const qNumStr = String(qNum).replace(/\./g,'\\.');
+    const wordRegex = new RegExp(`(^|[^0-9.])${qNumStr}([^0-9.]|$)`);
+    for(const f of allTextFields){
+      if(!f)continue;
+      const fLatin = toLatinDigits(String(f));
+      if(wordRegex.test(fLatin)) return true;
+    }
+    return false;
+  }
+  for(const f of allTextFields){
+    if(!f) continue;
+    const fStr = String(f).toLowerCase();
+    const fLat = toLatinDigits(fStr).toLowerCase();
+    if(fStr.includes(tokenLower) || fLat.includes(tokenLowerLatin)) return true;
+  }
+  return false;
+}
+
+/* ============ Calendar ============ */
+let calTarget=null,calYear,calMonth;
+function openCalendarFor(input){
+  closeTimePicker();calTarget=input;
+  const raw=toLatinDigits(input.value||'').trim();
+  if(raw){const p=raw.split(/[\/\-\.]/).map(Number);if(p.length===3&&p[0]&&p[1]){calYear=p[0];calMonth=p[1];}}
+  if(!calYear||!calMonth){const d=new Date();const j=d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));calYear=j.jy;calMonth=j.jm;}
+  renderCalendar();
+  const popup=document.getElementById('calPopup');
+  popup.style.display='block';popup.style.top='0px';popup.style.left='0px';
+  const rect=input.getBoundingClientRect();
+  const h=popup.offsetHeight,w=popup.offsetWidth;
+  let top=rect.bottom+6,left=rect.left;
+  if(top+h>window.innerHeight-8)top=rect.top-h-6;
+  if(left+w>window.innerWidth-8)left=window.innerWidth-w-8;
+  if(left<8)left=8;if(top<8)top=8;
+  popup.style.top=top+'px';popup.style.left=left+'px';
+}
+function closeCalendar(){document.getElementById('calPopup').style.display='none';calTarget=null;}
+function calNav(dir){calMonth+=dir;if(calMonth>12){calMonth=1;calYear++;}if(calMonth<1){calMonth=12;calYear--;}renderCalendar();}
+function calToday(){const d=new Date();const j=d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));calYear=j.jy;calMonth=j.jm;selectDay(j.jd);}
+function selectDay(d){
+  if(!calTarget)return;
+  const str=`${calYear}/${String(calMonth).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+  const id=calTarget.id;calTarget.value=toFa(str);closeCalendar();
+  if(id==='records_from'||id==='records_to'){ensureValidRange(id);renderRecords();}
+}
+function ensureValidRange(changedId){
+  const f=normalizeDate(document.getElementById('records_from').value);
+  const t=normalizeDate(document.getElementById('records_to').value);
+  if(f&&t&&f>t){if(changedId==='records_from')document.getElementById('records_to').value=document.getElementById('records_from').value;else document.getElementById('records_from').value=document.getElementById('records_to').value;}
+}
+function renderCalendar(){
+  const popup=document.getElementById('calPopup');
+  const firstJdn=j2d(calYear,calMonth,1);
+  const g=d2g(firstJdn);
+  const firstDate=new Date(g.gy,g.gm-1,g.gd);
+  const startDow=(firstDate.getDay()+1)%7;
+  const daysInMonth=calMonth<=6?31:(calMonth<=11?30:(isLeapYear(calYear)?30:29));
+  const td=new Date();const tj=d2j(g2d(td.getFullYear(),td.getMonth()+1,td.getDate()));
+  let selDay=null;
+  if(calTarget){const p=toLatinDigits(calTarget.value||'').split(/[\/\-\.]/).map(Number);if(p.length===3&&p[0]===calYear&&p[1]===calMonth)selDay=p[2];}
+  let html='';
+  html+='<div class="cal-header">';
+  html+='<button type="button" onclick="calNav(-1)">‹</button>';
+  html+=`<div class="cal-title">${MONTHS[calMonth-1]} ${toFa(calYear)}</div>`;
+  html+='<button type="button" onclick="calNav(1)">›</button></div>';
+  html+='<div class="cal-weekdays">';WDAYS.forEach(w=>html+=`<div>${w}</div>`);html+='</div>';
+  html+='<div class="cal-days">';
+  for(let i=0;i<startDow;i++)html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    let cls='cal-day';
+    if(tj.jy===calYear&&tj.jm===calMonth&&tj.jd===d)cls+=' today';
+    if(selDay===d)cls+=' selected';
+    html+=`<div class="${cls}" onclick="selectDay(${d})">${toFa(d)}</div>`;
+  }
+  html+='</div><div class="cal-footer">';
+  html+='<button type="button" onclick="calToday()">امروز</button>';
+  html+='<button type="button" onclick="closeCalendar()">بستن</button></div>';
+  popup.innerHTML=html;
+}
+
+/* ============ Time ============ */
+let timeTarget=null,tempH=0,tempM=0;
+function openTimeFor(input){
+  closeCalendar();timeTarget=input;
+  const raw=toLatinDigits(input.value||'').trim();
+  if(raw&&/^\d{1,2}:\d{1,2}$/.test(raw)){const[h,m]=raw.split(':').map(Number);tempH=h;tempM=m;}
+  else{const d=new Date();tempH=d.getHours();tempM=d.getMinutes();}
+  buildTimeCols();updateTimeDisplay();
+  const popup=document.getElementById('timePopup');
+  popup.style.display='block';popup.style.top='0px';popup.style.left='0px';
+  const rect=input.getBoundingClientRect();
+  const h=popup.offsetHeight,w=popup.offsetWidth;
+  let top=rect.bottom+6,left=rect.left;
+  if(top+h>window.innerHeight-8)top=rect.top-h-6;
+  if(left+w>window.innerWidth-8)left=window.innerWidth-w-8;
+  if(left<8)left=8;if(top<8)top=8;
+  popup.style.top=top+'px';popup.style.left=left+'px';
+  setTimeout(()=>{scrollToSelected('hourCol',tempH);scrollToSelected('minCol',tempM);},50);
+}
+function closeTimePicker(){document.getElementById('timePopup').style.display='none';timeTarget=null;}
+function buildTimeCols(){
+  const hc=document.getElementById('hourCol');const mc=document.getElementById('minCol');
+  hc.innerHTML='';mc.innerHTML='';
+  for(let hh=0;hh<24;hh++){const el=document.createElement('div');el.className='time-col-item'+(hh===tempH?' selected':'');el.textContent=toFa(String(hh).padStart(2,'0'));el.onclick=()=>{tempH=hh;hc.querySelectorAll('.time-col-item').forEach((x,i)=>x.classList.toggle('selected',i===tempH));updateTimeDisplay();};hc.appendChild(el);}
+  for(let mm=0;mm<60;mm++){const el=document.createElement('div');el.className='time-col-item'+(mm===tempM?' selected':'');el.textContent=toFa(String(mm).padStart(2,'0'));el.onclick=()=>{tempM=mm;mc.querySelectorAll('.time-col-item').forEach((x,i)=>x.classList.toggle('selected',i===tempM));updateTimeDisplay();};mc.appendChild(el);}
+}
+function scrollToSelected(colId,val){const col=document.getElementById(colId);const items=col.querySelectorAll('.time-col-item');if(items[val]){const item=items[val];col.scrollTop=item.offsetTop-col.clientHeight/2+item.offsetHeight/2;}}
+function updateTimeDisplay(){document.getElementById('timeDisplay').textContent=toFa(`${String(tempH).padStart(2,'0')}:${String(tempM).padStart(2,'0')}`);}
+function setTimePreset(hh,mm){tempH=hh;tempM=mm;buildTimeCols();updateTimeDisplay();setTimeout(()=>{scrollToSelected('hourCol',tempH);scrollToSelected('minCol',tempM);},30);}
+function timeNow(){const d=new Date();tempH=d.getHours();tempM=d.getMinutes();buildTimeCols();updateTimeDisplay();setTimeout(()=>{scrollToSelected('hourCol',tempH);scrollToSelected('minCol',tempM);},30);}
+function timeConfirm(){if(timeTarget){timeTarget.value=toFa(`${String(tempH).padStart(2,'0')}:${String(tempM).padStart(2,'0')}`);}closeTimePicker();}
+document.addEventListener('click',e=>{
+  const cal=document.getElementById('calPopup');
+  if(cal.style.display==='block'){if(!e.target.closest('#calPopup')&&!e.target.classList.contains('date-input'))closeCalendar();}
+  const tp=document.getElementById('timePopup');
+  if(tp.style.display==='block'){if(!e.target.closest('#timePopup')&&!e.target.classList.contains('time-input'))closeTimePicker();}
+});
+
+/* ============ Storage ============ */
+const DEFAULT_UNITS=[{v:'kg',l:'کیلوگرم',factor:1}];
+const DEFAULT_PRODUCTS=[{name:'شکر',unit:'kg',subtypes:[]}];
+const PRODUCTS_INIT_KEY='wh_products_init';
+function normalizeProductList(arr){
+  if(!Array.isArray(arr))return [];
+  return arr.map(x=>{
+    if(typeof x==='string')return {name:x,unit:'pcs',subtypes:[]};
+    if(x&&typeof x==='object'&&x.name){
+      const subtypes = Array.isArray(x.subtypes)?x.subtypes.map(s=>String(s||'').trim()).filter(Boolean):[];
+      return {name:String(x.name),unit:x.unit||'pcs',subtypes};
+    }
+    return null;
+  }).filter(Boolean);
+}
+function normalizeStringList(arr){if(!Array.isArray(arr))return [];return arr.map(x=>typeof x==='string'?x:(x&&x.name?x.name:null)).filter(x=>x&&typeof x==='string');}
+function normalizeUnitList(arr){
+  if(!Array.isArray(arr)||!arr.length)return [...DEFAULT_UNITS];
+  return arr.map(x=>{
+    if(typeof x==='string'){const d=DEFAULT_UNITS.find(u=>u.v===x);return d?{...d}:{v:x,l:x,factor:null};}
+    if(x&&x.v){
+      let f=x.factor;
+      if(f===undefined) f=null;
+      if(f!==null && f!==''){f=parseFloat(toLatinDigits(String(f)));if(isNaN(f))f=null;}
+      else f=null;
+      return {v:String(x.v),l:String(x.l||x.v),factor:f};
+    }
+    return null;
+  }).filter(Boolean);
+}
+function ensureDefaultProducts(){
+  if(products.length){try{localStorage.setItem(PRODUCTS_INIT_KEY,'1');}catch(e){}return;}
+  try{if(localStorage.getItem(PRODUCTS_INIT_KEY)==='1')return;}catch(e){}
+  products = DEFAULT_PRODUCTS.map(p=>({...p,subtypes:[...p.subtypes]}));
+  try{localStorage.setItem(PRODUCTS_INIT_KEY,'1');}catch(e){}
+}
+
+let records=[];
+let products=[];
+let sellers=[];
+let buyers=[];
+let drivers=[];
+let unitsList=[...DEFAULT_UNITS];
+let username=localStorage.getItem('lab_username')||'';
+let darkMode=localStorage.getItem('lab_darkmode')==='1';
+let currentType=null,editingId=null;
+let dirty=false;
+let lastSyncAt=null;
+let ghCanWrite=null;
+let ghFileSize=0;
+let summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
+let showDeleted = false;
+let advFilter = { product:'', subtype:'', party:'', driver:'' };
+
+function unitLabel(v){const u=unitsList.find(x=>x.v===v);return u?u.l:v||'—';}
+function unitFactor(v){const u=unitsList.find(x=>x.v===v);return u?u.factor:null;}
+function normalizeRecord(r){
+  if(!r||typeof r!=='object')return r;
+  if(typeof r.updatedAt!=='number')r.updatedAt=(typeof r.id==='number')?r.id:Date.now();
+  if(typeof r.deleted!=='boolean')r.deleted=false;
+  if(r.unit===undefined)r.unit='';
+  if(r.subtype===undefined)r.subtype='';
+  if(r.totalWeight===undefined)r.totalWeight='';
+  if(r.invoiceNumber===undefined)r.invoiceNumber=r.docNumber||'';
+  if(r.basilNumber===undefined)r.basilNumber='';
+  if(r.waybillNumber===undefined)r.waybillNumber='';
+  if(r.driver===undefined)r.driver='';
+  return r;
+}
+function calcKg(quantity, unit){
+  const f=unitFactor(unit);
+  if(f===null||f===undefined)return 0;
+  const q=parseFloat(toLatinDigits(String(quantity||'')));
+  if(isNaN(q))return 0;
+  return q*f;
+}
+function getRecordKg(r){
+  if(r.totalWeight!==undefined && r.totalWeight!==null && String(r.totalWeight).trim()!==''){
+    const w=parseFloat(toLatinDigits(String(r.totalWeight)));
+    if(!isNaN(w)) return w;
+  }
+  return calcKg(r.quantity, r.unit);
+}
+
+/* ============ Pending State ============ */
+const PENDING_KEY='wh_pending_state';
+function savePendingState(){
+  if(!dirty)return;
+  try{localStorage.setItem(PENDING_KEY,JSON.stringify({records,products,sellers,buyers,drivers,unitsList,ts:Date.now(),username:username||''}));}catch(e){}
+}
+function loadPendingState(){try{const raw=localStorage.getItem(PENDING_KEY);if(!raw)return null;return JSON.parse(raw);}catch(e){return null;}}
+function clearPendingState(){try{localStorage.removeItem(PENDING_KEY);}catch(e){}}
+function loadPendingIntoRAM(p){
+  records=(p.records||[]).map(normalizeRecord);
+  products=normalizeProductList(p.products||[]);
+  sellers=normalizeStringList(p.sellers||p.deliverers||p.suppliers||[]);
+  buyers=normalizeStringList(p.buyers||p.receivers||[]);
+  drivers=normalizeStringList(p.drivers||[]);
+  unitsList=normalizeUnitList(p.unitsList||[]);
+  ensureDefaultProducts();
+}
+function markDirty(){dirty=true;savePendingState();updateSyncBar();}
+
+/* ============ Space Warning ============ */
+function formatBytes(b){
+  if(b<1024)return toFa(b)+' بایت';
+  if(b<1024*1024)return toFa((b/1024).toFixed(1))+' کیلوبایت';
+  return toFa((b/1024/1024).toFixed(2))+' مگابایت';
+}
+function updateSpaceWarning(){
+  const el=document.getElementById('spaceWarning');
+  if(!el)return;
+  const compact=document.getElementById('ghCompactStatus');
+  const hasConfig=!!(ghConfig.token&&ghConfig.owner&&ghConfig.repo);
+  if(compact&&hasConfig&&ghFileSize>0){
+    const readOnly=(ghCanWrite===false);
+    const base=readOnly?`🔒 ${ghConfig.owner}/${ghConfig.repo} (فقط خواندنی)`:`✅ متصل به ${ghConfig.owner}/${ghConfig.repo}`;
+    compact.innerHTML=`${esc(base)}<span class="gh-size">📦 حجم فایل روی سرور: ${formatBytes(ghFileSize)}</span>`;
+  }
+  if(!ghConfig.token||ghFileSize===0){el.hidden=true;return;}
+  const kb=ghFileSize/1024;
+  if(kb<400){el.hidden=true;return;}
+  el.hidden=false;
+  const sizeStr=formatBytes(ghFileSize);
+  if(kb<900){el.className='space-warning warning';el.innerHTML=`⚠️ <b>حجم فایل داده روی GitHub: ${sizeStr}</b><br>در حال نزدیک شدن به محدودیت (۱ مگابایت).`;}
+  else{el.className='space-warning danger';el.innerHTML=`🚨 <b>حجم فایل داده روی GitHub: ${sizeStr}</b><br>در آستانه پر شدن! لطفاً فوراً بکاپ تهیه کنید.`;}
+}
+function updateSyncBar(state,msg){
+  const statusEl=document.getElementById('syncBarStatus');
+  const pullBtn=document.getElementById('syncPullBtn');
+  const pushBtn=document.getElementById('syncPushBtn');
+  if(!statusEl)return;
+  const hasToken=!!ghConfig.token;
+  const readOnly=(ghCanWrite===false);
+  if(state==='loading'){statusEl.className='sync-bar-status loading';statusEl.innerHTML='<span class="sync-spin">🔄</span> '+(msg||'در حال دریافت...');pullBtn.disabled=true;pushBtn.disabled=true;return;}
+  if(state==='saving'){statusEl.className='sync-bar-status loading';statusEl.innerHTML='<span class="sync-spin">🔄</span> '+(msg||'در حال ذخیره...');pullBtn.disabled=true;pushBtn.disabled=true;return;}
+  if(state==='error'){statusEl.className='sync-bar-status error';statusEl.textContent='❌ '+(msg||'خطا در اتصال');pullBtn.disabled=!hasToken;pushBtn.disabled=!hasToken||readOnly;return;}
+  if(!hasToken){statusEl.className='sync-bar-status noconfig';statusEl.textContent='⚪ برای شروع، از منوی ☰ تنظیمات GitHub را وارد کنید';pullBtn.disabled=true;pushBtn.disabled=true;return;}
+  if(readOnly){statusEl.className='sync-bar-status readonly';statusEl.textContent='🔒 توکن فقط خواندنی است — فقط می‌تونید دریافت کنید';pullBtn.disabled=false;pushBtn.disabled=true;return;}
+  if(dirty){statusEl.className='sync-bar-status dirty';statusEl.textContent='🟠 تغییرات ذخیره‌نشده — دکمه «ذخیره» را بزنید';pullBtn.disabled=false;pushBtn.disabled=false;return;}
+  statusEl.className='sync-bar-status synced';
+  const t=lastSyncAt?toFa(new Date(lastSyncAt).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})):'';
+  statusEl.textContent='🟢 همه چیز ذخیره شده'+(t?` — آخرین همگام‌سازی: ${t}`:'');
+  pullBtn.disabled=false;pushBtn.disabled=false;
+}
+function applyDarkMode(){document.body.classList.toggle('dark',darkMode);const t=document.getElementById('darkModeToggle');if(t)t.checked=darkMode;}
+function toggleDarkMode(on){darkMode=!!on;try{localStorage.setItem('lab_darkmode',darkMode?'1':'0');}catch(e){}applyDarkMode();}
+
+/* ============ GitHub Sync ============ */
+const GH_CONFIG_KEY='wh_github_config';
+let ghConfig={owner:'ghandsenobar',repo:'Warehouse',token:''};
+try{
+  const saved=JSON.parse(localStorage.getItem(GH_CONFIG_KEY)||'{}');
+  if(saved.owner)ghConfig.owner=saved.owner;
+  if(saved.repo)ghConfig.repo=saved.repo;
+  if(saved.token)ghConfig.token=saved.token;
+}catch(e){}
+let ghFileSha=null;
+function saveGhConfig(){try{localStorage.setItem(GH_CONFIG_KEY,JSON.stringify(ghConfig));}catch(e){}}
+function utf8ToBase64(str){
+  const utf8 = new TextEncoder().encode(str);
+  let binary = '';
+  const chunk = 0x8000;
+  for(let i=0; i<utf8.length; i+=chunk){
+    binary += String.fromCharCode.apply(null, utf8.subarray(i, Math.min(i+chunk, utf8.length)));
+  }
+  return btoa(binary);
+}
+function base64ToUtf8(b64){
+  const clean = b64.replace(/\s/g,'');
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+async function checkTokenPermissions(){
+  if(!ghConfig.token)return null;
+  try{
+    const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}`;
+    const r=await fetch(url,{headers:{'Authorization':'Bearer '+ghConfig.token,'Accept':'application/vnd.github+json'}});
+    if(!r.ok)return {canWrite:null,source:'error',status:r.status};
+    const scopesHeader=r.headers.get('X-OAuth-Scopes')||'';
+    const data=await r.json();
+    const perms=data.permissions||{};
+    if(typeof perms.push==='boolean')return {canWrite:perms.push,source:'permissions'};
+    if(scopesHeader){
+      const scopes=scopesHeader.split(',').map(s=>s.trim());
+      const canWrite=scopes.includes('repo')||scopes.includes('public_repo')||scopes.includes('write:packages');
+      return {canWrite,source:'scopes',scopes};
+    }
+    return {canWrite:false,source:'no-scopes'};
+  }catch(e){return null;}
+}
+function updateGhUI(){
+  const hasConfig=!!(ghConfig.token&&ghConfig.owner&&ghConfig.repo);
+  const compact=document.getElementById('ghCompact');
+  const full=document.getElementById('ghFullFields');
+  const compactStatus=document.getElementById('ghCompactStatus');
+  if(!compact||!full)return;
+  if(hasConfig){
+    compact.hidden=false;full.hidden=true;
+    const readOnly=(ghCanWrite===false);
+    compact.classList.toggle('readonly',readOnly);
+    const base=readOnly?`🔒 ${ghConfig.owner}/${ghConfig.repo} (فقط خواندنی)`:`✅ متصل به ${ghConfig.owner}/${ghConfig.repo}`;
+    if(ghFileSize>0){compactStatus.innerHTML=`${esc(base)}<span class="gh-size">📦 حجم فایل روی سرور: ${formatBytes(ghFileSize)}</span>`;}
+    else{compactStatus.textContent=base;}
+  }else{compact.hidden=true;full.hidden=false;}
+}
+function toggleGhEdit(forceClose){
+  const compact=document.getElementById('ghCompact');
+  const full=document.getElementById('ghFullFields');
+  if(!compact||!full)return;
+  if(forceClose===true){if(ghConfig.token){updateGhUI();document.getElementById('ghCancelBtn').hidden=true;}return;}
+  if(full.hidden){full.hidden=false;compact.hidden=true;document.getElementById('ghCancelBtn').hidden=false;}
+  else{if(ghConfig.token){updateGhUI();document.getElementById('ghCancelBtn').hidden=true;}}
+}
+async function saveGhConfigFromUI(){
+  ghConfig.owner=document.getElementById('ghOwner').value.trim();
+  ghConfig.repo=document.getElementById('ghRepo').value.trim();
+  ghConfig.token=document.getElementById('ghToken').value.trim();
+  if(!ghConfig.owner||!ghConfig.repo||!ghConfig.token){setFileInfo('ghInfo','❌ همه فیلدها را پر کنید',true);return;}
+  saveGhConfig();
+  setFileInfo('ghInfo','⏳ در حال تست اتصال...',false);
+  ghFileSha=null;ghCanWrite=null;
+  try{
+    const data=await ghGet();
+    if(data){setFileInfo('ghInfo',`✅ اتصال برقرار شد — ${toFa((data.records||[]).length)} رکورد روی سرور`,false);}
+    else{setFileInfo('ghInfo','✅ متصل — فایل روی سرور نیست',false);}
+    if(!records.length&&!products.length&&data){applyRemoteData(data);renderRecords();renderManageLists();renderManageProducts();}
+  }catch(err){
+    setFileInfo('ghInfo','❌ خطا در اتصال: '+(err.message||''),true);
+    updateSyncBar('error','خطا در اتصال');return;
+  }
+  const perm=await checkTokenPermissions();
+  if(perm&&perm.canWrite===true){ghCanWrite=true;setFileInfo('ghInfo','✅ دسترسی کامل',false);}
+  else if(perm&&perm.canWrite===false){ghCanWrite=false;setFileInfo('ghInfo','⚠️ توکن فقط خواندنی است',true);}
+  else{ghCanWrite=null;setFileInfo('ghInfo','✅ متصل — سطح دسترسی نامشخص',false);}
+  updateSyncBar('synced');updateGhUI();updateSpaceWarning();
+  setTimeout(()=>{document.getElementById('ghCancelBtn').hidden=true;updateGhUI();},800);
+}
+async function ghGet(){
+  if(!ghConfig.token)throw new Error('no token');
+  const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json?_=${Date.now()}`;
+  const r=await fetch(url,{headers:{'Authorization':'Bearer '+ghConfig.token,'Accept':'application/vnd.github+json'}});
+  if(r.status===404){ghFileSha=null;ghFileSize=0;updateSpaceWarning();updateGhUI();return null;}
+  if(!r.ok)throw new Error('fetch '+r.status);
+  const data=await r.json();
+  ghFileSha=data.sha;ghFileSize=data.size||0;
+  updateSpaceWarning();updateGhUI();
+  if(!data.content){throw new Error('no-content');}
+  const jsonStr = base64ToUtf8(data.content);
+  return JSON.parse(jsonStr);
+}
+async function ghPut(payload){
+  if(!ghConfig.token)throw new Error('no token');
+  const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json`;
+  const jsonStr = JSON.stringify(payload, null, 2);
+  const content = utf8ToBase64(jsonStr);
+  const body={message:'Update warehouse — '+new Date().toISOString()+' by '+(username||'unknown'),content};
+  if(ghFileSha)body.sha=ghFileSha;
+  const r=await fetch(url,{method:'PUT',headers:{'Authorization':'Bearer '+ghConfig.token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){let errText='';try{errText=await r.text();}catch(e){}const err=new Error('push '+r.status);err.status=r.status;err.body=errText;throw err;}
+  const res=await r.json();
+  ghFileSha=res.content.sha;ghFileSize=res.content.size||0;
+  updateSpaceWarning();updateGhUI();
+}
+function mergeRecordsById(local, remote){
+  const map=new Map();
+  (remote||[]).forEach(r=>{if(r&&r.id!=null)map.set(r.id,normalizeRecord({...r}));});
+  (local||[]).forEach(r=>{
+    if(!r||r.id==null)return;
+    const ex=map.get(r.id);
+    if(!ex){map.set(r.id,normalizeRecord({...r}));return;}
+    const localT=r.updatedAt||0;
+    const remoteT=ex.updatedAt||0;
+    if(localT>=remoteT)map.set(r.id,normalizeRecord({...r}));
+  });
+  return Array.from(map.values());
+}
+function mergeUnique(a,b){return Array.from(new Set([...(a||[]),...(b||[])]));}
+function mergeProductsList(a,b){
+  const map=new Map();
+  const mergeOne = (p)=>{
+    if(!p||!p.name)return;
+    const ex=map.get(p.name);
+    if(!ex){map.set(p.name,{...p,subtypes:Array.isArray(p.subtypes)?[...p.subtypes]:[]});return;}
+    if(!ex.unit && p.unit)ex.unit=p.unit;
+    const subs = new Set([...(ex.subtypes||[]), ...((p.subtypes)||[])]);
+    ex.subtypes = Array.from(subs);
+  };
+  [...(a||[])].forEach(mergeOne);
+  [...(b||[])].forEach(mergeOne);
+  return Array.from(map.values());
+}
+function mergeUnitsList(a,b){
+  const map=new Map();
+  [...(b||[])].forEach(u=>{if(!u||!u.v)return;if(!map.has(u.v))map.set(u.v,{v:u.v,l:u.l||u.v,factor:(u.factor===undefined?null:u.factor)});});
+  [...(a||[])].forEach(u=>{if(!u||!u.v)return;map.set(u.v,{v:u.v,l:u.l||u.v,factor:(u.factor===undefined?null:u.factor)});});
+  return Array.from(map.values());
+}
+function applyRemoteData(data){
+  records=(data.records||[]).map(normalizeRecord);
+  products=normalizeProductList(data.products||[]);
+  sellers=normalizeStringList(data.sellers||data.deliverers||data.suppliers||[]);
+  buyers=normalizeStringList(data.buyers||data.receivers||[]);
+  drivers=normalizeStringList(data.drivers||[]);
+  unitsList=normalizeUnitList(data.unitsList||[]);
+  ensureDefaultProducts();
+}
+async function syncPull(){
+  if(!ghConfig.token){await customAlert('ابتدا از منوی ☰ تنظیمات GitHub را وارد کنید');return;}
+  if(dirty){
+    const choice=await customTriple(
+      '⚠️ شما تغییرات ذخیره‌نشده دارید.\n\nاگر فقط «دریافت» کنید، تغییرات فعلی برای همیشه پاک می‌شوند.\n\nتوصیه می‌شود ابتدا ذخیره کنید.',
+      {okText:'⬆️ اول ذخیره کن',thirdText:'🗑️ دور انداختن و دریافت',cancelText:'لغو',thirdDanger:true}
+    );
+    if(choice===true){await syncPush();return;}
+    else if(choice==='third'){clearPendingState();dirty=false;updateSyncBar();}
+    else{return;}
+  }
+  updateSyncBar('loading','در حال دریافت از GitHub...');
+  try{
+    const data=await ghGet();
+    if(!data){updateSyncBar('synced');await customAlert('هنوز داده‌ای روی GitHub ذخیره نشده');return;}
+    applyRemoteData(data);
+    dirty=false;lastSyncAt=Date.now();
+    editingId=null;currentType=null;
+    applyTypeUI();fillFormProducts();fillUnits();fillParties();fillDrivers();renderRecords();renderManageLists();renderManageProducts();
+    updateSyncBar('synced');
+    await customAlert(`✅ ${toFa(records.filter(r=>!r.deleted).length)} رکورد دریافت شد`);
+  }catch(e){
+    updateSyncBar('error','خطا در دریافت');
+    await customAlert('خطا در دریافت از GitHub.\n\nجزئیات: '+(e.message||'نامشخص'));
+  }
+}
+async function syncPush(){
+  if(!ghConfig.token){await customAlert('ابتدا از منوی ☰ تنظیمات GitHub را وارد کنید');return;}
+  if(ghCanWrite===false){await customAlert('🔒 توکن شما فقط خواندنی است.\n\nبرای ذخیره، توکن با دسترسی Contents:write بسازید.');return;}
+  updateSyncBar('saving','در حال ذخیره روی GitHub...');
+  try{
+    let remote=null;
+    try{remote=await ghGet();}catch(e){remote=null;}
+    records=mergeRecordsById(records,remote?.records||[]);
+    products=mergeProductsList(products,remote?.products||[]);
+    sellers=mergeUnique(sellers,remote?.sellers||remote?.deliverers||remote?.suppliers||[]);
+    buyers=mergeUnique(buyers,remote?.buyers||remote?.receivers||[]);
+    drivers=mergeUnique(drivers,remote?.drivers||[]);
+    unitsList=mergeUnitsList(unitsList,remote?.unitsList||[]);
+    const payload={version:3,updatedAt:new Date().toISOString(),updatedBy:username||'unknown',records,products,sellers,buyers,drivers,unitsList};
+    await ghPut(payload);
+    dirty=false;lastSyncAt=Date.now();ghCanWrite=true;
+    clearPendingState();
+    renderRecords();renderManageLists();renderManageProducts();
+    updateSyncBar('synced');
+    await customAlert('✅ تغییرات با موفقیت روی GitHub ذخیره شد');
+  }catch(e){
+    if(e.status===403||e.status===404){ghCanWrite=false;updateSyncBar('synced');await customAlert('🔒 توکن شما دسترسی نوشتن ندارد (خطای ۴۰۳).');return;}
+    updateSyncBar('error','خطا در ذخیره');
+    await customAlert('خطا در ذخیره روی GitHub.\n\nجزئیات: '+(e.message||'نامشخص'));
+  }
+}
+async function initFromGitHub(){
+  if(!ghConfig.token){updateSyncBar();return;}
+  updateSyncBar('loading','در حال دریافت...');
+  try{
+    const data=await ghGet();
+    if(data){applyRemoteData(data);dirty=false;lastSyncAt=Date.now();renderRecords();renderManageLists();renderManageProducts();}
+    const perm=await checkTokenPermissions();
+    if(perm)ghCanWrite=perm.canWrite;
+    updateSyncBar('synced');
+  }catch(e){
+    updateSyncBar('error','خطا در دریافت');
+    console.error('initFromGitHub error:', e);
+  }
+}
+async function initApp(){
+  const pending=loadPendingState();
+  const hasPending = pending && (
+    (pending.records && pending.records.length > 0) ||
+    (pending.products && pending.products.length > 0) ||
+    (pending.unitsList && pending.unitsList.length > 0) ||
+    (pending.sellers && pending.sellers.length > 0) ||
+    (pending.buyers && pending.buyers.length > 0) ||
+    (pending.drivers && pending.drivers.length > 0)
+  );
+  
+  if(hasPending){
+    dirty=true;updateSyncBar();
+    const recCount=(pending.records||[]).filter(r=>!r.deleted).length;
+    const delCount=(pending.records||[]).filter(r=>r.deleted).length;
+    const ts=pending.ts?new Date(pending.ts).toLocaleString('fa-IR',{dateStyle:'short',timeStyle:'short'}):'—';
+    const by=pending.username||'ناشناس';
+    
+    let msg = `⚠️ تغییرات ذخیره‌نشده پیدا شد\n\n📅 ${ts}\n👤 ${by}\n\n`;
+    if(recCount > 0 || delCount > 0){
+      msg += `📋 شامل ${toFa(recCount)} رکورد`;
+      if(delCount > 0) msg += ` و ${toFa(delCount)} حذف‌شده`;
+      msg += '\n';
+    } else {
+      msg += `📋 تغییرات در کالاها، واحدها یا لیست‌ها\n`;
+    }
+    msg += '\nچه کاری انجام شود؟';
+    
+    const choice=await customTriple(msg,{okText:'⬆️ ارسال',thirdText:'🗑️ دور انداختن',cancelText:'فعلاً نه',thirdDanger:true});
+    if(choice===true){loadPendingIntoRAM(pending);renderRecords();renderManageLists();renderManageProducts();await syncPush();return;}
+    if(choice==='third'){
+      const c=await customConfirm('⚠️ این تغییرات برای همیشه از بین می‌رن.\n\nمطمئنی؟',{okText:'بله',danger:true});
+      if(c){clearPendingState();dirty=false;updateSyncBar();await initFromGitHub();}
+      else{return initApp();}
+      return;
+    }
+    loadPendingIntoRAM(pending);renderRecords();renderManageLists();renderManageProducts();updateSyncBar();
+    setTimeout(()=>{showToast('تغییرات ذخیره‌نشده در حافظه نگه داشته شدند','warning');},400);
+    return;
+  }
+  ensureDefaultProducts();
+  await initFromGitHub();
+}
+
+/* ============ Drawer ============ */
+function openDrawer(){
+  document.getElementById('drawer').classList.add('show');
+  document.getElementById('drawerOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+  document.getElementById('usernameInput').value=username||'';
+  document.getElementById('darkModeToggle').checked=darkMode;
+  document.getElementById('ghOwner').value=ghConfig.owner||'';
+  document.getElementById('ghRepo').value=ghConfig.repo||'';
+  document.getElementById('ghToken').value=ghConfig.token||'';
+  document.getElementById('backupInfo').textContent='';
+  document.getElementById('restoreInfo').textContent='';
+  document.getElementById('ghInfo').textContent='';
+  document.getElementById('ghDeleteInfo').textContent='';
+  document.getElementById('ghCancelBtn').hidden=true;
+  collapseAllSections();
+  updateGhUI();renderManageLists();renderManageProducts();
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('show');document.getElementById('drawerOverlay').classList.remove('show');document.body.style.overflow='';}
+function saveUsername(){username=document.getElementById('usernameInput').value.trim();try{localStorage.setItem('lab_username',username);}catch(e){}}
+function setFileInfo(id,msg,isError){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className='file-info '+(isError?'error':'success');}
+
+/* ============ Manage Units ============ */
+function renderManageLists(){
+  const uc=document.getElementById('manageUnits');
+  if(uc){
+    uc.innerHTML=unitsList.length?unitsList.map((u,i)=>{
+      const f=(u.factor===null||u.factor===undefined)?'':u.factor;
+      return `<div class="manage-row" style="grid-template-columns:60px 1fr 90px 38px;">
+        <input type="text" value="${esc(u.v)}" onchange="updateUnitCode(${i},this.value,this)" title="کد واحد" style="font-family:monospace;text-align:center;">
+        <input type="text" value="${esc(u.l)}" onchange="updateUnitLabel(${i},this.value,this)" title="نام واحد">
+        <input type="number" step="any" min="0" value="${f}" placeholder="ضریب (kg)" onchange="updateUnitFactor(${i},this.value)" style="text-align:center;">
+        <button type="button" onclick="deleteUnit(${i})">🗑️</button>
+      </div>`;
+    }).join(''):'<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px;">خالی</div>';
+  }
+}
+function updateUnitCode(i,val,el){
+  const v=val.trim();
+  if(!v){el.value=unitsList[i].v;return;}
+  if(unitsList.some((u,idx)=>idx!==i&&u.v===v)){customAlert('این کد قبلاً وجود دارد');el.value=unitsList[i].v;return;}
+  const oldV=unitsList[i].v;
+  unitsList[i].v=v;
+  products.forEach(p=>{if(p.unit===oldV)p.unit=v;});
+  records.forEach(r=>{if(r.unit===oldV)r.unit=v;});
+  markDirty();renderManageLists();fillUnits();renderRecords();
+}
+function updateUnitLabel(i,val,el){
+  const v=val.trim();
+  if(!v){el.value=unitsList[i].l;return;}
+  unitsList[i].l=v;
+  markDirty();renderManageLists();fillUnits();renderRecords();
+}
+function updateUnitFactor(i,val){
+  if(!unitsList[i])return;
+  const v=String(val||'').trim();
+  if(v===''){unitsList[i].factor=null;}
+  else{const n=parseFloat(toLatinDigits(v));unitsList[i].factor=isNaN(n)?null:n;}
+  markDirty();fillUnits();renderRecords();updateAutoKg();
+}
+async function deleteUnit(i){
+  const u=unitsList[i];
+  if(!u)return;
+  const usedByProducts=products.filter(p=>p.unit===u.v);
+  const usedByRecords=records.filter(r=>!r.deleted && r.unit===u.v);
+  if(usedByProducts.length || usedByRecords.length){
+    const ok=await customConfirm(`واحد «${u.l}» در ${toFa(usedByProducts.length)} کالا و ${toFa(usedByRecords.length)} رکورد استفاده شده.\n\nادامه؟`,{okText:'حذف',danger:true});
+    if(!ok)return;
+  }else{
+    const ok=await customConfirm(`واحد «${u.l}» حذف شود؟`,{okText:'حذف',danger:true});
+    if(!ok)return;
+  }
+  unitsList.splice(i,1);
+  if(unitsList.length===0) unitsList=[...DEFAULT_UNITS];
+  markDirty();renderManageLists();fillUnits();renderRecords();
+}
+async function menuAddUnit(){
+  const v=await customPrompt('کد واحد (مثلاً: kg, pcs, m):','',{placeholder:'kg'});
+  if(!v)return;const vc=v.trim();if(!vc)return;
+  if(unitsList.some(u=>u.v===vc)){customAlert('این کد قبلاً وجود دارد');return;}
+  const l=await customPrompt('نام نمایشی واحد:',vc,{placeholder:'کیلوگرم'});
+  if(!l)return;
+  const fStr=await customPrompt('ضریب تبدیل به کیلوگرم:\n(اگر واحد وزنی نیست، خالی بگذارید)\nمثال: گرم = 0.001 ، تن = 1000','',{placeholder:'0.001'});
+  let factor=null;
+  if(fStr && String(fStr).trim()!==''){const n=parseFloat(toLatinDigits(String(fStr)));if(!isNaN(n))factor=n;}
+  unitsList.push({v:vc,l:l.trim()||vc,factor});
+  markDirty();renderManageLists();fillUnits();
+}
+
+/* ============ Manage Products ============ */
+function renderManageProducts(){
+  const el=document.getElementById('manageProducts');
+  if(!el)return;
+  if(!products.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">هنوز کالایی اضافه نشده</div>';return;}
+  el.innerHTML=products.map((p,i)=>{
+    const subs=(p.subtypes||[]).filter(s=>s && s.trim());
+    const subHtml = subs.length
+      ? `<div class="prod-subs">${subs.map(s=>`<span class="prod-sub-tag">${esc(s)}</span>`).join('')}</div>`
+      : '<div class="prod-subs-empty">بدون زیرمجموعه</div>';
+    return `<div class="product-row">
+      <div class="product-info">
+        <div class="product-name">📦 ${esc(p.name)} <span class="product-unit">${esc(unitLabel(p.unit))}</span></div>
+        ${subHtml}
+      </div>
+      <div class="product-actions">
+        <button type="button" onclick="editProductInSettings(${i})" title="ویرایش">✏️</button>
+        <button type="button" onclick="deleteProductFromSettings(${i})" title="حذف">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function menuAddProductFull(){
+  const n=await customPrompt('نام کالای جدید:','',{placeholder:'مثلاً: شکر'});
+  if(!n)return;const v=n.trim();if(!v)return;
+  if(products.some(p=>p.name===v)){await customAlert('این کالا قبلاً وجود دارد');return;}
+  const unitListStr=unitsList.map((u,i)=>`${i+1}. ${u.v} (${u.l})`).join('\n');
+  const unitIdxStr=await customPrompt('شماره واحد پیش‌فرض:\n'+unitListStr,'1',{placeholder:'1'});
+  if(!unitIdxStr)return;
+  const idx=parseInt(toLatinDigits(unitIdxStr))-1;
+  const unit=unitsList[idx]?.v || unitsList[0]?.v || 'kg';
+  const subsStr=await customPrompt('زیرمجموعه‌ها (با کاما جدا کنید - اختیاری):\nمثال: کوهرنگ, اصفهان, صنوبر','',{placeholder:'کوهرنگ, اصفهان'});
+  const subtypes = subsStr ? subsStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  products.push({name:v,unit,subtypes});
+  markDirty();fillFormProducts();renderManageProducts();updateSubtypesForProduct();
+}
+async function editProductInSettings(index){
+  const p=products[index];
+  if(!p)return;
+  const n=await customPrompt('نام کالا:',p.name,{placeholder:'مثلاً: شکر'});
+  if(!n)return;
+  const newName=n.trim();
+  if(!newName)return;
+  if(products.some((x,i)=>i!==index && x.name===newName)){await customAlert('این نام قبلاً استفاده شده');return;}
+  const unitListStr=unitsList.map((u,i)=>`${i+1}. ${u.v} (${u.l})`).join('\n');
+  const currentUnitIdx=unitsList.findIndex(u=>u.v===p.unit)+1;
+  const unitIdxStr=await customPrompt('شماره واحد پیش‌فرض:\n'+unitListStr,String(currentUnitIdx||1),{placeholder:'1'});
+  if(!unitIdxStr)return;
+  const idx2=parseInt(toLatinDigits(unitIdxStr))-1;
+  const unit=unitsList[idx2]?.v || unitsList[0]?.v || 'kg';
+  const currentSubs=(p.subtypes||[]).join(', ');
+  const subsStr=await customPrompt('زیرمجموعه‌ها (با کاما جدا کنید - اختیاری):',currentSubs,{placeholder:'کوهرنگ, اصفهان'});
+  const subtypes = subsStr ? subsStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const oldName=p.name;
+  products[index]={name:newName,unit,subtypes};
+  if(oldName!==newName){records.forEach(r=>{if(r.product===oldName) r.product=newName;});}
+  markDirty();fillFormProducts();renderManageProducts();renderRecords();updateSubtypesForProduct();
+}
+async function deleteProductFromSettings(index){
+  const p=products[index];
+  if(!p)return;
+  const used=records.filter(r=>!r.deleted && r.product===p.name).length;
+  if(used>0){
+    const ok=await customConfirm(`کالای «${p.name}» در ${toFa(used)} رکورد استفاده شده.\n(رکوردهای قبلی حفظ می‌شوند)\n\nادامه؟`,{okText:'حذف',danger:true});
+    if(!ok)return;
+  }else{
+    const ok=await customConfirm(`کالای «${p.name}» حذف شود؟`,{okText:'حذف',danger:true});
+    if(!ok)return;
+  }
+  products.splice(index,1);
+  markDirty();fillFormProducts();renderManageProducts();
+}
+async function menuAddProduct(){await menuAddProductFull();}
+async function removeProductFromList(name){if(!name)return;const idx=products.findIndex(p=>p.name===name);if(idx===-1)return;await deleteProductFromSettings(idx);}
+async function menuAddParty(){
+  const isIn=currentType==='in';
+  const label=isIn?'فروشنده':'خریدار';
+  const n=await customPrompt(`نام ${label} جدید:`,'');
+  if(!n)return;const v=n.trim();if(!v)return;
+  const list=isIn?sellers:buyers;
+  if(list.includes(v)){customAlert('قبلاً وجود دارد');return;}
+  list.push(v);
+  markDirty();fillParties();
+}
+async function removePartyFromList(name){
+  if(!name||!currentType)return;
+  const isIn=currentType==='in';
+  const label=isIn?'فروشنده':'خریدار';
+  const ok=await customConfirm(`«${name}» از لیست ${label}ها حذف شود؟`,{okText:'حذف',danger:true});
+  if(!ok)return;
+  if(isIn)sellers=sellers.filter(x=>x!==name);
+  else buyers=buyers.filter(x=>x!==name);
+  markDirty();fillParties();
+}
+async function menuAddDriver(){
+  const n=await customPrompt('نام راننده جدید:','',{placeholder:'مثلاً: آقای احمدی'});
+  if(!n)return;const v=n.trim();if(!v)return;
+  if(drivers.includes(v)){customAlert('قبلاً وجود دارد');return;}
+  drivers.push(v);
+  markDirty();fillDrivers();
+}
+async function removeDriverFromList(name){
+  if(!name)return;
+  const ok=await customConfirm(`راننده «${name}» از لیست حذف شود؟`,{okText:'حذف',danger:true});
+  if(!ok)return;
+  drivers=drivers.filter(x=>x!==name);
+  markDirty();fillDrivers();
+}
+function updateSubtypesForProduct(preserveValue){
+  const prodName=document.getElementById('f_product').value;
+  const field=document.getElementById('subtypeField');
+  const sel=document.getElementById('f_subtype');
+  if(!field||!sel)return;
+  const prod=products.find(p=>p.name===prodName);
+  const subs=(prod && Array.isArray(prod.subtypes)) ? prod.subtypes.filter(s=>s && s.trim()) : [];
+  if(subs.length===0){field.hidden=true;sel.innerHTML='';return;}
+  field.hidden=false;
+  const cur = preserveValue ? sel.value : '';
+  sel.innerHTML='<option value="">-- انتخاب کنید (اختیاری) --</option>'+subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(cur && subs.includes(cur)) sel.value=cur;
+}
+
+/* ============ Type UI ============ */
+async function switchType(t){
+  if(editingId!==null){
+    const ok=await customConfirm('در حال ویرایش هستید. تغییر نوع ویرایش را لغو می‌کند. ادامه؟',{danger:true});
+    if(!ok)return;
+    editingId=null;
+  }
+  if(currentType===t){currentType=null;}
+  else{
+    currentType=t;
+    ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    const psel=document.getElementById('f_product');if(psel) psel.value='';
+    const psel2=document.getElementById('f_party');if(psel2) psel2.value='';
+    const psel3=document.getElementById('f_driver');if(psel3) psel3.value='';
+    const subSel=document.getElementById('f_subtype');if(subSel) subSel.innerHTML='';
+    const subField=document.getElementById('subtypeField');if(subField) subField.hidden=true;
+    if(unitsList.length) document.getElementById('f_unit').value=unitsList[0].v;
+    setNow();updateAutoKg();
+  }
+  applyTypeUI();
+}
+async function closeForm(){
+  if(editingId!==null){const ok=await customConfirm('در حال ویرایش هستید. فرم بسته شود؟',{danger:true});if(!ok)return;}
+  currentType=null;editingId=null;applyTypeUI();
+}
+function cancelEdit(){editingId=null;currentType=null;applyTypeUI();}
+function applyTypeUI(){
+  const btnIn=document.getElementById('btnIn');
+  const btnOut=document.getElementById('btnOut');
+  const formCard=document.getElementById('formCard');
+  const formHead=document.getElementById('formHead');
+  const editBanner=document.getElementById('editBanner');
+  const saveBtn=document.getElementById('saveBtn');
+  const cancelEditBtn=document.getElementById('cancelEditBtn');
+  const partyLabel=document.getElementById('f_party_label');
+  btnIn.classList.toggle('active',currentType==='in');
+  btnOut.classList.toggle('active',currentType==='out');
+  if(currentType===null){formCard.hidden=true;formHead.classList.remove('in-mode','out-mode');return;}
+  formCard.hidden=false;
+  formHead.classList.toggle('in-mode',currentType==='in');
+  formHead.classList.toggle('out-mode',currentType==='out');
+  const isEditing=editingId!==null;
+  editBanner.hidden=!isEditing;
+  cancelEditBtn.hidden=!isEditing;
+  saveBtn.textContent=isEditing?'💾 ذخیره تغییرات':'💾 ثبت اطلاعات';
+  const isIn=currentType==='in';
+  document.getElementById('formTitle').innerHTML=(isEditing?'✏️ ویرایش ':'ثبت ')+`<span>${isIn?'ورود کالا 📥':'خروج کالا 📤'}</span>`;
+  partyLabel.textContent=isIn?'فروشنده':'خریدار';
+  fillFormProducts();fillUnits();fillParties();fillDrivers();updateSubtypesForProduct(true);
+  if(!isEditing){setNow();}
+  updateAutoKg();
+}
+function fillFormProducts(){
+  const sel=document.getElementById('f_product');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- انتخاب کنید --</option>'+products.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  if(products.some(p=>p.name===cur))sel.value=cur;
+}
+function fillUnits(){
+  const sel=document.getElementById('f_unit');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=unitsList.map(u=>`<option value="${esc(u.v)}">${esc(u.l)}</option>`).join('');
+  if(unitsList.some(u=>u.v===cur))sel.value=cur;
+}
+function fillParties(){
+  const sel=document.getElementById('f_party');
+  if(!sel)return;
+  const cur=sel.value;
+  const list=currentType==='in'?sellers:(currentType==='out'?buyers:[]);
+  sel.innerHTML='<option value="">-- انتخاب کنید --</option>'+list.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(list.includes(cur))sel.value=cur;
+}
+function fillDrivers(){
+  const sel=document.getElementById('f_driver');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- انتخاب کنید --</option>'+drivers.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(drivers.includes(cur))sel.value=cur;
+}
+function updateAutoKg(){
+  const box=document.getElementById('autoKgBox');
+  const valEl=document.getElementById('autoKgValue');
+  const formulaEl=document.getElementById('autoKgFormula');
+  if(!box||!valEl||!formulaEl)return;
+  const qtyStr=document.getElementById('f_quantity').value.trim();
+  const unit=document.getElementById('f_unit').value;
+  const f=unitFactor(unit);
+  if(f===null||f===undefined){box.classList.add('no-factor');valEl.textContent='۰';formulaEl.textContent='واحد انتخاب‌شده ضریب تبدیل کیلوگرم ندارد';return;}
+  box.classList.remove('no-factor');
+  const qty=parseFloat(toLatinDigits(qtyStr));
+  if(!qtyStr || isNaN(qty)){valEl.textContent='۰';formulaEl.textContent=`ضریب واحد: ${toFa(f)} kg`;return;}
+  const kg=qty*f;
+  valEl.textContent=fmtKg(kg);
+  formulaEl.textContent=`${fmtQty(qty)} × ${toFa(f)} kg = ${fmtKg(kg)} kg`;
+}
+async function addProduct(){if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}await menuAddProduct();fillFormProducts();}
+async function removeProduct(){
+  if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}
+  const sel=document.getElementById('f_product');const name=sel.value;
+  if(!name){await customAlert('اول یک کالا انتخاب کنید');return;}
+  await removeProductFromList(name);fillFormProducts();updateSubtypesForProduct();
+}
+async function addParty(){if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}await menuAddParty();fillParties();}
+async function removeParty(){
+  if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}
+  const sel=document.getElementById('f_party');const name=sel.value;
+  if(!name){await customAlert('اول یک مورد انتخاب کنید');return;}
+  await removePartyFromList(name);
+}
+async function addDriver(){if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}await menuAddDriver();fillDrivers();}
+async function removeDriver(){
+  if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}
+  const sel=document.getElementById('f_driver');const name=sel.value;
+  if(!name){await customAlert('اول یک راننده انتخاب کنید');return;}
+  await removeDriverFromList(name);
+}
+async function addUnitQuick(){await menuAddUnit();fillUnits();updateAutoKg();}
+
+/* ============ Edit ============ */
+function editRecord(id){
+  const r=records.find(x=>x.id===id);
+  if(!r){customAlert('رکورد پیدا نشد');return;}
+  currentType=r.type;editingId=id;applyTypeUI();
+  document.getElementById('f_date').value=r.date||'';
+  document.getElementById('f_time').value=r.time||'';
+  document.getElementById('f_notes').value=r.notes||'';
+  document.getElementById('f_invoice').value=r.invoiceNumber||r.docNumber||'';
+  document.getElementById('f_basil').value=r.basilNumber||'';
+  document.getElementById('f_waybill').value=r.waybillNumber||'';
+  const ps=document.getElementById('f_product');
+  if(r.product){
+    if(!Array.from(ps.options).some(o=>o.value===r.product)){
+      const o=document.createElement('option');o.value=r.product;o.textContent=r.product;ps.appendChild(o);
+    }
+    ps.value=r.product;
+  }
+  document.getElementById('f_quantity').value=r.quantity||'';
+  if(r.unit){
+    const us=document.getElementById('f_unit');
+    if(!Array.from(us.options).some(o=>o.value===r.unit)){
+      const o=document.createElement('option');o.value=r.unit;o.textContent=r.unit;us.appendChild(o);
+    }
+    us.value=r.unit;
+  }
+  updateSubtypesForProduct(false);
+  if(r.subtype){
+    const subSel=document.getElementById('f_subtype');
+    if(subSel){
+      if(!Array.from(subSel.options).some(o=>o.value===r.subtype)){
+        const o=document.createElement('option');o.value=r.subtype;o.textContent=r.subtype;subSel.appendChild(o);
+      }
+      subSel.value=r.subtype;
+      document.getElementById('subtypeField').hidden=false;
+    }
+  }
+  const pt=document.getElementById('f_party');
+  if(r.party){
+    if(!Array.from(pt.options).some(o=>o.value===r.party)){
+      const o=document.createElement('option');o.value=r.party;o.textContent=r.party;pt.appendChild(o);
+    }
+    pt.value=r.party;
+  }
+  const dr=document.getElementById('f_driver');
+  if(r.driver){
+    if(!Array.from(dr.options).some(o=>o.value===r.driver)){
+      const o=document.createElement('option');o.value=r.driver;o.textContent=r.driver;dr.appendChild(o);
+    }
+    dr.value=r.driver;
+  }
+  updateAutoKg();
+  document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+  renderRecords();
+}
+function duplicateRecord(id){
+  const r=records.find(x=>x.id===id);
+  if(!r||r.deleted){customAlert('رکورد پیدا نشد');return;}
+  if(editingId!==null)editingId=null;
+  currentType=r.type;editingId=null;applyTypeUI();
+  setNow();
+  document.getElementById('f_notes').value=r.notes||'';
+  document.getElementById('f_invoice').value=r.invoiceNumber||r.docNumber||'';
+  document.getElementById('f_basil').value=r.basilNumber||'';
+  document.getElementById('f_waybill').value=r.waybillNumber||'';
+  const ps=document.getElementById('f_product');
+  if(r.product){
+    if(!Array.from(ps.options).some(o=>o.value===r.product)){
+      const o=document.createElement('option');o.value=r.product;o.textContent=r.product;ps.appendChild(o);
+    }
+    ps.value=r.product;
+  }
+  document.getElementById('f_quantity').value=r.quantity||'';
+  if(r.unit){
+    const us=document.getElementById('f_unit');
+    if(!Array.from(us.options).some(o=>o.value===r.unit)){
+      const o=document.createElement('option');o.value=r.unit;o.textContent=r.unit;us.appendChild(o);
+    }
+    us.value=r.unit;
+  }
+  updateSubtypesForProduct(false);
+  if(r.subtype){
+    const subSel=document.getElementById('f_subtype');
+    if(subSel && Array.from(subSel.options).some(o=>o.value===r.subtype)){subSel.value=r.subtype;}
+  }
+  const pt=document.getElementById('f_party');
+  if(r.party){
+    if(!Array.from(pt.options).some(o=>o.value===r.party)){
+      const o=document.createElement('option');o.value=r.party;o.textContent=r.party;pt.appendChild(o);
+    }
+    pt.value=r.party;
+  }
+  const dr=document.getElementById('f_driver');
+  if(r.driver){
+    if(!Array.from(dr.options).some(o=>o.value===r.driver)){
+      const o=document.createElement('option');o.value=r.driver;o.textContent=r.driver;dr.appendChild(o);
+    }
+    dr.value=r.driver;
+  }
+  updateAutoKg();
+  document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+  showToast('رکورد کپی شد — بررسی و ذخیره کنید','info',2500);
+}
+
+/* ============ View Receipt ============ */
+let currentPreviewRecordId=null;
+function viewRecord(id){
+  const r=records.find(x=>x.id===id);
+  if(!r || r.deleted){customAlert('رکورد پیدا نشد');return;}
+  currentPreviewRecordId=id;
+  const html=buildReceipt(r);
+  document.getElementById('receiptPreviewPaper').innerHTML=html;
+  document.getElementById('receiptPreviewOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeReceiptPreview(){
+  document.getElementById('receiptPreviewOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  currentPreviewRecordId=null;
+}
+function printReceiptFromPreview(){
+  if(currentPreviewRecordId===null)return;
+  const r=records.find(x=>x.id===currentPreviewRecordId);
+  if(!r){customAlert('رکورد پیدا نشد');return;}
+  setPrintPageRule('@page{size:A5 portrait;margin:6mm;}');
+  document.getElementById('printArea').innerHTML=buildReceipt(r);
+  document.getElementById('receiptPreviewOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  setTimeout(()=>{window.print();setTimeout(()=>{document.getElementById('printArea').innerHTML='';},500);},120);
+}
+document.getElementById('receiptPreviewOverlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('receiptPreviewOverlay'))closeReceiptPreview();
+});
+function buildReceipt(r){
+  const isIn=r.type==='in';
+  const partyLabel=isIn?'فروشنده':'خریدار';
+  const title=isIn?'رسید ورود کالا به انبار':'رسید خروج کالا از انبار';
+  const productLabel=isIn?'کالای دریافتی':'کالای تحویلی';
+  const p=products.find(x=>x.name===r.product);
+  const unit=r.unit?unitLabel(r.unit):(p?unitLabel(p.unit):'—');
+  const kg=getRecordKg(r);
+  const receiptNo=String(r.id||'').slice(-8);
+  const fullProduct=productFullName(r);
+  const basilRow = r.basilNumber ? `<div class="p-receipt-row"><span class="p-receipt-lbl">شماره باسکول</span><span class="p-receipt-val">${esc(r.basilNumber)}</span></div>` : '';
+  const waybillRow = r.waybillNumber ? `<div class="p-receipt-row"><span class="p-receipt-lbl">شماره بارنامه</span><span class="p-receipt-val">${esc(r.waybillNumber)}</span></div>` : '';
+  const notesBlock = r.notes ? `<div class="p-receipt-notes-block"><div class="p-receipt-notes-lbl">توضیحات</div><div>${esc(r.notes)}</div></div>` : '';
+  return `
+    <div class="p-receipt">
+      <div class="p-receipt-letterhead">
+        <div class="p-receipt-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
+        <div class="p-receipt-factory">کارخانه قند صنوبر — واحد انبار</div>
+      </div>
+      <hr class="p-receipt-hr">
+      <div class="p-receipt-title ${isIn?'in':'out'}">${title}</div>
+      <div class="p-receipt-no">شماره رسید: ${toFa(receiptNo)}</div>
+      <hr class="p-receipt-hr">
+      <div class="p-receipt-meta">
+        <span>📅 ${esc(toFa(r.date)||'-')}</span>
+        <span>🕐 ${esc(toFa(r.time)||'-')}</span>
+      </div>
+      <hr class="p-receipt-hr-dash">
+      <div class="p-receipt-product-block">
+        <div class="p-receipt-product-lbl">${productLabel}</div>
+        <div class="p-receipt-product-name">${esc(fullProduct)||'-'}</div>
+      </div>
+      <div class="p-receipt-rows">
+        <div class="p-receipt-row p-receipt-qty">
+          <span class="p-receipt-lbl">تعداد</span>
+          <span class="p-receipt-val">${fmtQty(r.quantity)||'-'} ${esc(unit)}</span>
+        </div>
+        <div class="p-receipt-row p-receipt-qty">
+          <span class="p-receipt-lbl">مجموع وزنی</span>
+          <span class="p-receipt-val">${fmtKg(kg)} کیلوگرم</span>
+        </div>
+      </div>
+      <hr class="p-receipt-hr-dash">
+      <div class="p-receipt-rows">
+        <div class="p-receipt-row">
+          <span class="p-receipt-lbl">${partyLabel}</span>
+          <span class="p-receipt-val">${esc(r.party)||'-'}</span>
+        </div>
+        <div class="p-receipt-row">
+          <span class="p-receipt-lbl">راننده</span>
+          <span class="p-receipt-val">${esc(r.driver)||'-'}</span>
+        </div>
+        <div class="p-receipt-row">
+          <span class="p-receipt-lbl">شماره فاکتور</span>
+          <span class="p-receipt-val">${esc(r.invoiceNumber||r.docNumber)||'-'}</span>
+        </div>
+        ${basilRow}
+        ${waybillRow}
+      </div>
+      ${notesBlock}
+      <div class="p-receipt-signatures">
+        <div class="p-receipt-sig">
+          <div class="p-receipt-sig-title">انباردار</div>
+          <div class="p-receipt-sig-line">(امضاء و تاریخ)</div>
+        </div>
+        <div class="p-receipt-sig">
+          <div class="p-receipt-sig-title">${partyLabel}</div>
+          <div class="p-receipt-sig-line">(امضاء و تاریخ)</div>
+        </div>
+      </div>
+      <div class="p-receipt-footer">تاریخ صدور: ${todayJalali()} — ساعت ${nowTime()}</div>
+    </div>
+  `;
+}
+
+/* ============ Save ============ */
+async function saveRecord(){
+  if(!currentType){await customAlert('اول ورود یا خروج را انتخاب کنید');return;}
+  const date=document.getElementById('f_date').value.trim();
+  const time=document.getElementById('f_time').value.trim();
+  const notes=document.getElementById('f_notes').value.trim();
+  const invoiceNumber=document.getElementById('f_invoice').value.trim();
+  const basilNumber=document.getElementById('f_basil').value.trim();
+  const waybillNumber=document.getElementById('f_waybill').value.trim();
+  const product=document.getElementById('f_product').value;
+  const subtype=document.getElementById('f_subtype').value.trim();
+  const qty=document.getElementById('f_quantity').value.trim();
+  const unit=document.getElementById('f_unit').value;
+  const party=document.getElementById('f_party').value;
+  const driver=document.getElementById('f_driver').value;
+  
+  if(!date){await customAlert('تاریخ را انتخاب کنید');return;}
+  if(!time){await customAlert('ساعت را انتخاب کنید');return;}
+  if(!product){await customAlert('کالا را انتخاب کنید');return;}
+  if(!qty){await customAlert('تعداد را وارد کنید');return;}
+  const q=parseFloat(toLatinDigits(qty));
+  if(isNaN(q)||q<=0){await customAlert('تعداد باید عددی بزرگتر از صفر باشد');return;}
+  if(!unit){await customAlert('واحد را انتخاب کنید');return;}
+  
+  const saveBtn = document.getElementById('saveBtn');
+  if(saveBtn.disabled) return;
+  saveBtn.disabled = true;
+  
+  try {
+    const kg=calcKg(qty, unit);
+    const data={type:currentType,date,time,notes,invoiceNumber,basilNumber,waybillNumber,product,subtype,quantity:qty,unit,totalWeight:String(kg),party,driver};
+    const wasEditing = editingId !== null;
+    
+    if(wasEditing){
+      const idx=records.findIndex(r=>r.id===editingId);
+      if(idx===-1){await customAlert('رکورد پیدا نشد');editingId=null;applyTypeUI();return;}
+      records[idx]={...records[idx],...data,updatedAt:Date.now()};
+      editingId=null;markDirty();clearForm();applyTypeUI();renderRecords();
+      showToast('تغییرات با موفقیت ذخیره شد','success');
+      focusFirstField();
+      return;
+    }
+    
+    const rec={id:generateId(),...data,updatedAt:Date.now(),deleted:false};
+    records.unshift(rec);
+    markDirty();clearForm();
+    const f=normalizeDate(document.getElementById('records_from').value);
+    const t=normalizeDate(document.getElementById('records_to').value);
+    const nd=normalizeDate(date);
+    if((f&&nd<f)||(t&&nd>t)){document.getElementById('records_from').value=date;document.getElementById('records_to').value=date;}
+    renderRecords();
+    showToast('رکورد با موفقیت ثبت شد','success');
+    focusFirstField();
+  } finally {
+    setTimeout(() => {
+      saveBtn.disabled = false;
+    }, 800);
+  }
+}
+function clearForm(){
+  ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f_product').value='';
+  document.getElementById('f_party').value='';
+  document.getElementById('f_driver').value='';
+  const subSel=document.getElementById('f_subtype');if(subSel) subSel.innerHTML='';
+  const subField=document.getElementById('subtypeField');if(subField) subField.hidden=true;
+  if(unitsList.length)document.getElementById('f_unit').value=unitsList[0].v;
+  updateAutoKg();
+  if(editingId===null)setNow();
+}
+function focusFirstField(){if(!currentType)return;setTimeout(()=>{const sel=document.getElementById('f_product');if(sel)sel.focus();},150);}
+async function delRecord(id){
+  const r=records.find(x=>x.id===id);
+  if(!r)return;
+  if(editingId===id){
+    const ok=await customConfirm('رکورد در حال ویرایش است. حذف شود؟',{okText:'حذف',danger:true});
+    if(!ok)return;editingId=null;currentType=null;applyTypeUI();
+  }else{
+    const ok=await customConfirm('این رکورد حذف شود؟',{okText:'حذف',danger:true});
+    if(!ok)return;
+  }
+  const idx=records.findIndex(x=>x.id===id);
+  if(idx!==-1){records[idx]={...records[idx],deleted:true,updatedAt:Date.now()};markDirty();}
+  renderRecords();
+}
+function recordsToday(){const t=todayJalali();document.getElementById('records_from').value=t;document.getElementById('records_to').value=t;renderRecords();}
+function recordsThisWeek(){
+  const d=new Date();const ds=(d.getDay()+1)%7;
+  const sat=new Date(d.getFullYear(),d.getMonth(),d.getDate()-ds);
+  document.getElementById('records_from').value=gregToJalaliStr(sat.getFullYear(),sat.getMonth()+1,sat.getDate());
+  document.getElementById('records_to').value=todayJalali();renderRecords();
+}
+function recordsThisMonth(){
+  const d=new Date();const j=d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));
+  document.getElementById('records_from').value=toFa(`${j.jy}/${String(j.jm).padStart(2,'0')}/01`);
+  document.getElementById('records_to').value=todayJalali();renderRecords();
+}
+function recordsAllDays(){document.getElementById('records_from').value='';document.getElementById('records_to').value='';renderRecords();}
+
+/* ============ Records View ============ */
+function getActiveRecords(){return records.filter(r=>!r.deleted);}
+function getVisibleRecords(){
+  return showDeleted ? records.slice() : records.filter(r=>!r.deleted);
+}
+
+/* ============ Advanced Filter ============ */
+function onAdvProductChange(){
+  advFilter.product = document.getElementById('adv_product').value;
+  advFilter.subtype = '';
+  buildAdvFilterOptions();
+  renderRecords();
+}
+function applyAdvFilterChange(){
+  advFilter.product = document.getElementById('adv_product').value;
+  advFilter.subtype = document.getElementById('adv_subtype').value;
+  advFilter.party   = document.getElementById('adv_party').value;
+  advFilter.driver  = document.getElementById('adv_driver').value;
+  updateAdvFilterChips();
+  updateAdvFilterBadge();
+  renderRecords();
+}
+function buildAdvFilterOptions(){
+  const visible = getActiveRecords();
+  const productsSet = new Set();
+  const partiesSet = new Set();
+  const driversSet = new Set();
+  const subtypesByProduct = new Map();
+
+  visible.forEach(r=>{
+    if(r.product){
+      productsSet.add(r.product);
+      if(r.subtype){
+        if(!subtypesByProduct.has(r.product)) subtypesByProduct.set(r.product, new Set());
+        subtypesByProduct.get(r.product).add(r.subtype);
+      }
+    }
+    if(r.party) partiesSet.add(r.party);
+    if(r.driver) driversSet.add(r.driver);
+  });
+
+  const pSel = document.getElementById('adv_product');
+  const curP = advFilter.product;
+  pSel.innerHTML = '<option value="">همه کالاها</option>' +
+    Array.from(productsSet).sort((a,b)=>a.localeCompare(b,'fa'))
+      .map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(productsSet.has(curP)) pSel.value = curP; else advFilter.product = '';
+
+  const sSel = document.getElementById('adv_subtype');
+  const curS = advFilter.subtype;
+  sSel.innerHTML = '<option value="">همه زیرمجموعه‌ها</option>';
+  if(advFilter.product && subtypesByProduct.has(advFilter.product)){
+    const subs = Array.from(subtypesByProduct.get(advFilter.product)).sort((a,b)=>a.localeCompare(b,'fa'));
+    sSel.innerHTML += subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    if(subs.includes(curS)) sSel.value = curS; else advFilter.subtype = '';
+  } else {
+    advFilter.subtype = '';
+  }
+
+  const ptSel = document.getElementById('adv_party');
+  const curPt = advFilter.party;
+  ptSel.innerHTML = '<option value="">همه طرف‌ها</option>' +
+    Array.from(partiesSet).sort((a,b)=>a.localeCompare(b,'fa'))
+      .map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(partiesSet.has(curPt)) ptSel.value = curPt; else advFilter.party = '';
+
+  const dSel = document.getElementById('adv_driver');
+  const curD = advFilter.driver;
+  dSel.innerHTML = '<option value="">همه راننده‌ها</option>' +
+    Array.from(driversSet).sort((a,b)=>a.localeCompare(b,'fa'))
+      .map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if(driversSet.has(curD)) dSel.value = curD; else advFilter.driver = '';
+
+  updateAdvFilterChips();
+  updateAdvFilterBadge();
+}
+function removeAdvFilter(key){
+  if(!key || !(key in advFilter)) return;
+  advFilter[key] = '';
+  buildAdvFilterOptions();
+  renderRecords();
+}
+function updateAdvFilterBadge(){
+  const count = Object.values(advFilter).filter(v=>v && String(v).trim()!=='').length;
+  const badge = document.getElementById('advFilterBadge');
+  if(!badge) return;
+  if(count>0){ badge.hidden = false; badge.textContent = toFa(count); }
+  else { badge.hidden = true; }
+}
+function updateAdvFilterChips(){
+  const container = document.getElementById('advFilterChips');
+  if(!container) return;
+  const chips = [];
+  const labels = { product: 'کالا', subtype: 'زیرمجموعه', party: 'طرف حساب', driver: 'راننده' };
+  Object.keys(advFilter).forEach(key=>{
+    const val = advFilter[key];
+    if(val && String(val).trim()!==''){
+      chips.push(`<span class="adv-chip">
+        <span class="chip-label">${labels[key]}:</span>
+        <span>${esc(val)}</span>
+        <button type="button" class="chip-remove" onclick="removeAdvFilter('${key}')" title="حذف فیلتر">✕</button>
+      </span>`);
+    }
+  });
+  container.innerHTML = chips.join('');
+}
+
+/* ============ Deleted Records ============ */
+function toggleShowDeleted(on){
+  showDeleted = !!on;
+  updateDeletedUI();
+  renderRecords();
+}
+function updateDeletedUI(){
+  const toggle = document.getElementById('showDeletedToggle');
+  const badge = document.getElementById('deletedCountBadge');
+  const clearBtn = document.getElementById('btnClearAllDeleted');
+  const count = records.filter(r=>r.deleted).length;
+  if(toggle) toggle.checked = showDeleted;
+  if(badge){
+    if(count > 0){ badge.hidden = false; badge.textContent = toFa(count); }
+    else { badge.hidden = true; }
+  }
+  if(clearBtn) clearBtn.disabled = (count === 0);
+}
+async function restoreRecord(id){
+  const r = records.find(x=>x.id===id);
+  if(!r || !r.deleted) return;
+  const ok = await customConfirm('این رکورد بازگردانی شود؟', {okText:'بازگردانی'});
+  if(!ok) return;
+  const idx = records.findIndex(x=>x.id===id);
+  if(idx !== -1){
+    records[idx] = {...records[idx], deleted:false, updatedAt:Date.now()};
+    markDirty();
+  }
+  renderRecords();
+  updateDeletedUI();
+}
+async function permanentlyDelete(id){
+  const r = records.find(x=>x.id===id);
+  if(!r) return;
+  const ok = await customConfirm('⚠️ این رکورد برای همیشه حذف شود؟\n\nاین عمل قابل بازگشت نیست.', {okText:'حذف کامل', danger:true});
+  if(!ok) return;
+  const idx = records.findIndex(x=>x.id===id);
+  if(idx !== -1){
+    records.splice(idx, 1);
+    markDirty();
+  }
+  renderRecords();
+  updateDeletedUI();
+}
+async function clearAllDeleted(){
+  const count = records.filter(r=>r.deleted).length;
+  if(count === 0){ await customAlert('رکورد حذف‌شده‌ای وجود ندارد'); return; }
+  const ok = await customConfirm(`⚠️ ${toFa(count)} رکورد حذف‌شده برای همیشه پاک شوند؟\n\nاین عمل قابل بازگشت نیست.`, {okText:'پاک کن', danger:true});
+  if(!ok) return;
+  const ok2 = await customConfirm('مطمئنی؟ این عمل قابل بازگشت نیست.', {okText:'بله، پاک کن', danger:true});
+  if(!ok2) return;
+  records = records.filter(r=>!r.deleted);
+  markDirty();
+  renderRecords();
+  updateDeletedUI();
+}
+
+/* ============ Match Filter ============ */
+function matchFilter(r){
+  const q=(document.getElementById('search').value||'').trim();
+  const fromFilter=normalizeDate(document.getElementById('records_from').value);
+  const toFilter=normalizeDate(document.getElementById('records_to').value);
+  const d=normalizeDate(r.date);
+  if(fromFilter&&d<fromFilter)return false;
+  if(toFilter&&d>toFilter)return false;
+  if(advFilter.product && r.product !== advFilter.product) return false;
+  if(advFilter.subtype && r.subtype !== advFilter.subtype) return false;
+  if(advFilter.party && r.party !== advFilter.party) return false;
+  if(advFilter.driver && r.driver !== advFilter.driver) return false;
+  return smartMatch(r, q);
+}
+function sortFn(a,b){return (normalizeDate(b.date)+' '+toLatinDigits(b.time||'')).localeCompare(normalizeDate(a.date)+' '+toLatinDigits(a.time||''));}
+function renderRecords(){
+  updateDeletedUI();
+  updateAdvFilterBadge();
+  const visible=getVisibleRecords();
+  const inList=visible.filter(r=>r.type==='in').filter(matchFilter).sort(sortFn);
+  const outList=visible.filter(r=>r.type==='out').filter(matchFilter).sort(sortFn);
+
+  const buildRow = (r) => {
+    const p=products.find(x=>x.name===r.product);
+    const u=r.unit?unitLabel(r.unit):(p?unitLabel(p.unit):'—');
+    const kg=getRecordKg(r);
+    const isDeleted=r.deleted;
+    const rowCls=(editingId===r.id?'editing ':'')+(isDeleted?'deleted-row':'');
+    const actionBtns = isDeleted
+      ? `<button class="btn btn-add btn-sm" onclick="restoreRecord(${r.id})" title="بازگردانی">🔄</button>
+         <button class="btn btn-danger btn-sm" onclick="permanentlyDelete(${r.id})" title="حذف کامل">🗑️</button>`
+      : `<button class="btn btn-info btn-sm" onclick="viewRecord(${r.id})" title="مشاهده و چاپ رسید">👁️</button>
+         <button class="btn btn-warning btn-sm" onclick="editRecord(${r.id})" title="ویرایش">✏️</button>
+         <button class="btn btn-purple btn-sm" onclick="duplicateRecord(${r.id})" title="کپی سریع">📋</button>
+         <button class="btn btn-danger btn-sm" onclick="delRecord(${r.id})" title="حذف">🗑️</button>`;
+    return `<tr class="${rowCls}">
+      <td>${esc(toFa(r.date))}</td><td>${esc(toFa(r.time))}</td>
+      <td><b>${esc(productFullName(r))}</b></td>
+      <td>${fmtQty(r.quantity)}</td>
+      <td>${esc(u)}</td>
+      <td style="color:var(--primary);font-weight:bold;">${fmtKg(kg)}</td>
+      <td>${esc(r.party||'-')}</td>
+      <td>${esc(r.driver||'-')}</td>
+      <td>${esc(r.invoiceNumber||r.docNumber||'-')}</td>
+      <td>${esc(r.notes||'')}</td>
+      <td><div class="row-btns">${actionBtns}</div></td>
+    </tr>`;
+  };
+
+  const inBody=document.getElementById('inBody');
+  document.getElementById('inBadge').textContent=toFa(inList.length);
+  if(inList.length){
+    inBody.innerHTML=inList.map(buildRow).join('');
+    document.getElementById('inEmpty').style.display='none';
+  }else{inBody.innerHTML='';document.getElementById('inEmpty').textContent='موردی یافت نشد';document.getElementById('inEmpty').style.display='block';}
+
+  const outBody=document.getElementById('outBody');
+  document.getElementById('outBadge').textContent=toFa(outList.length);
+  if(outList.length){
+    outBody.innerHTML=outList.map(buildRow).join('');
+    document.getElementById('outEmpty').style.display='none';
+  }else{outBody.innerHTML='';document.getElementById('outEmpty').textContent='موردی یافت نشد';document.getElementById('outEmpty').style.display='block';}
+
+  renderSummary();
+  buildAdvFilterOptions();
+}
+
+/* ============ Summary ============ */
+function setSummaryMode(mode){
+  summaryMode=mode;
+  try{localStorage.setItem('wh_summary_mode',mode);}catch(e){}
+  document.getElementById('sumModeGrouped').classList.toggle('active',mode==='grouped');
+  document.getElementById('sumModeDetailed').classList.toggle('active',mode==='detailed');
+  renderSummary();
+}
+function buildSummaryData(){
+  const visible = getActiveRecords().filter(matchFilter);
+  const map = new Map();
+
+  visible.forEach(r => {
+    const name = (summaryMode === 'detailed')
+      ? (r.subtype ? `${r.product||''} ${r.subtype}`.trim() : (r.product||'(بدون نام)'))
+      : (r.product||'(بدون نام)');
+
+    if(!map.has(name)) map.set(name, {
+      name,
+      totalIn: 0,  totalOut: 0,
+      totalInQty: 0, totalOutQty: 0,
+      units: new Set(),
+      hasWeighted: false,
+      hasNonWeighted: false
+    });
+
+    const item = map.get(name);
+    const kg  = getRecordKg(r);
+    const qty = parseFloat(toLatinDigits(String(r.quantity||''))) || 0;
+    const u   = r.unit || '';
+    const f   = unitFactor(u);
+    const isWeighted = (f !== null && f !== undefined);
+
+    if(isWeighted) item.hasWeighted = true;
+    else           item.hasNonWeighted = true;
+    if(u) item.units.add(u);
+
+    if(r.type === 'in'){
+      item.totalIn += kg;    item.totalInQty += qty;
+    } else if(r.type === 'out'){
+      item.totalOut += kg;   item.totalOutQty += qty;
+    }
+  });
+
+  const list = Array.from(map.values());
+  list.forEach(item => {
+    item.unitsArr = Array.from(item.units);
+
+    if(!item.hasWeighted && item.hasNonWeighted){
+      if(item.unitsArr.length === 1){
+        item.mode = 'qty';
+        item.unitLabel = unitLabel(item.unitsArr[0]);
+      } else {
+        item.mode = 'qty-multi';
+      }
+    } else {
+      item.mode = 'kg';
+    }
+  });
+
+  list.sort((a,b)=>a.name.localeCompare(b.name,'fa'));
+  return list;
+}
+function renderSummary(){
+  const list  = buildSummaryData();
+  const body  = document.getElementById('summaryBody');
+  const foot  = document.getElementById('summaryFoot');
+  const empty = document.getElementById('summaryEmpty');
+  if(!body || !foot || !empty) return;
+
+  if(!list.length){ body.innerHTML = ''; foot.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  let totalIn = 0, totalOut = 0;
+  let nonWeightedCount = 0;
+
+  body.innerHTML = list.map((item, i) => {
+    let inShown, outShown, badge = '';
+
+    if(item.mode === 'qty'){
+      inShown  = item.totalInQty  > 0 ? `${fmtQty(item.totalInQty)} ${esc(item.unitLabel)}`  : '—';
+      outShown = item.totalOutQty > 0 ? `${fmtQty(item.totalOutQty)} ${esc(item.unitLabel)}` : '—';
+      badge    = ` <span class="qty-badge" title="کالای غیروزنی — واحد: ${esc(item.unitLabel)}">🔢</span>`;
+      nonWeightedCount++;
+    } else if(item.mode === 'qty-multi'){
+      inShown  = item.totalInQty  > 0 ? fmtQty(item.totalInQty)  : '—';
+      outShown = item.totalOutQty > 0 ? fmtQty(item.totalOutQty) : '—';
+      badge    = ' <span class="qty-badge" title="کالای غیروزنی با چند واحد">🔢</span>';
+      nonWeightedCount++;
+    } else {
+      totalIn  += item.totalIn;
+      totalOut += item.totalOut;
+      inShown  = item.totalIn  > 0 ? fmtKg(item.totalIn)  : '—';
+      outShown = item.totalOut > 0 ? fmtKg(item.totalOut) : '—';
+    }
+
+    return `<tr>
+      <td class="num-cell">${toFa(i+1)}</td>
+      <td class="product-cell">${esc(item.name)}${badge}</td>
+      <td class="in-cell">${inShown}</td>
+      <td class="out-cell">${outShown}</td>
+    </tr>`;
+  }).join('');
+
+  const footNote = nonWeightedCount > 0
+    ? ` <span style="font-weight:normal;font-size:10px;color:var(--muted);">(${toFa(nonWeightedCount)} کالای غیروزنی جدا نمایش داده شد)</span>`
+    : '';
+  foot.innerHTML = `<tr>
+    <td colspan="2" class="foot-label">جمع کل (${toFa(list.length)} ${summaryMode==='detailed'?'مورد':'کالا'})${footNote}</td>
+    <td class="foot-in">${fmtKg(totalIn)}</td>
+    <td class="foot-out">${fmtKg(totalOut)}</td>
+  </tr>`;
+}
+function buildSummaryPrintBlock(){
+  const list = buildSummaryData();
+  if(!list.length) return '';
+
+  let totalIn = 0, totalOut = 0;
+  let nonWeightedCount = 0;
+
+  const rows = list.map((item, i) => {
+    let inShown, outShown, marker = '';
+
+    if(item.mode === 'qty'){
+      inShown  = item.totalInQty  > 0 ? `${fmtQty(item.totalInQty)} ${esc(item.unitLabel)}`  : '—';
+      outShown = item.totalOutQty > 0 ? `${fmtQty(item.totalOutQty)} ${esc(item.unitLabel)}` : '—';
+      marker   = ' *';
+      nonWeightedCount++;
+    } else if(item.mode === 'qty-multi'){
+      inShown  = item.totalInQty  > 0 ? fmtQty(item.totalInQty)  : '—';
+      outShown = item.totalOutQty > 0 ? fmtQty(item.totalOutQty) : '—';
+      marker   = ' *';
+      nonWeightedCount++;
+    } else {
+      totalIn  += item.totalIn;
+      totalOut += item.totalOut;
+      inShown  = item.totalIn  > 0 ? fmtKg(item.totalIn)  : '—';
+      outShown = item.totalOut > 0 ? fmtKg(item.totalOut) : '—';
+    }
+
+    return `<tr><td class="num-cell">${toFa(i+1)}</td><td class="product-cell">${esc(item.name)}${marker}</td><td>${inShown}</td><td>${outShown}</td></tr>`;
+  }).join('');
+
+  const modeLabel = summaryMode==='detailed' ? ' (تفکیکی)' : '';
+  const note = nonWeightedCount > 0
+    ? `<div style="font-size:7.5px;text-align:right;margin-top:3px;">* کالای غیروزنی — مقدار بر حسب تعداد و واحد نمایش داده شده است.</div>`
+    : '';
+
+  return `<div class="p-summary-block">
+    <div class="p-summary-title">📊 خلاصه ورود و خروج کالا${modeLabel}</div>
+    <table class="p-summary-table">
+      <colgroup><col style="width:8%"><col style="width:42%"><col style="width:25%"><col style="width:25%"></colgroup>
+      <thead><tr><th>#</th><th>کالا</th><th>مجموع ورود</th><th>مجموع خروج</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="2" class="foot-label">جمع کل (${toFa(list.length)} ${summaryMode==='detailed'?'مورد':'کالا'})</td><td>${fmtKg(totalIn)}</td><td>${fmtKg(totalOut)}</td></tr></tfoot>
+    </table>
+    ${note}
+  </div>`;
+}
+function printSummaryReport(){
+  const list=buildSummaryData();
+  if(!list.length){customAlert('موردی برای چاپ وجود ندارد');return;}
+  setPrintPageRule('@page{size:A4 portrait;margin:6mm;}');
+  runPrint(buildPrintHeader('خلاصه ورود و خروج کالا')+buildSummaryPrintBlock()+buildSignature());
+}
+
+/* ============ Daily Summary ============ */
+function buildDailySummaryData(){
+  const visible = getActiveRecords().filter(matchFilter);
+  const dateSet = new Set();
+  const weightedSet = new Set();
+  const nonWeightedSet = new Set();
+
+  const keyFn = r => {
+    if(summaryMode === 'detailed'){
+      return r.subtype ? `${r.product||''} ${r.subtype}`.trim() : (r.product||'');
+    }
+    return r.product||'';
+  };
+
+  const isWeightedRecord = r => {
+    const f = unitFactor(r.unit);
+    return f !== null && f !== undefined;
+  };
+
+  visible.forEach(r => {
+    if(r.date) dateSet.add(normalizeDate(r.date));
+    const k = keyFn(r);
+    if(!k) return;
+    if(isWeightedRecord(r)) weightedSet.add(k);
+    else                    nonWeightedSet.add(k);
+  });
+
+  const dates = Array.from(dateSet).sort((a,b)=>a.localeCompare(b));
+  const weightedArr = Array.from(weightedSet).sort((a,b)=>a.localeCompare(b,'fa'));
+  const nonWeightedArr = Array.from(nonWeightedSet).sort((a,b)=>a.localeCompare(b,'fa'));
+
+  const weightedMatrix = {};
+  const nonWeightedMatrix = {};
+  dates.forEach(d => { weightedMatrix[d] = {}; nonWeightedMatrix[d] = {}; });
+
+  visible.forEach(r => {
+    const d = normalizeDate(r.date);
+    const k = keyFn(r);
+    if(!d || !k) return;
+
+    const isW = isWeightedRecord(r);
+    const targetMatrix = isW ? weightedMatrix : nonWeightedMatrix;
+
+    if(!targetMatrix[d]) targetMatrix[d] = {};
+    if(!targetMatrix[d][k]){
+      targetMatrix[d][k] = isW ? {in:0, out:0} : {in:0, out:0, units:new Set()};
+    }
+
+    if(isW){
+      const kg = getRecordKg(r);
+      if(r.type === 'in')       targetMatrix[d][k].in  += kg;
+      else if(r.type === 'out') targetMatrix[d][k].out += kg;
+    } else {
+      const qty = parseFloat(toLatinDigits(String(r.quantity||''))) || 0;
+      if(r.type === 'in')       targetMatrix[d][k].in  += qty;
+      else if(r.type === 'out') targetMatrix[d][k].out += qty;
+      if(r.unit) targetMatrix[d][k].units.add(r.unit);
+    }
+  });
+
+  const nonWeightedUnits = {};
+  nonWeightedArr.forEach(p => {
+    const unitSet = new Set();
+    dates.forEach(d => {
+      const cell = nonWeightedMatrix[d]?.[p];
+      if(cell && cell.units) cell.units.forEach(u => unitSet.add(u));
+    });
+    nonWeightedUnits[p] = unitSet.size === 1
+      ? unitLabel(Array.from(unitSet)[0])
+      : (unitSet.size > 1 ? 'چند واحد' : '');
+  });
+
+  const weightedIn  = weightedArr.filter(p => dates.some(d => weightedMatrix[d]?.[p]?.in  > 0));
+  const weightedOut = weightedArr.filter(p => dates.some(d => weightedMatrix[d]?.[p]?.out > 0));
+  const nonWeightedIn  = nonWeightedArr.filter(p => dates.some(d => nonWeightedMatrix[d]?.[p]?.in  > 0));
+  const nonWeightedOut = nonWeightedArr.filter(p => dates.some(d => nonWeightedMatrix[d]?.[p]?.out > 0));
+
+  return {
+    dates,
+    weightedIn, weightedOut, weightedMatrix,
+    nonWeightedIn, nonWeightedOut, nonWeightedMatrix, nonWeightedUnits
+  };
+}
+function buildDailyTable(dates, weightedIn, weightedOut, nonWeightedIn, nonWeightedOut, weightedMatrix, nonWeightedMatrix, nonWeightedUnits){
+  if(dates.length === 0) return '';
+  if(weightedIn.length === 0 && weightedOut.length === 0 &&
+     nonWeightedIn.length === 0 && nonWeightedOut.length === 0) return '';
+
+  const wIn = weightedIn.length, wOut = weightedOut.length;
+  const nIn = nonWeightedIn.length, nOut = nonWeightedOut.length;
+  const totalDataCols = wIn + wOut + nIn + nOut;
+  const hasW = (wIn + wOut) > 0;
+  const hasN = (nIn + nOut) > 0;
+
+  let density;
+  if(totalDataCols <= 3)       density = 'sm';
+  else if(totalDataCols <= 6)  density = 'md';
+  else if(totalDataCols <= 10) density = 'lg';
+  else                         density = 'xl';
+
+  const dateW = Math.max(8, Math.min(14, 80/(totalDataCols+1))).toFixed(1) + '%';
+  const dataW = ((100 - parseFloat(dateW)) / totalDataCols).toFixed(2) + '%';
+
+  let h1 = `<tr><th class="th-date" rowspan="3" style="width:${dateW}">تاریخ</th>`;
+  if(hasW) h1 += `<th class="th-group" colspan="${wIn+wOut}">⚖️ کالاهای وزنی (kg)</th>`;
+  if(hasN) h1 += `<th class="th-group${hasW?' group-sep':''}" colspan="${nIn+nOut}">🔢 کالاهای شمارشی (تعداد)</th>`;
+  h1 += '</tr>';
+
+  let h2 = '<tr>';
+  if(wIn > 0) h2 += `<th class="th-io" colspan="${wIn}">📥 ورودی</th>`;
+  if(wOut > 0) h2 += `<th class="th-io" colspan="${wOut}">📤 خروجی</th>`;
+  if(nIn > 0){
+    const sep = hasW ? ' group-sep' : '';
+    h2 += `<th class="th-io${sep}" colspan="${nIn}">📥 ورودی</th>`;
+  }
+  if(nOut > 0) h2 += `<th class="th-io" colspan="${nOut}">📤 خروجی</th>`;
+  h2 += '</tr>';
+
+  let h3 = '<tr>';
+  weightedIn.forEach(p => h3 += `<th class="th-prod" style="width:${dataW}">${esc(p)}</th>`);
+  weightedOut.forEach(p => h3 += `<th class="th-prod" style="width:${dataW}">${esc(p)}</th>`);
+  nonWeightedIn.forEach((p, idx) => {
+    const u = nonWeightedUnits[p];
+    const lbl = u ? `${esc(p)}<span class="p-daily-unit">(${esc(u)})</span>` : esc(p);
+    const sep = (hasW && idx===0) ? ' group-sep' : '';
+    h3 += `<th class="th-prod${sep}" style="width:${dataW}">${lbl}</th>`;
+  });
+  nonWeightedOut.forEach((p, idx) => {
+    const u = nonWeightedUnits[p];
+    const lbl = u ? `${esc(p)}<span class="p-daily-unit">(${esc(u)})</span>` : esc(p);
+    const sep = (!hasW && nIn>0 && idx===0) ? ' group-sep' : '';
+    h3 += `<th class="th-prod${sep}" style="width:${dataW}">${lbl}</th>`;
+  });
+  h3 += '</tr>';
+
+  const totalsWIn = {}, totalsWOut = {}, totalsNIn = {}, totalsNOut = {};
+  weightedIn.forEach(p => totalsWIn[p] = 0);
+  weightedOut.forEach(p => totalsWOut[p] = 0);
+  nonWeightedIn.forEach(p => totalsNIn[p] = 0);
+  nonWeightedOut.forEach(p => totalsNOut[p] = 0);
+
+  let body = '';
+  dates.forEach(d => {
+    let row = `<tr><td class="date-cell">${esc(toFa(d))}</td>`;
+    weightedIn.forEach(p => {
+      const v = weightedMatrix[d]?.[p]?.in || 0;
+      totalsWIn[p] += v;
+      row += `<td class="in-cell${v===0?' zero':''}">${v>0?fmtKg(v):'—'}</td>`;
+    });
+    weightedOut.forEach(p => {
+      const v = weightedMatrix[d]?.[p]?.out || 0;
+      totalsWOut[p] += v;
+      row += `<td class="out-cell${v===0?' zero':''}">${v>0?fmtKg(v):'—'}</td>`;
+    });
+    nonWeightedIn.forEach((p, idx) => {
+      const v = nonWeightedMatrix[d]?.[p]?.in || 0;
+      totalsNIn[p] += v;
+      const sep = (hasW && idx===0) ? ' group-sep' : '';
+      row += `<td class="in-cell${v===0?' zero':''}${sep}">${v>0?fmtKg(v):'—'}</td>`;
+    });
+    nonWeightedOut.forEach((p, idx) => {
+      const v = nonWeightedMatrix[d]?.[p]?.out || 0;
+      totalsNOut[p] += v;
+      const sep = (!hasW && nIn>0 && idx===0) ? ' group-sep' : '';
+      row += `<td class="out-cell${v===0?' zero':''}${sep}">${v>0?fmtKg(v):'—'}</td>`;
+    });
+    row += '</tr>';
+    body += row;
+  });
+
+  let f1 = '<tr><td class="date-cell">جمع ستون</td>';
+  weightedIn.forEach(p => f1 += `<td class="in-cell${totalsWIn[p]===0?' zero':''}">${totalsWIn[p]>0?fmtKg(totalsWIn[p]):'—'}</td>`);
+  weightedOut.forEach(p => f1 += `<td class="out-cell${totalsWOut[p]===0?' zero':''}">${totalsWOut[p]>0?fmtKg(totalsWOut[p]):'—'}</td>`);
+  nonWeightedIn.forEach((p, idx) => {
+    const sep = (hasW && idx===0) ? ' group-sep' : '';
+    f1 += `<td class="in-cell${totalsNIn[p]===0?' zero':''}${sep}">${totalsNIn[p]>0?fmtKg(totalsNIn[p]):'—'}</td>`;
+  });
+  nonWeightedOut.forEach((p, idx) => {
+    const sep = (!hasW && nIn>0 && idx===0) ? ' group-sep' : '';
+    f1 += `<td class="out-cell${totalsNOut[p]===0?' zero':''}${sep}">${totalsNOut[p]>0?fmtKg(totalsNOut[p]):'—'}</td>`;
+  });
+  f1 += '</tr>';
+
+  let totalWInAll=0, totalWOutAll=0, totalNInAll=0, totalNOutAll=0;
+  Object.values(totalsWIn).forEach(v => totalWInAll += v);
+  Object.values(totalsWOut).forEach(v => totalWOutAll += v);
+  Object.values(totalsNIn).forEach(v => totalNInAll += v);
+  Object.values(totalsNOut).forEach(v => totalNOutAll += v);
+
+  let f2 = '<tr><td class="date-cell" style="font-size:0.9em;">جمع کل</td>';
+  if(wIn > 0) f2 += `<td colspan="${wIn}">${totalWInAll>0?fmtKg(totalWInAll)+' kg':'—'}</td>`;
+  if(wOut > 0) f2 += `<td colspan="${wOut}">${totalWOutAll>0?fmtKg(totalWOutAll)+' kg':'—'}</td>`;
+  if(nIn > 0){
+    const sep = hasW ? ' group-sep' : '';
+    f2 += `<td class="${sep}" colspan="${nIn}">${totalNInAll>0?fmtKg(totalNInAll)+' عدد':'—'}</td>`;
+  }
+  if(nOut > 0){
+    const sep = (!hasW && nIn>0) ? ' group-sep' : '';
+    f2 += `<td class="${sep}" colspan="${nOut}">${totalNOutAll>0?fmtKg(totalNOutAll)+' عدد':'—'}</td>`;
+  }
+  f2 += '</tr>';
+
+  const modeLabel = summaryMode === 'detailed' ? ' (تفکیکی)' : ' (کلی)';
+
+  return `<div class="p-daily-block">
+    <div class="p-summary-title">📅 خلاصه روزانه ورود و خروج کالا${modeLabel}</div>
+    <table class="p-daily-table daily-${density}">
+      <thead>${h1}${h2}${h3}</thead>
+      <tbody>${body}</tbody>
+      <tfoot>${f1}${f2}</tfoot>
+    </table>
+  </div>`;
+}
+function buildDailySummaryPrintBlock(){
+  const data = buildDailySummaryData();
+  const {
+    dates,
+    weightedIn, weightedOut, weightedMatrix,
+    nonWeightedIn, nonWeightedOut, nonWeightedMatrix, nonWeightedUnits
+  } = data;
+
+  if(dates.length === 0) return '';
+
+  return buildDailyTable(
+    dates,
+    weightedIn, weightedOut,
+    nonWeightedIn, nonWeightedOut,
+    weightedMatrix, nonWeightedMatrix,
+    nonWeightedUnits
+  );
+}
+function printDailySummaryReport(){
+  const data = buildDailySummaryData();
+  const {dates, weightedIn, weightedOut, nonWeightedIn, nonWeightedOut} = data;
+
+  if(dates.length === 0 ||
+     (weightedIn.length === 0 && weightedOut.length === 0 &&
+      nonWeightedIn.length === 0 && nonWeightedOut.length === 0)){
+    customAlert('رکوردی برای چاپ وجود ندارد');
+    return;
+  }
+
+  const totalCols = weightedIn.length + weightedOut.length
+                  + nonWeightedIn.length + nonWeightedOut.length;
+
+  let rule;
+  if(totalCols <= 2){
+    rule = '@page{size:A5 portrait;margin:6mm;}';
+  } else if(totalCols <= 5){
+    rule = '@page{size:A4 portrait;margin:6mm;}';
+  } else {
+    rule = '@page{size:A4 landscape;margin:6mm;}';
+  }
+
+  setPrintPageRule(rule);
+  runPrint(
+    buildPrintHeader('خلاصه روزانه ورود و خروج کالا') +
+    buildDailySummaryPrintBlock() +
+    buildSignature()
+  );
+}
+
+/* ============ CSV ============ */
+function buildCSV(type){
+  const list=getActiveRecords().filter(r=>r.type===type).filter(matchFilter).sort(sortFn);
+  const t=s=>s==null?'':String(s);
+  if(!list.length)return null;
+  const partyLabel=type==='in'?'فروشنده':'خریدار';
+  const header=['#','تاریخ','ساعت','کالا','زیرمجموعه','تعداد','واحد','وزن (kg)',partyLabel,'راننده','شماره فاکتور','شماره باسکول','شماره بارنامه','توضیحات'];
+  const rows=[header];
+  list.forEach((r,i)=>{
+    const p=products.find(x=>x.name===r.product);
+    const u=r.unit?unitLabel(r.unit):(p?unitLabel(p.unit):'');
+    const kg=getRecordKg(r);
+    rows.push([i+1,t(toFa(r.date)||''),t(toFa(r.time)||''),t(r.product||''),t(r.subtype||''),t(toLatinDigits(r.quantity||'')),t(u),t(kg),t(r.party||''),t(r.driver||''),t(r.invoiceNumber||r.docNumber||''),t(r.basilNumber||''),t(r.waybillNumber||''),t(r.notes||'')]);
+  });
+  return rows;
+}
+function downloadCSV(rows,filename){
+  const csv=rows.map(r=>r.map(cell=>{const s=String(cell==null?'':cell);if(/[,"\n\r]/.test(s))return '"'+s.replace(/"/g,'""')+'"';return s;}).join(',')).join('\r\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},500);
+}
+function exportCSV(type){
+  const rows=buildCSV(type);
+  if(!rows||rows.length<2){customAlert('داده‌ای برای خروجی وجود ندارد');return;}
+  const d=new Date();const j=d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));
+  const dp=`${j.jy}-${String(j.jm).padStart(2,'0')}-${String(j.jd).padStart(2,'0')}`;
+  const tp=`${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
+  const names={in:'incoming',out:'outgoing'};
+  downloadCSV(rows,`warehouse-${names[type]||type}-${dp}_${tp}.csv`);
+}
+
+/* ============ Print Reports ============ */
+function setPrintPageRule(rule){
+  document.getElementById('__dyn_page_style__')?.remove();
+  const style = document.createElement('style');
+  style.id = '__dyn_page_style__';
+  style.textContent = rule ? `@media print{${rule}}` : '';
+  document.head.appendChild(style);
+}
+function getFilterInfoText(){
+  const q=(document.getElementById('search').value||'').trim();
+  const from=document.getElementById('records_from').value;
+  const to=document.getElementById('records_to').value;
+  const parts=[];
+  if(from)parts.push(`از: ${from}`);
+  if(to)parts.push(`تا: ${to}`);
+  if(q)parts.push(`جستجو: «${q}»`);
+  if(advFilter.product)parts.push(`کالا: ${advFilter.product}`);
+  if(advFilter.subtype)parts.push(`زیرمجموعه: ${advFilter.subtype}`);
+  if(advFilter.party)parts.push(`طرف: ${advFilter.party}`);
+  if(advFilter.driver)parts.push(`راننده: ${advFilter.driver}`);
+  return parts.length?parts.join(' | '):'همه رکوردها';
+}
+function buildPrintHeader(title){
+  return `<div class="p-letterhead"><div class="p-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div><div class="p-factory">کارخانه قند صنوبر</div><div class="p-report-title">${esc(title)}</div></div><div class="p-meta"><span>تاریخ تهیه گزارش: ${todayJalali()} — ساعت ${nowTime()}</span><span>فیلتر: ${esc(getFilterInfoText())}</span></div>`;
+}
+function buildSignature(){
+  return `<div class="p-signature"><div class="p-sig-box"><div class="p-sig-label">نام و امضاء انباردار</div><div class="p-sig-space"></div><div class="p-sig-hint">(امضاء)</div></div><div class="p-sig-box"><div class="p-sig-label">تاریخ</div><div class="p-sig-space"></div><div class="p-sig-hint">روز / ماه / سال</div></div></div><div class="p-footer-note">این گزارش به‌صورت خودکار توسط سیستم مدیریت انبار کارخانه قند صنوبر تهیه شده است.</div>`;
+}
+function buildMovementTable(list,partyLabel){
+  if(!list.length)return `<div class="p-empty-msg">موردی برای نمایش وجود ندارد</div>`;
+  let totalKg=0;
+  const rows=list.map((r,i)=>{
+    const p=products.find(x=>x.name===r.product);
+    const u=r.unit?unitLabel(r.unit):(p?unitLabel(p.unit):'');
+    const kg=getRecordKg(r);
+    totalKg+=kg;
+    return `<tr><td>${toFa(i+1)}</td><td>${esc(toFa(r.date)||'')}</td><td>${esc(toFa(r.time)||'')}</td><td>${esc(productFullName(r))||'-'}</td><td>${fmtQty(r.quantity)||'-'}</td><td>${esc(u)}</td><td><b>${fmtKg(kg)}</b></td><td>${esc(r.party||'-')}</td><td>${esc(r.driver||'-')}</td><td>${esc(r.invoiceNumber||r.docNumber||'-')}</td><td>${esc(r.basilNumber||'-')}</td><td>${esc(r.waybillNumber||'-')}</td><td class="notes-cell" title="${esc(r.notes)||''}">${esc(r.notes)||'-'}</td></tr>`;
+  }).join('');
+  return `<table class="p-table"><colgroup><col style="width:3%"><col style="width:7%"><col style="width:4%"><col style="width:11%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:7%"><col style="width:21%"></colgroup><thead><tr><th>#</th><th>تاریخ</th><th>ساعت</th><th>کالا</th><th>تعداد</th><th>واحد</th><th>وزن (kg)</th><th>${partyLabel}</th><th>راننده</th><th>فاکتور</th><th>باسکول</th><th>بارنامه</th><th>توضیحات</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="6" style="text-align:left;font-weight:900;">جمع کل وزن (kg):</td><td style="font-weight:900;font-size:9px;">${fmtKg(totalKg)}</td><td colspan="6"></td></tr></tfoot></table>`;
+}
+function runPrint(html){document.getElementById('printArea').innerHTML=html;setTimeout(()=>{window.print();setTimeout(()=>{document.getElementById('printArea').innerHTML='';},500);},120);}
+function printInReport(){
+  const list=getActiveRecords().filter(r=>r.type==='in').filter(matchFilter).sort(sortFn);
+  if(!list.length){customAlert('رکورد ورودی برای چاپ وجود ندارد');return;}
+  setPrintPageRule('@page{size:A4 portrait;margin:6mm;}');
+  runPrint(buildPrintHeader('گزارش ورود کالا')+buildMovementTable(list,'فروشنده')+buildSummaryPrintBlock()+buildSignature());
+}
+function printOutReport(){
+  const list=getActiveRecords().filter(r=>r.type==='out').filter(matchFilter).sort(sortFn);
+  if(!list.length){customAlert('رکورد خروجی برای چاپ وجود ندارد');return;}
+  setPrintPageRule('@page{size:A4 portrait;margin:6mm;}');
+  runPrint(buildPrintHeader('گزارش خروج کالا')+buildMovementTable(list,'خریدار')+buildSummaryPrintBlock()+buildSignature());
+}
+function printFullReport(){
+  const inList=getActiveRecords().filter(r=>r.type==='in').filter(matchFilter).sort(sortFn);
+  const outList=getActiveRecords().filter(r=>r.type==='out').filter(matchFilter).sort(sortFn);
+  if(!inList.length && !outList.length){customAlert('رکوردی برای چاپ وجود ندارد');return;}
+  setPrintPageRule('@page{size:A4 portrait;margin:6mm;}');
+  const header=buildPrintHeader('گزارش جامع انبار');
+  let body='';
+  if(inList.length){body+=`<div class="p-section-title">بخش ورود کالا (${toFa(inList.length)} رکورد)</div>`;body+=buildMovementTable(inList,'فروشنده');}
+  if(inList.length && outList.length)body+=`<div class="p-section-gap"></div>`;
+  if(outList.length){body+=`<div class="p-section-title">بخش خروج کالا (${toFa(outList.length)} رکورد)</div>`;body+=buildMovementTable(outList,'خریدار');}
+  runPrint(header+body+buildSummaryPrintBlock()+buildSignature());
+}
+
+/* ============ Backup / Restore ============ */
+function buildBackupFileName(){
+  const d=new Date();const j=d2j(g2d(d.getFullYear(),d.getMonth()+1,d.getDate()));
+  const dp=`${j.jy}-${String(j.jm).padStart(2,'0')}-${String(j.jd).padStart(2,'0')}`;
+  const tp=`${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
+  return `warehouse-backup-${dp}_${tp}.json`;
+}
+function buildBackupObject(){return{app:'warehouse-manager',version:3,exportedAt:new Date().toISOString(),username,products,sellers,buyers,drivers,unitsList,records};}
+async function backupDownload(){
+  const name = buildBackupFileName();
+  const json = JSON.stringify(buildBackupObject(), null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+
+  if (typeof window.showSaveFilePicker === 'function') {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: name,
+        startIn: 'downloads',
+        types: [{
+          description: 'فایل پشتیبان JSON',
+          accept: { 'application/json': ['.json'] }
+        }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      setFileInfo('backupInfo', `✅ ذخیره شد: ${handle.name}`, false);
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        setFileInfo('backupInfo', '❌ ذخیره لغو شد', true);
+        return;
+      }
+      console.warn('showSaveFilePicker failed, using fallback:', e);
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 500);
+  setFileInfo('backupInfo', `⬇️ دانلود شد: ${name}`, false);
+}
+async function restoreFromFile(ev){
+  const file=ev.target.files&&ev.target.files[0];ev.target.value='';
+  if(!file)return;
+  let data=null;
+  try{
+    const text=await file.text();
+    data=JSON.parse(text);
+    if(!data||typeof data!=='object')throw new Error('invalid');
+    if(!Array.isArray(data.records))throw new Error('records missing');
+  }catch(e){
+    setFileInfo('restoreInfo','❌ فایل معتبر نیست',true);
+    await customAlert('فایل معتبر نیست');
+    return;
+  }
+  const fileRecords=(data.records||[]).map(normalizeRecord);
+  const fileIds=new Set(fileRecords.map(r=>r.id));
+  const currentExtra=records.filter(r=>!fileIds.has(r.id));
+  const fileProducts=normalizeProductList(data.products||[]);
+  const fileSellers=normalizeStringList(data.sellers||data.deliverers||data.suppliers||[]);
+  const fileBuyers=normalizeStringList(data.buyers||data.receivers||[]);
+  const fileDrivers=normalizeStringList(data.drivers||[]);
+  const fileUnits=normalizeUnitList(data.unitsList||[]);
+  const msg=`بارگذاری از فایل:\n«${file.name}»\n\n📦 رکوردهای فایل: ${toFa(fileRecords.length)}\n🆕 رکوردهای جدید فعلی: ${toFa(currentExtra.length)}\n📊 مجموع پس از ادغام: ${toFa(fileRecords.length+currentExtra.length)}\n\n⚠️ بعد از ادغام دکمه «⬆️ ذخیره» را بزنید.`;
+  const ok=await customConfirm(msg,{okText:'ادغام'});
+  if(!ok)return;
+  try{
+    records=mergeRecordsById([...currentExtra, ...fileRecords], fileRecords);
+    products=mergeProductsList(products,fileProducts);
+    sellers=mergeUnique(sellers,fileSellers);
+    buyers=mergeUnique(buyers,fileBuyers);
+    drivers=mergeUnique(drivers,fileDrivers);
+    const map=new Map();
+    [...unitsList,...fileUnits].forEach(u=>{if(u&&u.v&&!map.has(u.v))map.set(u.v,{v:u.v,l:u.l||u.v,factor:(u.factor===undefined?null:u.factor)});});
+    unitsList=Array.from(map.values());
+    if(typeof data.username==='string' && data.username){
+      username=data.username;
+      try{localStorage.setItem('lab_username',username);}catch(e){}
+      document.getElementById('usernameInput').value=username;
+    }
+    markDirty();editingId=null;currentType=null;
+    applyTypeUI();fillFormProducts();fillParties();fillDrivers();renderRecords();renderManageLists();renderManageProducts();
+    setFileInfo('restoreInfo',`✅ ادغام شد — مجموع: ${toFa(records.filter(r=>!r.deleted).length)} رکورد`,false);
+    await customAlert('✅ ادغام انجام شد\n\nدکمه «⬆️ ذخیره» را بزنید.');
+  }catch(e){
+    setFileInfo('restoreInfo','❌ خطا در بازیابی',true);
+    await customAlert('خطا در بازیابی');
+  }
+}
+async function deleteGhDatabase(){
+  if(!ghConfig.token){await customAlert('ابتدا از منوی ☰ تنظیمات GitHub را وارد کنید');return;}
+  if(ghCanWrite===false){await customAlert('🔒 توکن شما فقط خواندنی است.\n\nبرای این کار توکن با دسترسی Contents:write لازمه.');return;}
+  const ok=await customConfirm('⚠️ تمام رکوردهای ثبت‌شده روی GitHub پاک می‌شوند.\n\n✅ کالاها، واحدها، راننده‌ها، فروشنده‌ها، خریدارها و تنظیمات حفظ می‌شوند.\n\nادامه؟',{okText:'بله، پاک کن',danger:true});
+  if(!ok)return;
+  const ok2=await customConfirm('مطمئنی؟ این عمل قابل بازگشت نیست.',{okText:'بله، پاک کن',danger:true});
+  if(!ok2)return;
+  try{
+    const remote=await ghGet();
+    if(!remote){await customAlert('فایل data.json روی GitHub وجود ندارد');return;}
+    const payload={version:3,updatedAt:new Date().toISOString(),updatedBy:username||'unknown',records:[],products:remote.products||[],sellers:remote.sellers||[],buyers:remote.buyers||[],drivers:remote.drivers||[],unitsList:remote.unitsList||[]};
+    await ghPut(payload);
+    setFileInfo('ghDeleteInfo','✅ رکوردهای GitHub پاک شد (کالاها و لیست‌ها حفظ شدند)',false);
+    await customAlert('✅ رکوردهای GitHub پاک شد\n\n✔️ کالاها، واحدها و لیست‌ها حفظ شدند');
+  }catch(e){
+    setFileInfo('ghDeleteInfo','❌ خطا: '+e.message,true);
+    await customAlert('خطا در پاک کردن:\n'+e.message);
+  }
+}
+
+/* ============ Init ============ */
+window.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.date-input').forEach(inp=>{
+    inp.readOnly=true;
+    inp.addEventListener('click',e=>{e.stopPropagation();openCalendarFor(inp);});
+  });
+  document.querySelectorAll('.time-input').forEach(inp=>{
+    inp.readOnly=true;
+    inp.addEventListener('click',e=>{e.stopPropagation();openTimeFor(inp);});
+  });
+  const t=todayJalali();
+  document.getElementById('records_from').value=t;
+  document.getElementById('records_to').value=t;
+  applyDarkMode();
+  collapseAllSections();
+  applyTypeUI();
+  renderRecords();
+  renderManageLists();
+  renderManageProducts();
+  setSummaryMode(summaryMode);
+  updateSyncBar();
+  updateSpaceWarning();
+  updateDeletedUI();
+  updateAdvFilterBadge();
+  document.getElementById('f_quantity').addEventListener('input',updateAutoKg);
+  document.getElementById('f_unit').addEventListener('change',updateAutoKg);
+  document.getElementById('f_product').addEventListener('change',()=>updateSubtypesForProduct(false));
+  document.getElementById('formCard').addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;
+    if(e.target.tagName==='TEXTAREA'&&!e.ctrlKey&&!e.metaKey)return;
+    if(e.target.tagName==='SELECT')return;
+    e.preventDefault();
+    saveRecord();
+  });
+  window.addEventListener('beforeunload',e=>{
+    if(dirty){e.preventDefault();e.returnValue='';return '';}
+  });
+  setTimeout(initApp,300);
+});
+
+/* ============ PWA Registration ============ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('✅ Service Worker registered:', reg.scope);
+        setInterval(() => reg.update().catch(()=>{}), 60 * 60 * 1000);
+      })
+      .catch(err => console.warn('⚠️ SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
