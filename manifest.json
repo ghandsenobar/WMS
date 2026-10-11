@@ -1,6 +1,6 @@
 {
-  "name": "سیستم مدیریت انبارداری صنوبر",
-  "short_name": "SENOBAR",
+  "name": "انبار کارخانه قند صنوبر",
+  "short_name": "انبار صنوبر",
   "description": "سیستم مدیریت انبار شرکت صنایع غذایی سایه سار صنوبر آریا",
   "lang": "fa",
   "dir": "rtl",
@@ -23,6 +23,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["business", "productivity"]
+  ]
 }
