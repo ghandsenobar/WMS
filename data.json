@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-11T18:00:42.095Z",
+  "updatedAt": "2026-10-11T18:06:17.706Z",
   "updatedBy": "امین رمضانی",
   "records": [
     {
@@ -2276,6 +2276,11 @@
     {
       "name": "قند کله",
       "unit": "kg",
+      "subtypes": []
+    },
+    {
+      "name": "کیسه خالی",
+      "unit": "pcs",
       "subtypes": []
     }
   ],
