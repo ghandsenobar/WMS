@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-11T00:45:58.765Z",
-  "updatedBy": "امین رمضانی",
+  "updatedAt": "2026-10-11T02:57:03.689Z",
+  "updatedBy": "امین",
   "records": [
     {
       "id": 1791615210935,
@@ -1142,6 +1142,82 @@
       "subtype": "",
       "basilNumber": "",
       "waybillNumber": ""
+    },
+    {
+      "id": 1791687413498,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۲۲",
+      "notes": "کارت ملت(284/600/000+25/600/000+1/550/000+12/200/000+2/200/000+10/000/000+2/590/000 جمع کل(338/740/000)",
+      "invoiceNumber": "",
+      "basilNumber": "4993",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "خانم افراسیابی",
+      "driver": "صادق موحدی",
+      "updatedAt": 1791687413498,
+      "deleted": false
+    },
+    {
+      "id": 1791687151819,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۲۱",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "4993",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "صدرقائنی",
+      "driver": "صادق موحدی",
+      "updatedAt": 1791687151819,
+      "deleted": false
+    },
+    {
+      "id": 1791687066381,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۱۹",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "محسن رضایی",
+      "driver": "رحیمی",
+      "updatedAt": 1791687066386,
+      "deleted": false
+    },
+    {
+      "id": 1791686977623,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۱۷",
+      "notes": "",
+      "invoiceNumber": "0",
+      "basilNumber": "4995",
+      "waybillNumber": "",
+      "product": "شکر",
+      "subtype": "کوهرنگ",
+      "quantity": "1500",
+      "unit": "kg",
+      "totalWeight": "1500",
+      "party": "پدری(بینالود)",
+      "driver": "نامدار",
+      "updatedAt": 1791686977624,
+      "deleted": false
     }
   ],
   "products": [
@@ -1206,7 +1282,9 @@
     "شاهمرادی",
     "آستان قدس",
     "لطفی(کلات)",
-    "امین"
+    "امین",
+    "پدری(بینالود)",
+    "صدرقائنی"
   ],
   "drivers": [
     "صادق موحدی",
@@ -1221,7 +1299,8 @@
     "متفرقه",
     "حاج آقا",
     "شریفی",
-    "فیضی"
+    "فیضی",
+    "نامدار"
   ],
   "unitsList": [
     {
