@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-11T02:57:03.689Z",
+  "updatedAt": "2026-10-11T03:04:08.512Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -1218,6 +1218,101 @@
       "driver": "نامدار",
       "updatedAt": 1791686977624,
       "deleted": false
+    },
+    {
+      "id": 1791687841827,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۳۲",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "400",
+      "unit": "kg",
+      "totalWeight": "400",
+      "party": "علی اکبر جعفری",
+      "driver": "علی اکبر جعفری",
+      "updatedAt": 1791687841827,
+      "deleted": false
+    },
+    {
+      "id": 1791687756346,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۳۱",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "3000",
+      "unit": "kg",
+      "totalWeight": "3000",
+      "party": "ارتضاء",
+      "driver": "رحیمی",
+      "updatedAt": 1791687756352,
+      "deleted": false
+    },
+    {
+      "id": 1791687698125,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۳۰",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "100",
+      "unit": "kg",
+      "totalWeight": "100",
+      "party": "ایروانی",
+      "driver": "ایروانی",
+      "updatedAt": 1791687698125,
+      "deleted": false
+    },
+    {
+      "id": 1791687653056,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۳۰",
+      "notes": "",
+      "invoiceNumber": "1228",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "شکر",
+      "subtype": "جوین",
+      "quantity": "300",
+      "unit": "kg",
+      "totalWeight": "300",
+      "party": "قربان پور",
+      "driver": "علیزاده",
+      "updatedAt": 1791687653057,
+      "deleted": false
+    },
+    {
+      "id": 1791687605401,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۰۹",
+      "time": "۰۶:۲۸",
+      "notes": "",
+      "invoiceNumber": "1228",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "1200",
+      "unit": "kg",
+      "totalWeight": "1200",
+      "party": "قربان پور",
+      "driver": "علیزاده",
+      "updatedAt": 1791687605411,
+      "deleted": false
     }
   ],
   "products": [
@@ -1284,7 +1379,9 @@
     "لطفی(کلات)",
     "امین",
     "پدری(بینالود)",
-    "صدرقائنی"
+    "صدرقائنی",
+    "قربان پور",
+    "ارتضاء"
   ],
   "drivers": [
     "صادق موحدی",
@@ -1300,7 +1397,9 @@
     "حاج آقا",
     "شریفی",
     "فیضی",
-    "نامدار"
+    "نامدار",
+    "علیزاده",
+    "علی اکبر جعفری"
   ],
   "unitsList": [
     {
