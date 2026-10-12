@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T08:39:20.704Z",
+  "updatedAt": "2026-10-12T08:46:28.637Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -3193,6 +3193,25 @@
       "party": "متفرقه",
       "driver": "",
       "updatedAt": 1791794160938,
+      "deleted": false
+    },
+    {
+      "id": 1791794778207,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۱۲:۱۵",
+      "notes": "توسط حسین بخشیان\nکارت کشاورزی 660/000 تومان",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "5",
+      "unit": "kg",
+      "totalWeight": "5",
+      "party": "متفرقه",
+      "driver": "متفرقه",
+      "updatedAt": 1791794778206,
       "deleted": false
     }
   ],
