@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T04:58:36.191Z",
+  "updatedAt": "2026-10-12T05:00:24.539Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2509,6 +2509,44 @@
       "party": "شاهمرادی",
       "driver": "صادق موحدی",
       "updatedAt": 1791781106758,
+      "deleted": false
+    },
+    {
+      "id": 1791781216475,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۰۸:۲۹",
+      "notes": "",
+      "invoiceNumber": "1289",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "جلال مزدگیر",
+      "driver": "رحیمی",
+      "updatedAt": 1791781216474,
+      "deleted": false
+    },
+    {
+      "id": 1791781175903,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۰۸:۲۸",
+      "notes": "",
+      "invoiceNumber": "1288",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "1500",
+      "unit": "kg",
+      "totalWeight": "1500",
+      "party": "خانم افراسیابی",
+      "driver": "رحیمی",
+      "updatedAt": 1791781175902,
       "deleted": false
     }
   ],
