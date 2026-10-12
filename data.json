@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T05:00:24.539Z",
+  "updatedAt": "2026-10-12T05:37:06.406Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2517,7 +2517,7 @@
       "date": "۱۴۰۵/۰۷/۲۰",
       "time": "۰۸:۲۹",
       "notes": "",
-      "invoiceNumber": "1289",
+      "invoiceNumber": "1292",
       "basilNumber": "",
       "waybillNumber": "",
       "product": "قند شکسته",
@@ -2525,9 +2525,9 @@
       "quantity": "2000",
       "unit": "kg",
       "totalWeight": "2000",
-      "party": "جلال مزدگیر",
+      "party": "محسن رضایی",
       "driver": "رحیمی",
-      "updatedAt": 1791781216474,
+      "updatedAt": 1791783419277,
       "deleted": false
     },
     {
