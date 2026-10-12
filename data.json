@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T06:48:46.609Z",
+  "updatedAt": "2026-10-12T07:19:13.935Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2757,6 +2757,25 @@
       "driver": "",
       "updatedAt": 1791787682302,
       "deleted": true
+    },
+    {
+      "id": 1791789545806,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۱۰:۴۷",
+      "notes": "نقدی 660/000 تومان",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "5",
+      "unit": "kg",
+      "totalWeight": "5",
+      "party": "متفرقه",
+      "driver": "",
+      "updatedAt": 1791789545806,
+      "deleted": false
     }
   ],
   "products": [
