@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T03:21:54.920Z",
+  "updatedAt": "2026-10-12T03:30:21.951Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2263,6 +2263,25 @@
       "driver": "فیضی",
       "updatedAt": 1791775305805,
       "deleted": false
+    },
+    {
+      "id": 1791775813747,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۱۵",
+      "time": "۰۶:۵۸",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "کیسه خالی",
+      "subtype": "",
+      "quantity": "2000",
+      "unit": "pcs",
+      "totalWeight": "0",
+      "party": "عصمتیان",
+      "driver": "رحیمی",
+      "updatedAt": 1791775813746,
+      "deleted": false
     }
   ],
   "products": [
@@ -2362,7 +2381,8 @@
     "متفرقه(رجبی)",
     "متفرقه(فاطمی)",
     "متفرقه(امیری)",
-    "امیر حسینی"
+    "امیر حسینی",
+    "عصمتیان"
   ],
   "drivers": [
     "صادق موحدی",
