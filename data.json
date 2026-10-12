@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T06:06:44.796Z",
+  "updatedAt": "2026-10-12T06:08:51.468Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -242,9 +242,9 @@
       "quantity": "30",
       "unit": "3kg",
       "totalWeight": "90",
-      "party": "حاج اقا",
+      "party": "حاج آقا",
       "driver": "",
-      "updatedAt": 1791784485990,
+      "updatedAt": 1791785325186,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -831,9 +831,9 @@
       "quantity": "40",
       "unit": "kg",
       "totalWeight": "40",
-      "party": "حاج اقا",
+      "party": "حاج آقا",
       "driver": "",
-      "updatedAt": 1791784485990,
+      "updatedAt": 1791785325186,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -1002,9 +1002,9 @@
       "quantity": "10",
       "unit": "kg",
       "totalWeight": "10",
-      "party": "حاج اقا",
+      "party": "حاج آقا",
       "driver": "",
-      "updatedAt": 1791784485990,
+      "updatedAt": 1791785325186,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -2775,7 +2775,7 @@
     "خانم افراسیابی",
     "خامسی",
     "ناجی",
-    "حاج اقا",
+    "حاج آقا",
     "خادم(قوچان)",
     "علی اکبر جعفری",
     "صبوری",
@@ -2826,7 +2826,8 @@
     "آذرنهامین",
     "کانون بازنشستگان",
     "افاضاتی",
-    "الهی طرقبه"
+    "الهی طرقبه",
+    "حاج اقا"
   ],
   "drivers": [
     "صادق موحدی",
