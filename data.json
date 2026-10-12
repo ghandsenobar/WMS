@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T06:47:08.973Z",
+  "updatedAt": "2026-10-12T06:48:09.122Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2738,6 +2738,25 @@
       "driver": "",
       "updatedAt": 1791787218809,
       "deleted": false
+    },
+    {
+      "id": 1791787663311,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۱۰:۱۵",
+      "notes": "",
+      "invoiceNumber": "",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "",
+      "quantity": "100",
+      "unit": "5kg",
+      "totalWeight": "500",
+      "party": "حاج آقا",
+      "driver": "",
+      "updatedAt": 1791787682302,
+      "deleted": true
     }
   ],
   "products": [
