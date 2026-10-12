@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T07:58:25.190Z",
+  "updatedAt": "2026-10-12T08:02:17.795Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2966,6 +2966,44 @@
       "driver": "متفرقه",
       "updatedAt": 1791791712542,
       "deleted": false
+    },
+    {
+      "id": 1791792126473,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۱۱:۳۱",
+      "notes": "",
+      "invoiceNumber": "1293",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "جامی نژاد",
+      "driver": "صادق موحدی",
+      "updatedAt": 1791792126472,
+      "deleted": false
+    },
+    {
+      "id": 1791792073203,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۱۱:۳۰",
+      "notes": "",
+      "invoiceNumber": "1289",
+      "basilNumber": "",
+      "waybillNumber": "",
+      "product": "قند شکسته",
+      "subtype": "پلاستیک ۵ کیلویی",
+      "quantity": "2000",
+      "unit": "kg",
+      "totalWeight": "2000",
+      "party": "جلال مزدگیر",
+      "driver": "صادق موحدی",
+      "updatedAt": 1791792073202,
+      "deleted": false
     }
   ],
   "products": [
@@ -3077,7 +3115,8 @@
     "حاج اقا",
     "واسعی",
     "وحدت پور",
-    "پورحاجی"
+    "پورحاجی",
+    "جامی نژاد"
   ],
   "drivers": [
     "صادق موحدی",
