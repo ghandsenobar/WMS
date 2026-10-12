@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "updatedAt": "2026-10-12T07:24:27.153Z",
+  "version": 4,
+  "updatedAt": "2026-10-12T07:41:48.526Z",
   "updatedBy": "unknown",
   "records": [
     {
@@ -531,25 +531,6 @@
       "driver": "شورگشتی",
       "updatedAt": 1791630031264,
       "deleted": false,
-      "subtype": "",
-      "basilNumber": "",
-      "waybillNumber": ""
-    },
-    {
-      "id": 1791612152156,
-      "type": "in",
-      "date": "۱۴۰۵/۰۷/۱۷",
-      "time": "۰۹:۳۱",
-      "notes": "",
-      "invoiceNumber": "5548453",
-      "product": "شکر کوهرنگ",
-      "quantity": "25010",
-      "unit": "kg",
-      "totalWeight": "25010",
-      "party": "شهرکرد",
-      "driver": "بخشی",
-      "updatedAt": 1791612210759,
-      "deleted": true,
       "subtype": "",
       "basilNumber": "",
       "waybillNumber": ""
@@ -2925,5 +2906,8 @@
       "l": "پلاستیک ۵ کیلویی",
       "factor": 5
     }
+  ],
+  "permanentlyDeletedIds": [
+    1791612152156
   ]
 }
