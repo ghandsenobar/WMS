@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T06:08:51.468Z",
+  "updatedAt": "2026-10-12T06:19:46.234Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -239,14 +239,14 @@
       "notes": "",
       "invoiceNumber": "0",
       "product": "قند شکسته",
-      "quantity": "30",
-      "unit": "3kg",
+      "quantity": "90",
+      "unit": "kg",
       "totalWeight": "90",
       "party": "حاج آقا",
       "driver": "",
-      "updatedAt": 1791785325186,
+      "updatedAt": 1791785390275,
       "deleted": false,
-      "subtype": "",
+      "subtype": "کارتن ۳ کیلویی",
       "basilNumber": "",
       "waybillNumber": ""
     },
