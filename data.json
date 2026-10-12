@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T05:40:02.530Z",
+  "updatedAt": "2026-10-12T05:40:23.166Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -376,8 +376,8 @@
       "unit": "kg",
       "totalWeight": "2250",
       "party": "حلب سازان. هدیش.",
-      "driver": "گیاهی",
-      "updatedAt": 1791629923395,
+      "driver": "",
+      "updatedAt": 1791783619256,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -2670,8 +2670,8 @@
     "آخوندان",
     "طاهری",
     "ایروانی",
-    "گیاهی",
-    "نعمتی"
+    "نعمتی",
+    "گیاهی"
   ],
   "unitsList": [
     {
