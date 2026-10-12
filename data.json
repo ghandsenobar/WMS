@@ -1,7 +1,7 @@
 {
-  "version": 3,
-  "updatedAt": "2026-10-12T08:54:55.968Z",
-  "updatedBy": "امین",
+  "version": 4,
+  "updatedAt": "2026-10-12T19:57:52.545Z",
+  "updatedBy": "unknown",
   "records": [
     {
       "id": 1791615210935,
@@ -2816,63 +2816,6 @@
       "deleted": false
     },
     {
-      "id": 1791612152156,
-      "type": "in",
-      "date": "۱۴۰۵/۰۷/۱۷",
-      "time": "۰۹:۳۱",
-      "notes": "",
-      "invoiceNumber": "5548453",
-      "product": "شکر کوهرنگ",
-      "quantity": "25010",
-      "unit": "kg",
-      "totalWeight": "25010",
-      "party": "شهرکرد",
-      "driver": "بخشی",
-      "updatedAt": 1791612210759,
-      "deleted": true,
-      "subtype": "",
-      "basilNumber": "",
-      "waybillNumber": ""
-    },
-    {
-      "id": 1791612004161,
-      "type": "in",
-      "date": "۱۴۰۵/۰۷/۱۷",
-      "time": "۰۹:۲۶",
-      "notes": "وزن صنوبر25030\nباسکول 5039",
-      "invoiceNumber": "5548453",
-      "product": "شکر کوهرنگ",
-      "quantity": "25010",
-      "unit": "kg",
-      "totalWeight": "25010",
-      "party": "شهرکرد",
-      "driver": "بخشی",
-      "updatedAt": 1791612207218,
-      "deleted": true,
-      "subtype": "",
-      "basilNumber": "",
-      "waybillNumber": ""
-    },
-    {
-      "id": 1791787663311,
-      "type": "out",
-      "date": "۱۴۰۵/۰۷/۲۰",
-      "time": "۱۰:۱۵",
-      "notes": "",
-      "invoiceNumber": "",
-      "basilNumber": "",
-      "waybillNumber": "",
-      "product": "قند شکسته",
-      "subtype": "",
-      "quantity": "100",
-      "unit": "5kg",
-      "totalWeight": "500",
-      "party": "حاج آقا",
-      "driver": "",
-      "updatedAt": 1791787682302,
-      "deleted": true
-    },
-    {
       "id": 1791791458538,
       "type": "out",
       "date": "۱۴۰۵/۰۷/۰۲",
@@ -3386,5 +3329,10 @@
       "l": "پلاستیک ۵ کیلویی",
       "factor": 5
     }
+  ],
+  "permanentlyDeletedIds": [
+    1791612152156,
+    1791612004161,
+    1791787663311
   ]
 }
