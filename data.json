@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T07:52:58.051Z",
+  "updatedAt": "2026-10-12T07:57:45.177Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2927,6 +2927,44 @@
       "party": "محسن رضایی",
       "driver": "محسن رضایی",
       "updatedAt": 1791791566412,
+      "deleted": false
+    },
+    {
+      "id": 1791791788235,
+      "type": "in",
+      "date": "۱۴۰۵/۰۷/۰۲",
+      "time": "۱۱:۲۵",
+      "notes": "راننده قنبر آبادی\nوزن صنوبر 10030",
+      "invoiceNumber": "",
+      "basilNumber": "4954",
+      "waybillNumber": "3387531",
+      "product": "شکر",
+      "subtype": "جوین",
+      "quantity": "10025",
+      "unit": "kg",
+      "totalWeight": "10025",
+      "party": "جوین",
+      "driver": "متفرقه",
+      "updatedAt": 1791791788234,
+      "deleted": false
+    },
+    {
+      "id": 1791791712543,
+      "type": "in",
+      "date": "۱۴۰۵/۰۷/۰۲",
+      "time": "۱۱:۲۳",
+      "notes": "راننده قدر آبادی\nوزن صنوبر 15015",
+      "invoiceNumber": "",
+      "basilNumber": "4951",
+      "waybillNumber": "3387530",
+      "product": "شکر",
+      "subtype": "جوین",
+      "quantity": "15025",
+      "unit": "kg",
+      "totalWeight": "15025",
+      "party": "جوین",
+      "driver": "متفرقه",
+      "updatedAt": 1791791712542,
       "deleted": false
     }
   ],
