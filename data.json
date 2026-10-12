@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T05:37:06.406Z",
+  "updatedAt": "2026-10-12T05:40:02.530Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -338,8 +338,8 @@
       "unit": "kg",
       "totalWeight": "25000",
       "party": "شهرکرد",
-      "driver": "نعمتی",
-      "updatedAt": 1791616510139,
+      "driver": "",
+      "updatedAt": 1791783502213,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -395,8 +395,8 @@
       "unit": "kg",
       "totalWeight": "2250",
       "party": "حلب سازان. هدیش.",
-      "driver": "گیاهی",
-      "updatedAt": 1791629964588,
+      "driver": "",
+      "updatedAt": 1791783589550,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -2184,8 +2184,8 @@
       "unit": "kg",
       "totalWeight": "150",
       "party": "ایروانی",
-      "driver": "ایروانی",
-      "updatedAt": 1791700332820,
+      "driver": "",
+      "updatedAt": 1791783543608,
       "deleted": false
     },
     {
@@ -2662,16 +2662,16 @@
     "فیضی",
     "علیزاده",
     "علی اکبر جعفری",
-    "ایروانی",
     "بخشی",
     "شورگشتی",
-    "گیاهی",
-    "نعمتی",
     "دهقان",
     "شریفی",
     "نامدار",
     "آخوندان",
-    "طاهری"
+    "طاهری",
+    "ایروانی",
+    "گیاهی",
+    "نعمتی"
   ],
   "unitsList": [
     {
