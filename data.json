@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-12T08:53:29.814Z",
+  "updatedAt": "2026-10-12T08:54:25.087Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2706,7 +2706,7 @@
       "type": "out",
       "date": "۱۴۰۵/۰۷/۲۰",
       "time": "۱۰:۴۷",
-      "notes": "نقدی 660/000 تومان",
+      "notes": "نقدی 660/000 تومان\nتوسط هاتفی",
       "invoiceNumber": "",
       "basilNumber": "",
       "waybillNumber": "",
@@ -2717,7 +2717,7 @@
       "totalWeight": "5",
       "party": "متفرقه",
       "driver": "",
-      "updatedAt": 1791789545806,
+      "updatedAt": 1791795254442,
       "deleted": false
     },
     {
