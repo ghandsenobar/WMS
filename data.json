@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-11T19:42:56.933Z",
-  "updatedBy": "unknown",
+  "updatedAt": "2026-10-12T03:21:54.920Z",
+  "updatedBy": "امین",
   "records": [
     {
       "id": 1791615210935,
@@ -2243,6 +2243,25 @@
       "party": "محمد رضایی مصلی",
       "driver": "رحیمی",
       "updatedAt": 1791706294336,
+      "deleted": false
+    },
+    {
+      "id": 1791775305806,
+      "type": "out",
+      "date": "۱۴۰۵/۰۷/۲۰",
+      "time": "۰۶:۵۱",
+      "notes": "",
+      "invoiceNumber": "0",
+      "basilNumber": "5050",
+      "waybillNumber": "",
+      "product": "شربت قند",
+      "subtype": "",
+      "quantity": "2075",
+      "unit": "kg",
+      "totalWeight": "2075",
+      "party": "جونی",
+      "driver": "فیضی",
+      "updatedAt": 1791775305805,
       "deleted": false
     }
   ],
