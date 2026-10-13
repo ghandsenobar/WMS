@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-13T02:56:16.565Z",
+  "updatedAt": "2026-10-13T02:57:50.501Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -660,11 +660,11 @@
       "quantity": "3000",
       "unit": "kg",
       "totalWeight": "3000",
-      "party": "محم رضایی پیروزی",
+      "party": "محمد رضایی پیروزی",
       "driver": "رحیمی",
-      "updatedAt": 1791609987065,
+      "updatedAt": 1791860264127,
       "deleted": false,
-      "subtype": "",
+      "subtype": "پلاستیک ۵ کیلویی",
       "basilNumber": "",
       "waybillNumber": ""
     },
