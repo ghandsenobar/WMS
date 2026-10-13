@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-13T02:40:12.114Z",
+  "updatedAt": "2026-10-13T02:42:31.615Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -375,11 +375,11 @@
       "quantity": "2250",
       "unit": "kg",
       "totalWeight": "2250",
-      "party": "حلب سازان. هدیش.",
+      "party": "Aj هدیش",
       "driver": "متفرقه",
-      "updatedAt": 1791784158597,
+      "updatedAt": 1791859292106,
       "deleted": false,
-      "subtype": "",
+      "subtype": "نیشابور",
       "basilNumber": "",
       "waybillNumber": ""
     },
@@ -394,11 +394,11 @@
       "quantity": "2250",
       "unit": "kg",
       "totalWeight": "2250",
-      "party": "حلب سازان. هدیش.",
+      "party": "Aj هدیش",
       "driver": "متفرقه",
-      "updatedAt": 1791784209670,
+      "updatedAt": 1791859339447,
       "deleted": false,
-      "subtype": "",
+      "subtype": "نیشابور",
       "basilNumber": "",
       "waybillNumber": ""
     },
