@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-13T02:39:18.693Z",
+  "updatedAt": "2026-10-13T02:40:12.114Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -699,8 +699,8 @@
       "unit": "kg",
       "totalWeight": "2090",
       "party": "جونی",
-      "driver": "فیضی",
-      "updatedAt": 1791630684710,
+      "driver": "",
+      "updatedAt": 1791859176981,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -1747,8 +1747,8 @@
       "unit": "kg",
       "totalWeight": "2100",
       "party": "جونی",
-      "driver": "فیضی",
-      "updatedAt": 1791693862544,
+      "driver": "",
+      "updatedAt": 1791859176981,
       "deleted": false
     },
     {
@@ -2222,8 +2222,8 @@
       "unit": "kg",
       "totalWeight": "2075",
       "party": "جونی",
-      "driver": "فیضی",
-      "updatedAt": 1791775305805,
+      "driver": "",
+      "updatedAt": 1791859176981,
       "deleted": false
     },
     {
@@ -2336,8 +2336,8 @@
       "unit": "kg",
       "totalWeight": "2030",
       "party": "جونی",
-      "driver": "فیضی",
-      "updatedAt": 1791776464064,
+      "driver": "",
+      "updatedAt": 1791859176981,
       "deleted": false
     },
     {
@@ -3294,14 +3294,14 @@
     "صادق موحدی",
     "رحیمی",
     "محسن رضایی",
-    "فیضی",
     "علیزاده",
     "علی اکبر جعفری",
+    "حاج آقا",
+    "متفرقه",
+    "فیضی",
     "بخشی",
     "شورگشتی",
-    "دهقان",
-    "حاج آقا",
-    "متفرقه"
+    "دهقان"
   ],
   "unitsList": [
     {
