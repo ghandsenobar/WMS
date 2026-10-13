@@ -1,5 +1,5 @@
 /* ============ Service Worker — انبار صنوبر ============ */
-const CACHE_NAME = 'senobar-warehouse-v3.2.0';
+const CACHE_NAME = 'senobar-warehouse-v3.3.0';
 const ASSETS = [
   './',
   './index.html',
