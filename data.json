@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updatedAt": "2026-10-13T12:07:56.511Z",
+  "version": 5,
+  "updatedAt": "2026-10-13T12:16:40.224Z",
   "updatedBy": "unknown",
   "records": [
     {
@@ -3536,8 +3536,7 @@
     "امیر حسینی",
     "حلب سازان. هدیش.",
     "مرگانی درگز",
-    "رخشی",
-    "متفرقه(امیری)"
+    "رخشی"
   ],
   "drivers": [
     "صادق موحدی",
@@ -3579,5 +3578,8 @@
       "factor": 5
     }
   ],
-  "permanentlyDeletedIds": []
+  "permanentlyDeletedIds": [],
+  "sellersUpdatedAt": 0,
+  "buyersUpdatedAt": 1791893795328,
+  "driversUpdatedAt": 0
 }
