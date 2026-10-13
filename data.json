@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-10-13T06:00:11.557Z",
+  "updatedAt": "2026-10-13T06:02:34.912Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -3183,7 +3183,7 @@
       "time": "۰۸:۰۲",
       "notes": "",
       "invoiceNumber": "1294",
-      "basilNumber": "",
+      "basilNumber": "5058",
       "waybillNumber": "",
       "product": "قند کله",
       "subtype": "",
@@ -3192,7 +3192,7 @@
       "totalWeight": "150",
       "party": "افاضاتی",
       "driver": "صادق موحدی",
-      "updatedAt": 1791865983238,
+      "updatedAt": 1791871329178,
       "deleted": false
     },
     {
@@ -3202,7 +3202,7 @@
       "time": "۰۸:۰۱",
       "notes": "",
       "invoiceNumber": "1294",
-      "basilNumber": "",
+      "basilNumber": "5058",
       "waybillNumber": "",
       "product": "قند شکسته",
       "subtype": "پلاستیک ۵ کیلویی",
@@ -3211,7 +3211,7 @@
       "totalWeight": "3350",
       "party": "افاضاتی",
       "driver": "صادق موحدی",
-      "updatedAt": 1791865943610,
+      "updatedAt": 1791871347343,
       "deleted": false
     },
     {
