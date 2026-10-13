@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-10-13T03:03:45.510Z",
+  "updatedAt": "2026-10-13T03:08:15.197Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -2497,7 +2497,7 @@
       "type": "out",
       "date": "۱۴۰۵/۰۷/۲۰",
       "time": "۰۸:۲۸",
-      "notes": "",
+      "notes": "کارت کشاورزی 132/000/000 تومان",
       "invoiceNumber": "1288",
       "basilNumber": "",
       "waybillNumber": "",
@@ -2508,7 +2508,7 @@
       "totalWeight": "1500",
       "party": "خانم افراسیابی",
       "driver": "رحیمی",
-      "updatedAt": 1791781175902,
+      "updatedAt": 1791860887924,
       "deleted": false
     },
     {
