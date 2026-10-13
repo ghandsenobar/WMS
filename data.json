@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-10-13T06:02:34.912Z",
+  "updatedAt": "2026-10-13T06:04:28.078Z",
   "updatedBy": "امین",
   "records": [
     {
@@ -3220,8 +3220,8 @@
       "date": "۱۴۰۵/۰۷/۲۱",
       "time": "۰۷:۵۹",
       "notes": "عقیل ملک آباد\nتوسط ابراهیم جهانبخش\nنقدی 13/200/000 تومان",
-      "invoiceNumber": "",
-      "basilNumber": "",
+      "invoiceNumber": "نقدی",
+      "basilNumber": "13/200/000",
       "waybillNumber": "",
       "product": "قند شکسته",
       "subtype": "پلاستیک ۵ کیلویی",
@@ -3230,7 +3230,7 @@
       "totalWeight": "100",
       "party": "متفرقه",
       "driver": "متفرقه",
-      "updatedAt": 1791865898520,
+      "updatedAt": 1791871417022,
       "deleted": false
     },
     {
