@@ -1,7 +1,7 @@
 {
-  "version": 4,
-  "updatedAt": "2026-10-12T19:57:52.545Z",
-  "updatedBy": "unknown",
+  "version": 3,
+  "updatedAt": "2026-10-13T02:39:18.693Z",
+  "updatedBy": "امین",
   "records": [
     {
       "id": 1791615210935,
@@ -521,15 +521,15 @@
       "type": "in",
       "date": "۱۴۰۵/۰۷/۱۶",
       "time": "۰۹:۳۵",
-      "notes": "شکر نیشابور",
+      "notes": "شکر نیشابور\nراننده شورگشتی",
       "invoiceNumber": "210456",
       "product": "شکر",
       "quantity": "10000",
       "unit": "kg",
       "totalWeight": "10000",
       "party": "نیشابور",
-      "driver": "شورگشتی",
-      "updatedAt": 1791630031264,
+      "driver": "متفرقه",
+      "updatedAt": 1791859038741,
       "deleted": false,
       "subtype": "",
       "basilNumber": "",
@@ -540,15 +540,15 @@
       "type": "in",
       "date": "۱۴۰۵/۰۷/۱۷",
       "time": "۰۹:۱۸",
-      "notes": "وزن صنوبر 25030 \nباسکول 5039\nکوهرنگ\nکوهرنگ",
+      "notes": "راننده بخشی\nوزن صنوبر 25030 \nباسکول 5039\nکوهرنگ\nکوهرنگ",
       "invoiceNumber": "5548453",
       "product": "شکر",
       "quantity": "25010",
       "unit": "kg",
       "totalWeight": "25010",
       "party": "شهرکرد",
-      "driver": "بخشی",
-      "updatedAt": 1791673999636,
+      "driver": "متفرقه",
+      "updatedAt": 1791859130650,
       "deleted": false,
       "subtype": "کوهرنگ",
       "basilNumber": "5039",
@@ -3329,10 +3329,5 @@
       "l": "پلاستیک ۵ کیلویی",
       "factor": 5
     }
-  ],
-  "permanentlyDeletedIds": [
-    1791612152156,
-    1791612004161,
-    1791787663311
   ]
 }
