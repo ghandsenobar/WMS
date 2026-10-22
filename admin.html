@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل مدیریت — انبار صنوبر</title>
+<meta name="theme-color" content="#166534">
+<link rel="icon" href="./icon-192.png">
+<link rel="stylesheet" href="./css/main.css">
+<link rel="stylesheet" href="./css/admin.css">
+</head>
+<body>
+
+<div id="loginScreen" style="position:fixed;inset:0;background:linear-gradient(160deg,#166534,#052e16);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9998;">
+  <div class="login-box">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">پنل مدیریت</div>
+    <div class="login-sub">فقط کاربران با نقش «مدیر»</div>
+    <div class="login-error" id="loginError" hidden></div>
+    <div class="login-field"><label>نام کاربری</label><input type="text" id="loginUsername"></div>
+    <div class="login-field"><label>رمز عبور</label><input type="password" id="loginPassword"></div>
+    <button type="button" class="login-btn" onclick="adminLogin()">ورود</button>
+    <div style="text-align:center;margin-top:14px;font-size:11.5px;"><a href="./index.html" style="color:var(--primary);text-decoration:none;">← بازگشت به اپ</a></div>
+  </div>
+</div>
+
+<div class="container" id="adminApp" hidden>
+  <div class="app-header">
+    <div class="company-name">پنل مدیریت سیستم انبار</div>
+    <div class="factory-name">کارخانه قند صنوبر</div>
+    <div class="app-title">🔐 مدیریت کاربران و دیتابیس</div>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" onclick="location.href='./index.html'" title="بازگشت">↩️</button>
+    </div>
+    <div class="user-pill" id="adminUserPill"></div>
+  </div>
+
+  <div class="sync-bar" style="margin-bottom:14px;">
+    <div class="sync-bar-status" id="syncStatus">⚪ در حال آماده‌سازی...</div>
+    <div class="sync-bar-actions">
+      <button type="button" class="sync-btn pull" onclick="adminPull()" id="adminPullBtn">⬇️ دریافت</button>
+      <button type="button" class="sync-btn push" onclick="adminPush()" id="adminPushBtn">⬆️ ذخیره</button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <button class="admin-nav-btn active" data-panel="dashboard" onclick="showPanel('dashboard')"><span class="admin-nav-icon">📊</span> داشبورد</button>
+      <button class="admin-nav-btn" data-panel="users" onclick="showPanel('users')"><span class="admin-nav-icon">👥</span> کاربران</button>
+      <button class="admin-nav-btn" data-panel="records" onclick="showPanel('records')"><span class="admin-nav-icon">📋</span> رکوردها</button>
+      <button class="admin-nav-btn" data-panel="audit" onclick="showPanel('audit')"><span class="admin-nav-icon">📜</span> لاگ عملیات</button>
+      <button class="admin-nav-btn" data-panel="database" onclick="showPanel('database')"><span class="admin-nav-icon">💾</span> دیتابیس</button>
+      <button class="admin-nav-btn" data-panel="system" onclick="showPanel('system')"><span class="admin-nav-icon">⚙️</span> سیستم</button>
+    </aside>
+    <main class="admin-content" id="adminContent">
+      <div class="admin-panel active" id="panel-dashboard">
+        <h2 class="admin-panel-title">📊 داشبورد</h2>
+        <div class="stat-grid" id="statGrid"></div>
+      </div>
+      <div class="admin-panel" id="panel-users">
+        <h2 class="admin-panel-title">👥 مدیریت کاربران</h2>
+        <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showUserModal()">➕ کاربر جدید</button>
+          <button class="btn btn-secondary" onclick="renderUsers()">🔄 بازخوانی</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>نام کاربری</th><th>نام نمایشی</th><th>نقش</th><th>وضعیت</th><th>آخرین ورود</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-panel" id="panel-records">
+        <h2 class="admin-panel-title">📋 رکوردها (نمای کلی)</h2>
+        <div class="admin-section">
+          <div class="admin-section-title">آمار سریع</div>
+          <div id="recordsStats"></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">رکوردهای آخر (۱۵ مورد)</div>
+          <div style="overflow-x:auto;">
+            <table class="admin-table">
+              <thead><tr><th>#</th><th>نوع</th><th>تاریخ</th><th>کالا</th><th>تعداد</th><th>ثبت‌کننده</th><th>آخرین ویرایش</th></tr></thead>
+              <tbody id="recentRecordsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="admin-panel" id="panel-audit">
+        <h2 class="admin-panel-title">📜 لاگ عملیات</h2>
+        <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <select id="auditFilter" onchange="renderAudit()" style="max-width:200px;">
+            <option value="">همه عملیات</option>
+            <option value="create">ثبت</option>
+            <option value="update">ویرایش</option>
+            <option value="delete">حذف</option>
+            <option value="login">ورود</option>
+            <option value="user">عملیات کاربر</option>
+          </select>
+          <button class="btn btn-secondary" onclick="renderAudit()">🔄 بازخوانی</button>
+        </div>
+        <div id="auditList" style="background:var(--card);border-radius:8px;border:1px solid var(--border);max-height:600px;overflow-y:auto;"></div>
+      </div>
+      <div class="admin-panel" id="panel-database">
+        <h2 class="admin-panel-title">💾 مدیریت دیتابیس</h2>
+        <div class="admin-section">
+          <div class="admin-section-title">📊 اطلاعات فایل</div>
+          <div id="dbInfo"></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">💾 پشتیبان‌گیری و بازیابی</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="adminBackup()">💾 دانلود پشتیبان</button>
+            <button class="btn btn-warning" onclick="document.getElementById('restoreFile').click()">📂 بارگذاری</button>
+            <input type="file" id="restoreFile" accept=".json" onchange="adminRestore(event)" style="display:none;">
+          </div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-title">🔐 تنظیمات GitHub</div>
+          <div class="field" style="margin-bottom:8px;"><label>Owner</label><input id="ghOwner" type="text"></div>
+          <div class="field" style="margin-bottom:8px;"><label>Repository</label><input id="ghRepo" type="text"></div>
+          <div class="field" style="margin-bottom:8px;"><label>Token</label><input id="ghToken" type="password"></div>
+          <button class="btn btn-primary" onclick="saveGh()">💾 ذخیره و تست</button>
+          <div id="ghTestInfo" style="font-size:11.5px;margin-top:8px;color:var(--muted);"></div>
+        </div>
+        <div class="admin-section danger-zone">
+          <div class="danger-zone-title">⚠️ منطقه خطر</div>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">عملیات زیر غیرقابل بازگشت هستند. با احتیاط استفاده کنید.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-warning" onclick="resetEpoch()">🔄 بازنشانی نسل (Epoch)</button>
+            <button class="btn btn-danger" onclick="clearAllRecords()">🗑️ حذف همه رکوردها</button>
+          </div>
+        </div>
+      </div>
+      <div class="admin-panel" id="panel-system">
+        <h2 class="admin-panel-title">⚙️ اطلاعات سیستم</h2>
+        <div class="admin-section">
+          <div class="admin-section-title">ساختار داده</div>
+          <div id="systemInfo"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-msg" id="modalMsg"></div>
+    <input type="text" class="modal-input" id="modalInput" hidden>
+    <div class="modal-btns">
+      <button class="modal-btn modal-cancel" id="modalCancel">لغو</button>
+      <button class="modal-btn modal-third" id="modalThird" hidden>—</button>
+      <button class="modal-btn modal-ok" id="modalOk">تأیید</button>
+    </div>
+  </div>
+</div>
+
+<!-- User modal -->
+<div class="modal-overlay" id="userModalOverlay">
+  <div class="modal-box" style="max-width:520px;">
+    <h3 style="margin-bottom:14px;" id="userModalTitle">کاربر جدید</h3>
+    <input type="hidden" id="userEditId">
+    <div class="field" style="margin-bottom:10px;"><label>نام کاربری</label><input id="umUsername" type="text"></div>
+    <div class="field" style="margin-bottom:10px;"><label>نام نمایشی</label><input id="umDisplay" type="text"></div>
+    <div class="field" style="margin-bottom:10px;" id="passField"><label>رمز عبور</label><input id="umPassword" type="password" placeholder="حداقل ۶ کاراکتر"></div>
+    <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
+    <div class="field" style="margin-bottom:16px;"><label><input type="checkbox" id="umActive" checked style="width:auto;"> فعال</label></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-cancel" onclick="closeUserModal()">لغو</button>
+      <button class="modal-btn modal-ok" onclick="saveUser()">💾 ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="./js/utils.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/admin.js"></script>
+</body>
+</html>
