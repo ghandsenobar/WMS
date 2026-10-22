@@ -13,7 +13,7 @@ let permanentlyDeletedIds = [];
 let deletedProducts = [], deletedSellers = [], deletedBuyers = [], deletedDrivers = [], deletedUnits = [];
 let dataEpoch = 1;
 
-let currentUser = null; // session user
+let currentUser = null;
 let currentType = null, editingId = null;
 let dirty = false, lastSyncAt = null;
 let printFontScale = 100;
@@ -48,7 +48,6 @@ function currentRole(){ return currentUser?.role || 'viewer'; }
 
 /* ─── Bootstrap ─── */
 window.addEventListener('DOMContentLoaded', async ()=>{
-  // Splash auto-hide
   (function(){
     const splash = document.getElementById('splashScreen');
     if(!splash) return;
@@ -65,7 +64,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   loadDisplaySettings();
   applyDarkMode();
 
-  // Date/time inputs
   document.querySelectorAll('.date-input').forEach(inp=>{
     inp.readOnly = true;
     inp.addEventListener('click', e=>{ e.stopPropagation(); openCalendarFor(inp); });
@@ -75,7 +73,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
-  // Searchable selects (party, driver)
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
     onAdd: async (name)=>{
@@ -101,13 +98,10 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     }
   });
 
-  // Try restore session
   const sess = loadSession();
   if(sess){
-    // verify user still exists after we load data
     await tryRestoreSession(sess);
   } else {
-    // Decide: setup / login
     if(!hasGhConfig()){
       document.getElementById('setupScreen').hidden = false;
       return;
@@ -118,13 +112,12 @@ window.addEventListener('DOMContentLoaded', async ()=>{
         document.getElementById('setupScreen').hidden = false;
         return;
       }
-      // has users → login
       document.getElementById('loginScreen').hidden = false;
       document.getElementById('loginUsername').focus();
     } catch(err){
       document.getElementById('loginScreen').hidden = false;
       document.getElementById('loginError').hidden = false;
-      document.getElementById('loginError').textContent = 'خطا در اتصال به GitHub. تنظیمات را بررسی کنید.';
+      document.getElementById('loginError').textContent = 'خطا در اتصال به سرور. تنظیمات را بررسی کنید.';
     }
   }
 });
@@ -138,18 +131,16 @@ async function doLogin(){
 
   try {
     if(!hasGhConfig()){
-      errEl.hidden=false; errEl.textContent='تنظیمات GitHub یافت نشد'; return;
+      errEl.hidden=false; errEl.textContent='تنظیمات دیتابیس یافت نشد'; return;
     }
     const raw = await ghGet();
     if(!raw){ errEl.hidden=false; errEl.textContent='داده‌ای روی سرور یافت نشد'; return; }
     const data = deserializeState(raw);
     const result = await verifyLogin(u, p, data.users);
     if(!result.ok){ errEl.hidden=false; errEl.textContent = result.reason; return; }
-    // Save session
+    
     saveSession(result.user.id, result.user.username, result.user.role);
-    // Update lastLogin
     result.user.lastLogin = Date.now();
-    // Load app
     await enterApp(result.user, data);
   } catch(err){
     errEl.hidden=false;
@@ -171,7 +162,6 @@ async function doFirstSetup(){
   saveGhConfig();
   ghFileSha = null;
   try {
-    // Check if file exists; if it exists but has users, abort
     const raw = await ghGet();
     if(raw && raw.users && raw.users.length>0){
       alert('داده‌ای با کاربران قبلی روی سرور وجود دارد. لطفاً وارد شوید.');
@@ -216,7 +206,6 @@ async function tryRestoreSession(sess){
 
 async function enterApp(user, data){
   currentUser = user;
-  // Store data globally
   records = data.records || [];
   products = data.products || [];
   sellers = data.sellers || [];
@@ -234,17 +223,14 @@ async function enterApp(user, data){
   dataEpoch = data.dataEpoch || 1;
   dirty = false; lastSyncAt = Date.now();
 
-  // Hide login/setup
   document.getElementById('loginScreen').hidden = true;
   document.getElementById('setupScreen').hidden = true;
   document.getElementById('mainApp').hidden = false;
 
-  // User pill
   const pill = document.getElementById('userPill');
   pill.innerHTML = `<span>👤 ${esc(user.displayName||user.username)}</span>
     <span class="role-badge">${roleLabel(user.role)}</span>`;
 
-  // Init form fields
   const t = todayJalali();
   document.getElementById('records_from').value = t;
   document.getElementById('records_to').value = t;
@@ -256,14 +242,12 @@ async function enterApp(user, data){
   setSummaryMode(summaryMode);
   updateSyncBar();
 
-  // Hide entry buttons for viewers
   if(!canCreateRecord(user.role)){
     document.getElementById('btnIn').style.display = 'none';
     document.getElementById('btnOut').style.display = 'none';
     document.getElementById('syncPushBtn').disabled = true;
   }
 
-  // Bindings for form
   document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
   document.getElementById('f_unit').addEventListener('change', updateAutoKg);
   document.getElementById('f_product').addEventListener('change', onProductChange);
@@ -400,7 +384,6 @@ function fillUnits(){
 function refreshPartyOptions(){
   const list = currentType==='in' ? sellers : (currentType==='out' ? buyers : []);
   if(ssParty) ssParty.setOptions(list.map(n=>({value:n, label:n})));
-  // Keep existing value
   if(ssParty && ssParty.getValue() && !list.includes(ssParty.getValue())){
     ssParty.clear();
   }
@@ -533,7 +516,6 @@ async function saveRecord(){
     records.unshift(rec);
     logAudit('create', `ثبت ${currentType==='in'?'ورود':'خروج'} — ${product} (${qty} ${unitLabel(unit)})`, rec.id);
     markDirty(); clearForm();
-    // Adjust date range to show new record
     const f = normalizeDate(document.getElementById('records_from').value);
     const t = normalizeDate(document.getElementById('records_to').value);
     const nd = normalizeDate(date);
@@ -550,12 +532,10 @@ async function saveRecord(){
 
 function logAudit(action, detail, recordId){
   auditLog.push({
-    t: Date.now(),
-    action,
+    t: Date.now(), action,
     userId: currentUser.id,
     userName: currentUser.displayName || currentUser.username,
-    detail: detail || '',
-    recordId: recordId || null
+    detail: detail || '', recordId: recordId || null
   });
   if(auditLog.length > 800) auditLog = auditLog.slice(-800);
 }
@@ -867,11 +847,25 @@ async function restoreRecord(id){
 /* ─── Save state (dirty) ─── */
 function markDirty(){
   dirty = true;
-  savePendingState({
+  const statePayload = {
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
     dataEpoch, currentUser
-  });
+  };
+
+  if (typeof isLocalMode === 'function' && isLocalMode()) {
+    // حالت محلی: ذخیره فوری
+    const payload = serializeState(statePayload);
+    if (typeof ghPut === 'function') {
+      ghPut(payload).catch(e => {
+        showToast('خطا در ذخیره‌سازی محلی: ' + e.message, 'error', 6000);
+      });
+    }
+  } else {
+    // حالت گیت‌هاب: ذخیره در Pending
+    if (typeof savePendingState === 'function') savePendingState(statePayload);
+  }
+  
   updateSyncBar();
 }
 
@@ -881,32 +875,42 @@ function updateSyncBar(state, msg){
   const pushBtn = document.getElementById('syncPushBtn');
   const badge = document.getElementById('unsavedTitleBadge');
   if(!st) return;
+  
   const unsavedCount = records.filter(r=>(r.updatedAt||0) > (lastSyncAt||0)).length;
   if(badge){
     badge.style.display = unsavedCount>0 ? 'inline-block' : 'none';
     if(unsavedCount>0) badge.textContent = toFa(unsavedCount);
   }
+  
+  if (typeof isLocalMode === 'function' && isLocalMode()) {
+    st.className = 'sync-bar-status synced';
+    st.textContent = `💾 حالت محلی — ${toFa(records.filter(r=>!r.deleted).length)} رکورد ذخیره شده`;
+    if(pullBtn) pullBtn.disabled = true;
+    if(pushBtn) pushBtn.disabled = true;
+    return;
+  }
+
   const canPush = canPush(currentRole());
-  pushBtn.disabled = !canPush;
-  if(state==='loading'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'...'); pullBtn.disabled=true; return; }
-  if(state==='saving'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'در حال ذخیره...'); pullBtn.disabled=true; pushBtn.disabled=true; return; }
-  if(state==='error'){ st.className='sync-bar-status error'; st.textContent='❌ '+(msg||'خطا'); pullBtn.disabled=false; return; }
-  if(!hasGhConfig()){ st.className='sync-bar-status noconfig'; st.textContent='⚪ تنظیمات GitHub پیکربندی نشده'; pullBtn.disabled=true; return; }
+  if(pushBtn) pushBtn.disabled = !canPush;
+  if(state==='loading'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'...'); if(pullBtn) pullBtn.disabled=true; return; }
+  if(state==='saving'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'در حال ذخیره...'); if(pullBtn) pullBtn.disabled=true; if(pushBtn) pushBtn.disabled=true; return; }
+  if(state==='error'){ st.className='sync-bar-status error'; st.textContent='❌ '+(msg||'خطا'); if(pullBtn) pullBtn.disabled=false; return; }
+  if(!hasGhConfig()){ st.className='sync-bar-status noconfig'; st.textContent='⚪ تنظیمات دیتابیس پیکربندی نشده'; if(pullBtn) pullBtn.disabled=true; return; }
   if(dirty || unsavedCount>0){
     st.className = 'sync-bar-status dirty';
     st.textContent = unsavedCount>0 ? `🟠 ${toFa(unsavedCount)} رکورد ذخیره‌نشده` : `🟠 تغییرات ذخیره‌نشده`;
-    pullBtn.disabled = false;
+    if(pullBtn) pullBtn.disabled = false;
     return;
   }
   st.className = 'sync-bar-status synced';
   const t = lastSyncAt ? toFa(new Date(lastSyncAt).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})) : '';
   st.textContent = '🟢 همه چیز ذخیره شده' + (t ? ` — ${t}` : '');
-  pullBtn.disabled = false;
+  if(pullBtn) pullBtn.disabled = false;
 }
 
 /* ─── Sync ─── */
 async function syncPull(){
-  if(!hasGhConfig()){ showToast('تنظیمات GitHub را وارد کنید','warning'); return; }
+  if(!hasGhConfig()){ showToast('تنظیمات پیکربندی نشده','warning'); return; }
   if(dirty){
     const choice = await customTriple(
       '⚠️ تغییرات ذخیره‌نشده دارید.\n\nاگر فقط دریافت کنید، تغییرات از بین می‌روند.',
@@ -942,7 +946,7 @@ async function syncPull(){
 }
 
 async function syncPush(){
-  if(!hasGhConfig()){ showToast('تنظیمات GitHub را وارد کنید','warning'); return; }
+  if(!hasGhConfig()){ showToast('تنظیمات پیکربندی نشده','warning'); return; }
   if(!canPush(currentRole())){ showToast('دسترسی ذخیره ندارید','warning'); return; }
   if(ghCanWrite===false){ await customAlert('🔒 توکن فقط خواندنی است'); return; }
   updateSyncBar('saving','در حال ذخیره...');
@@ -958,7 +962,6 @@ async function syncPush(){
     if(c){ await syncPull(); }
     return;
   }
-  // Merge tombstones & data
   const remoteTomb = remote ? remote.permanentlyDeletedIds : [];
   permanentlyDeletedIds = Array.from(new Set([...permanentlyDeletedIds, ...remoteTomb]));
   if(remote){
@@ -974,9 +977,8 @@ async function syncPush(){
   buyers = mergeWithTombstones(buyers, remote?remote.buyers:[], deletedBuyers);
   drivers = mergeWithTombstones(drivers, remote?remote.drivers:[], deletedDrivers);
   unitsList = mergeUnitsRespectingTombstones(unitsList, remote?remote.unitsList:[], deletedUnits);
-  // users: local wins (admin manages via admin.html, no auto-merge)
+  
   if(remote && remote.users && remote.users.length && !users.length) users = remote.users;
-  // audit merge (concat, unique by timestamp+action+userId+detail)
   if(remote && remote.auditLog){
     const key = a=>a.t+'|'+a.action+'|'+a.userId+'|'+(a.detail||'');
     const seen = new Set(auditLog.map(key));
@@ -995,7 +997,7 @@ async function syncPush(){
     clearPendingState();
     renderRecords(); renderManageLists(); renderManageProducts();
     updateSyncBar('synced');
-    showToast('تغییرات روی GitHub ذخیره شد','success');
+    showToast('تغییرات روی سرور ذخیره شد','success');
   } catch(e){
     if(e.status===409){ await customAlert('تضاد نسخه — دوباره تلاش می‌کنم'); return syncPush(); }
     if(e.status===403||e.status===404){ ghCanWrite=false; updateSyncBar('synced'); await customAlert('🔒 دسترسی نوشتن ندارد'); return; }
@@ -1545,7 +1547,7 @@ async function menuAddDriverFromSettings(){
   if(!drivers.includes(v)){ drivers.push(v); markDirty(); renderManageLists(); refreshDriverOptions(); }
 }
 
-/* ─── Backup ─── */
+/* ─── Backup (SMART RESTORE) ─── */
 function backupDownload(){
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
@@ -1560,26 +1562,62 @@ function backupDownload(){
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
   document.getElementById('backupInfo').textContent = '✅ دانلود شد';
 }
+
 async function restoreFromFile(ev){
-  const file = ev.target.files?.[0]; ev.target.value='';
+  const file = ev.target.files?.[0]; 
+  ev.target.value='';
   if(!file) return;
+
   try {
     const text = await file.text();
-    const data = JSON.parse(text);
-    if(!data.records) throw new Error('invalid');
-    const ok = await customConfirm('⚠️ ادغام فایل با داده فعلی؟', {okText:'ادغام'});
+    let data;
+    
+    // ۱. بررسی اینکه فایل JSON معتبری هست یا نه
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      await customAlert('❌ فایل انتخاب شده یک فایل متنی JSON معتبر نیست.\n\nمطمئن شو فایلی که دانلود کردی پسوند .json داره.');
+      return;
+    }
+
+    // ۲. بررسی اینکه اصلاً داده‌ای توش هست یا نه (ساپورت نسخه قدیم و جدید)
+    if(!data || (!data.records && !data.products && !data.units && !data.unitsList)) {
+      await customAlert('⚠️ این فایل ساختار یک فایل پشتیبان انبار را ندارد.\n\n(احتمالاً فایل اشتباهی رو انتخاب کردی)');
+      return;
+    }
+
+    const ok = await customConfirm('⚠️ آیا از ادغام این فایل با داده‌های فعلی مطمئن هستی؟', {okText:'بله، ادغام کن'});
     if(!ok) return;
+
+    // ۳. تبدیل داده‌های قدیمی به فرمت جدید
     const parsed = deserializeState(data);
+    
+    // ۴. ادغام داده‌ها
     records = mergeRecordsById(records, parsed.records, permanentlyDeletedIds);
     products = mergeProductsList(products, parsed.products);
-    sellers = mergeUnique(sellers, parsed.sellers);
-    buyers = mergeUnique(buyers, parsed.buyers);
-    drivers = mergeUnique(drivers, parsed.drivers);
+    sellers = mergeUnique(sellers, parsed.sellers || []);
+    buyers = mergeUnique(buyers, parsed.buyers || []);
+    drivers = mergeUnique(drivers, parsed.drivers || []);
+    
+    // ۵. ادغام واحدها
+    const unitMap = new Map();
+    [...unitsList, ...(parsed.unitsList || [])].forEach(u => {
+      if(u && u.v && !unitMap.has(u.v)) unitMap.set(u.v, u);
+    });
+    unitsList = Array.from(unitMap.values());
+
     markDirty();
-    renderRecords(); renderManageLists(); renderManageProducts();
-    showToast('ادغام شد','success');
-  } catch(err){
-    showToast('فایل معتبر نیست','error');
+    renderRecords(); 
+    renderManageLists(); 
+    renderManageProducts();
+    refreshPartyOptions(); 
+    refreshDriverOptions();
+    
+    showToast('✅ فایل با موفقیت ادغام شد', 'success');
+    
+  } catch(err) {
+    console.error('Restore Error:', err);
+    await customAlert('❌ خطا در بازیابی فایل:\n\n' + (err.message || 'نامشخص'));
   }
 }
 
