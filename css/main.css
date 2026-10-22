@@ -66,7 +66,7 @@ body{margin:0;padding:12px;background:var(--bg);color:var(--text);font-size:14px
 @keyframes spin{to{transform:rotate(360deg);}}
 .sync-spin{display:inline-block;animation:spin 1s linear infinite;}
 
-/* Entry Buttons (Modified to be side-by-side and shorter) */
+/* Entry Buttons */
 .entry-buttons{display:flex;gap:10px;margin-bottom:14px;}
 .entry-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 5px;border:2px solid var(--border);background:var(--card);border-radius:var(--radius);cursor:pointer;transition:.15s;min-height:65px;color:var(--text);}
 .entry-btn.active.in-btn{border-color:var(--in-color);background:var(--in-color);color:#fff;}
@@ -97,33 +97,38 @@ input.time-input{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http:
 .full{grid-column:1/-1;}
 textarea{resize:vertical;min-height:52px;}
 
-.btn{padding:10px 14px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;}
-.btn-primary{background:var(--primary);color:#fff;}
-.btn-secondary{background:var(--border);color:var(--text);}
-.btn-warning{background:var(--warning);color:#fff;}
-.btn-danger{background:var(--danger);color:#fff;}
-.btn-info{background:#0ea5e9;color:#fff;}
-.btn-purple{background:#8b5cf6;color:#fff;}
-.btn-sm{padding:5px 8px;font-size:11px;}
-.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+/* Search Input Clear */
+.search-wrap{position:relative;}
+.search-wrap input{padding-left:36px;}
+.search-clear{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:none;background:var(--border);color:var(--muted);font-size:13px;font-weight:bold;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0;}
+.search-clear.show{display:flex;}
 
-/* Auto kg */
-.auto-kg-box{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(59,130,246,.04));border:2px solid var(--primary);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px;}
-.auto-kg-box .auto-kg-label{font-size:13px;font-weight:bold;color:var(--primary-dark);}
-.auto-kg-box .auto-kg-value{font-size:22px;font-weight:900;color:var(--primary);}
-.auto-kg-box .auto-kg-unit{font-size:14px;color:var(--muted);font-weight:bold;}
-.auto-kg-box .auto-kg-formula{font-size:11px;color:var(--muted);display:block;margin-top:2px;}
-.auto-kg-box.no-factor{background:rgba(100,116,139,.08);border-color:var(--muted);}
-.auto-kg-box.no-factor .auto-kg-value{color:var(--muted);}
+/* Fields List Checkbox */
+.fields-list-wrap{background:var(--subtle-bg);border:1px solid var(--border);border-radius:8px;padding:6px;max-height:320px;overflow-y:auto;}
+.field-checkbox{display:flex;align-items:center;gap:8px;padding:7px 6px;cursor:pointer;font-size:12.5px;border-radius:6px;transition:background .1s;}
+.field-checkbox:hover{background:rgba(37,99,235,.06);}
+.field-checkbox input[type="checkbox"]{margin:0;flex-shrink:0;width:16px;height:16px;cursor:pointer;}
+.field-checkbox.disabled{opacity:.65;cursor:not-allowed;}
+.field-checkbox.disabled input{cursor:not-allowed;}
+.field-checkbox .field-label{flex:1;}
+.field-checkbox .field-note{font-size:10px;font-weight:normal;color:var(--muted);margin-right:4px;}
 
-/* Searchable Select */
-.searchable-select{position:relative;width:100%;}
-.ss-input{padding-left:32px!important;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");background-repeat:no-repeat;background-position:left 10px center;}
-.ss-dropdown{position:absolute;top:100%;right:0;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.2);max-height:260px;overflow-y:auto;z-index:50;padding:4px;}
-.ss-item{padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
-.ss-item:hover,.ss-item.active{background:var(--primary);color:#fff;}
-.ss-item.create{color:var(--success);font-weight:bold;border-top:1px dashed var(--border);margin-top:4px;}
-.ss-empty{padding:12px;text-align:center;color:var(--muted);font-size:12px;}
+/* List Scroll */
+.list-scroll{max-height:320px;overflow-y:auto; padding-right:4px;}
+
+/* Table column hide classes */
+.records-table-scroll.hide-field-time [data-field="time"],
+.records-table-scroll.hide-field-subtype [data-field="subtype"],
+.records-table-scroll.hide-field-quantity [data-field="quantity"],
+.records-table-scroll.hide-field-unit [data-field="unit"],
+.records-table-scroll.hide-field-weight [data-field="weight"],
+.records-table-scroll.hide-field-party [data-field="party"],
+.records-table-scroll.hide-field-driver [data-field="driver"],
+.records-table-scroll.hide-field-invoice [data-field="invoice"],
+.records-table-scroll.hide-field-basil [data-field="basil"],
+.records-table-scroll.hide-field-waybill [data-field="waybill"],
+.records-table-scroll.hide-field-notes [data-field="notes"],
+.records-table-scroll.hide-field-creator [data-field="creator"] {display:none!important;}
 
 /* Tables */
 table{width:100%;border-collapse:collapse;font-size:12.5px;}
@@ -149,7 +154,7 @@ tr.editing td:first-child{border-right:3px solid var(--warning);}
 .collapsible-section{margin-bottom:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .collapsible-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;cursor:pointer;background:var(--subtle-bg);}
 .collapsible-title{font-size:13px;font-weight:bold;color:var(--primary-dark);display:flex;align-items:center;gap:8px;flex:1;}
-.collapsible-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--warning);color:#fff;font-size:11px;font-weight:bold;}
+.collapsible-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--danger);color:#fff;font-size:11px;font-weight:bold;}
 .collapsible-toggle{width:28px;height:28px;border-radius:6px;background:var(--card);border:1px solid var(--border);color:var(--primary-dark);font-size:16px;font-weight:bold;cursor:pointer; pointer-events: none;}
 .collapsible-body{padding:12px 14px;border-top:1px solid var(--border);}
 .collapsible-body.collapsed{display:none;}
