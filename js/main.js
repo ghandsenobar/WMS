@@ -88,6 +88,8 @@ function loadDisplaySettings(){
   const m = localStorage.getItem('wh_data_mode')||'weighted';
   dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
   summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
+  letterheadCompany = localStorage.getItem('wh_letterhead_company') || '';
+  letterheadFactory = localStorage.getItem('wh_letterhead_factory') || '';
   
   try{
     const raw = localStorage.getItem('wh_visible_fields');
@@ -108,6 +110,7 @@ function loadDisplaySettings(){
   
   renderFieldsList();
   applyFieldVisibility();
+  updateHeaderUI();
 }
 
 function updateHeaderUI() {
@@ -118,8 +121,8 @@ function updateHeaderUI() {
   
   if(c) c.textContent = letterheadCompany || 'نام شرکت (برای ویرایش کلیک کنید)';
   if(f) f.textContent = letterheadFactory || 'نام کارخانه (برای ویرایش کلیک کنید)';
-  if(ci) ci.value = letterheadCompany;
-  if(fi) fi.value = letterheadFactory;
+  if(ci) ci.value = letterheadCompany || '';
+  if(fi) fi.value = letterheadFactory || '';
 }
 
 async function editLetterhead(type) {
@@ -132,8 +135,13 @@ async function editLetterhead(type) {
 }
 
 function updateLetterhead(type, val) {
-  if (type === 'company') letterheadCompany = val.trim();
-  else letterheadFactory = val.trim();
+  if (type === 'company') {
+    letterheadCompany = val.trim();
+    localStorage.setItem('wh_letterhead_company', letterheadCompany);
+  } else {
+    letterheadFactory = val.trim();
+    localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+  }
   updateHeaderUI();
   markDirty();
 }
@@ -461,8 +469,10 @@ async function enterApp(user, data){
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
   
-  letterheadCompany = data.letterheadCompany || '';
-  letterheadFactory = data.letterheadFactory || '';
+  letterheadCompany = data.letterheadCompany || letterheadCompany || '';
+  letterheadFactory = data.letterheadFactory || letterheadFactory || '';
+  localStorage.setItem('wh_letterhead_company', letterheadCompany);
+  localStorage.setItem('wh_letterhead_factory', letterheadFactory);
   updateHeaderUI();
   
   dirty = false; lastSyncAt = Date.now();
@@ -738,6 +748,25 @@ async function addDriver(){
   if(!currentType){ showToast('اول ورود/خروج را انتخاب کنید','warning'); return; }
   await menuAddDriver();
   refreshDriverOptions();
+}
+
+async function menuAddParty(){
+  const isIn=currentType==='in';
+  const label=isIn?'فروشنده':'خریدار';
+  const n=await customPrompt(`نام ${label} جدید:`,'');
+  if(!n)return;const v=n.trim();if(!v)return;
+  const list=isIn?sellers:buyers;
+  if(list.includes(v)){showToast('قبلاً وجود دارد','warning');return;}
+  if(isIn) deletedSellers = deletedSellers.filter(x=>x!==v);
+  else     deletedBuyers  = deletedBuyers.filter(x=>x!==v);
+  list.push(v);markDirty();fillParties();renderManageLists();
+}
+async function menuAddDriver(){
+  const n=await customPrompt('نام راننده جدید:','',{placeholder:'مثلاً: آقای احمدی'});
+  if(!n)return;const v=n.trim();if(!v)return;
+  if(drivers.includes(v)){showToast('قبلاً وجود دارد','warning');return;}
+  deletedDrivers = deletedDrivers.filter(x=>x!==v);
+  drivers.push(v);markDirty();fillDrivers();renderManageLists();
 }
 
 /* ─── Save ─── */
@@ -1251,6 +1280,8 @@ async function syncPull(){
     deletedUnits = data.deletedUnits; dataEpoch = data.dataEpoch;
     letterheadCompany = data.letterheadCompany || '';
     letterheadFactory = data.letterheadFactory || '';
+    localStorage.setItem('wh_letterhead_company', letterheadCompany);
+    localStorage.setItem('wh_letterhead_factory', letterheadFactory);
     updateHeaderUI();
     dirty = false; lastSyncAt = Date.now();
     editingId = null; currentType = null;
