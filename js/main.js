@@ -66,6 +66,7 @@ function matchesDataMode(r) {
 const ALL_FIELDS = [
   { key: 'date',    label: 'تاریخ',        mandatory: true  },
   { key: 'time',    label: 'ساعت',         mandatory: false },
+  { key: 'type',    label: 'نوع',          mandatory: false },
   { key: 'product', label: 'کالا',          mandatory: true  },
   { key: 'subtype', label: 'زیرمجموعه',      mandatory: false },
   { key: 'quantity',label: 'تعداد',         mandatory: false },
@@ -190,6 +191,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
+  // Initialize Searchable Selects
   ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
@@ -217,11 +219,13 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   });
   ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
 
+  // Advanced Filters Searchable Selects
   ssAdvProduct = new SearchableSelect(document.getElementById('ss_adv_product'), { allowAdd: false, onChange: onAdvProductChange });
   ssAdvSubtype = new SearchableSelect(document.getElementById('ss_adv_subtype'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvParty = new SearchableSelect(document.getElementById('ss_adv_party'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvDriver = new SearchableSelect(document.getElementById('ss_adv_driver'), { allowAdd: false, onChange: applyAdvFilterChange });
 
+  // Search Clear logic
   const searchInput = document.getElementById('search');
   const searchClear = document.getElementById('searchClear');
   searchInput.addEventListener('input', ()=>{
@@ -229,10 +233,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     else searchClear.classList.remove('show');
     onSearchInput();
   });
-
-  // Pre-fill setup fields
-  document.getElementById('setupOwner').value = DEFAULT_GH_OWNER;
-  document.getElementById('setupRepo').value = DEFAULT_GH_REPO;
 
   const sess = loadSession();
   if(sess){
@@ -296,24 +296,37 @@ async function doFirstSetup(){
   const owner = document.getElementById('setupOwner').value.trim();
   const repo = document.getElementById('setupRepo').value.trim();
   const token = document.getElementById('setupToken').value.trim();
-  const user = document.getElementById('setupUser').value.trim();
-  const display = document.getElementById('setupDisplay').value.trim();
-  const pass = document.getElementById('setupPass').value;
-  if(!owner||!repo||!token||!user||!pass||pass.length<4){
-    alert('همه فیلدها الزامی است — رمز حداقل ۴ کاراکتر');
+  
+  if(!owner||!repo||!token){
+    alert('اطلاعات اتصال به دیتابیس (Username, Repo, Token) الزامی است');
     return;
   }
+
   ghConfig = { owner, repo, token };
   saveGhConfig();
   ghFileSha = null;
+  
   try {
     const raw = await ghGet();
+    // اگر دیتابیس از قبل وجود داشت و کاربر داشت، مستقیم برو به لاگین!
     if(raw && raw.users && raw.users.length>0){
-      alert('داده‌ای با کاربران قبلی روی سرور وجود دارد. لطفاً وارد شوید.');
+      showToast('اتصال موفق! دیتابیس یافت شد. لطفاً وارد شوید.', 'success', 5000);
       document.getElementById('setupScreen').hidden = true;
       document.getElementById('loginScreen').hidden = false;
+      document.getElementById('loginUsername').focus();
+      return; 
+    }
+
+    // اگر کاربر نداشت، یعنی واقعاً نصب اولیه است. حالا مشخصات ادمین جدید را می‌خواهیم
+    const user = document.getElementById('setupUser').value.trim();
+    const display = document.getElementById('setupDisplay').value.trim();
+    const pass = document.getElementById('setupPass').value;
+    
+    if(!user||!pass||pass.length<4){
+      alert('برای ایجاد حساب مدیر جدید، نام کاربری و رمز عبور (حداقل ۴ کاراکتر) الزامی است');
       return;
     }
+
     const userObj = await createUserObject({
       username:user, password:pass, displayName:display || user, role:'admin', currentUserId:''
     });
@@ -330,7 +343,7 @@ async function doFirstSetup(){
     saveSession(userObj.id, userObj.username, userObj.role);
     await enterApp(userObj, deserializeState(payload));
   } catch(err){
-    alert('خطا در راه‌اندازی: ' + (err.message||'نامشخص'));
+    alert('خطا در اتصال به دیتابیس: ' + (err.message||'نامشخص'));
   }
 }
 
@@ -851,13 +864,13 @@ function renderRecords(){
       <td data-field="quantity">${fmtQty(r.quantity)}</td>
       <td data-field="unit">${esc(u)}</td>
       <td data-field="weight" style="color:var(--primary);font-weight:bold;">${fmtKg(kg)}</td>
-      <td data-field="party">${esc(r.party||'-')}</td>
-      <td data-field="driver">${esc(r.driver||'-')}</td>
-      <td data-field="invoice">${esc(r.invoiceNumber||'-')}</td>
-      <td data-field="basil">${esc(r.basilNumber||'-')}</td>
-      <td data-field="waybill">${esc(r.waybillNumber||'-')}</td>
-      <td data-field="notes">${esc(r.notes||'')}</td>
-      <td data-field="creator"><span class="audit-info" title="${esc(auditTitle)}">👤 ${esc(r.createdByName||'-')}</span></td>
+      <td data-field="party">${esc(toFa(r.party||'-'))}</td>
+      <td data-field="driver">${esc(toFa(r.driver||'-'))}</td>
+      <td data-field="invoice">${esc(toFa(r.invoiceNumber||'-'))}</td>
+      <td data-field="basil">${esc(toFa(r.basilNumber||'-'))}</td>
+      <td data-field="waybill">${esc(toFa(r.waybillNumber||'-'))}</td>
+      <td data-field="notes">${esc(toFa(r.notes||''))}</td>
+      <td data-field="creator"><span class="audit-info" title="${esc(auditTitle)}">👤 ${esc(toFa(r.createdByName||'-'))}</span></td>
       <td><div style="display:flex;gap:4px;justify-content:flex-end;">${btns}</div></td>
     </tr>`;
   };
@@ -887,6 +900,7 @@ function renderRecords(){
   renderDeletedRecords();
   updateDeletedUI();
   updateSyncBar();
+  applyFieldVisibility(); // Ensure visibility applied after render
 }
 
 function updateFilterBadges(){
@@ -894,6 +908,7 @@ function updateFilterBadges(){
   const searchBadge = document.getElementById('searchBadge');
   if(searchBadge){
     searchBadge.hidden = !q;
+    if(q) searchBadge.textContent = 'فیلتر فعال';
   }
   const advActive = Object.values(advFilter).filter(v=>v && v.trim()).length;
   const advFilterBadge = document.getElementById('advFilterBadge');
@@ -905,7 +920,7 @@ function updateFilterBadges(){
 
 /* ─── Filters ─── */
 function onSearchInput(){
-  updateFilterBadges();
+  updateFilterBadges(); // آپدیت فوری نشانگر
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(renderRecords, 200);
 }
@@ -1020,17 +1035,22 @@ function renderDeletedRecords(){
   tbody.innerHTML = deleted.map(r=>{
     const p = products.find(x=>x.name===r.product);
     const u = r.unit ? unitLabel(r.unit) : (p ? unitLabel(p.unit) : '—');
+    const kg = getRecordKg(r);
     const typeLabel = r.type==='in' ? '📥 ورود' : '📤 خروج';
     const delStr = r.updatedAt ? formatTime(r.updatedAt) : '—';
     return `<tr style="opacity:.7;text-decoration:line-through;">
-      <td>${esc(toFa(r.date))}</td>
-      <td>${esc(toFa(r.time))}</td>
-      <td>${typeLabel}</td>
-      <td><b>${esc(r.product||'-')}</b></td>
-      <td>${fmtQty(r.quantity)}</td>
-      <td>${esc(u)}</td>
-      <td>${esc(r.party||'-')}</td>
-      <td>${esc(r.driver||'-')}</td>
+      <td data-field="date">${esc(toFa(r.date))}</td>
+      <td data-field="time">${esc(toFa(r.time))}</td>
+      <td data-field="type">${typeLabel}</td>
+      <td data-field="product"><b>${esc(r.product||'-')}</b></td>
+      <td data-field="subtype">${esc(r.subtype||'-')}</td>
+      <td data-field="quantity">${fmtQty(r.quantity)}</td>
+      <td data-field="unit">${esc(u)}</td>
+      <td data-field="weight" style="color:var(--primary);font-weight:bold;">${fmtKg(kg)}</td>
+      <td data-field="party">${esc(toFa(r.party||'-'))}</td>
+      <td data-field="driver">${esc(toFa(r.driver||'-'))}</td>
+      <td data-field="notes">${esc(toFa(r.notes||''))}</td>
+      <td data-field="creator">${esc(toFa(r.createdByName||'-'))}</td>
       <td style="font-size:11px;">${delStr}</td>
       <td><button class="btn btn-add btn-sm" onclick="restoreRecord(${r.id})">🔄</button></td>
     </tr>`;
@@ -1273,15 +1293,19 @@ function buildReceipt(r, showLetterhead){
     head = `<div class="p-receipt-company">${esc(letterheadCompany)}</div>
             <div class="p-receipt-factory">${esc(letterheadFactory)} — واحد انبار</div>`;
   }
+  
   const qtyRow = (r.quantity && String(r.quantity).trim()) ? 
-    `<div class="p-receipt-row"><span class="p-receipt-lbl">تعداد</span><span class="p-receipt-val">${fmtQty(r.quantity)} ${esc(unit)}</span></div>` : '';
-  const kgRow = kg>0 ? `<div class="p-receipt-row"><span class="p-receipt-lbl">مجموع وزنی</span><span class="p-receipt-val">${fmtKg(kg)}</span></div>` : '';
-  const partyRow = r.party ? `<div class="p-receipt-row"><span class="p-receipt-lbl">${partyLabel}</span><span class="p-receipt-val">${esc(r.party)}</span></div>` : '';
-  const driverRow = r.driver ? `<div class="p-receipt-row"><span class="p-receipt-lbl">راننده</span><span class="p-receipt-val">${esc(r.driver)}</span></div>` : '';
-  const invoiceRow = r.invoiceNumber ? `<div class="p-receipt-row"><span class="p-receipt-lbl">شماره فاکتور</span><span class="p-receipt-val">${esc(r.invoiceNumber)}</span></div>` : '';
-  const basilRow = r.basilNumber ? `<div class="p-receipt-row"><span class="p-receipt-lbl">شماره باسکول</span><span class="p-receipt-val">${esc(r.basilNumber)}</span></div>` : '';
-  const waybillRow = r.waybillNumber ? `<div class="p-receipt-row"><span class="p-receipt-lbl">شماره بارنامه</span><span class="p-receipt-val">${esc(r.waybillNumber)}</span></div>` : '';
-  const notesBlock = r.notes ? `<div class="p-receipt-notes-block" style="padding:6px 0;"><div style="font-weight:bold;font-size:0.9rem;color:#555;margin-bottom:3px;">توضیحات</div><div>${esc(r.notes)}</div></div>` : '';
+    `<tr><td class="p-receipt-lbl">تعداد</td><td class="p-receipt-val" style="text-align:left;">${fmtQty(r.quantity)} ${esc(unit)}</td></tr>` : '';
+  const kgRow = kg>0 ? `<tr><td class="p-receipt-lbl">مجموع وزنی</td><td class="p-receipt-val" style="text-align:left;">${fmtKg(kg)}</td></tr>` : '';
+  
+  const partyRow = r.party ? `<tr><td class="p-receipt-lbl">${partyLabel}</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.party))}</td></tr>` : '';
+  const driverRow = r.driver ? `<tr><td class="p-receipt-lbl">راننده</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.driver))}</td></tr>` : '';
+  const invoiceRow = r.invoiceNumber ? `<tr><td class="p-receipt-lbl">شماره فاکتور</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.invoiceNumber))}</td></tr>` : '';
+  const basilRow = r.basilNumber ? `<tr><td class="p-receipt-lbl">شماره باسکول</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.basilNumber))}</td></tr>` : '';
+  const waybillRow = r.waybillNumber ? `<tr><td class="p-receipt-lbl">شماره بارنامه</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.waybillNumber))}</td></tr>` : '';
+  
+  const notesBlock = r.notes ? `<div class="p-receipt-notes-block" style="padding:10px 0;"><div style="font-weight:bold;font-size:0.9rem;color:#555;margin-bottom:3px;">توضیحات</div><div style="white-space:pre-wrap;font-size:0.9rem;line-height:1.6;">${esc(toFa(r.notes))}</div></div>` : '';
+  
   let sig = '';
   if(showLetterhead){
     sig = `<div class="p-receipt-signatures">
@@ -1292,6 +1316,7 @@ function buildReceipt(r, showLetterhead){
   } else {
     sig = `<div class="p-receipt-footer" style="border-top:1px solid #000;">توجه: مقادیر وزنی بر حسب کیلوگرم — بدون سربرگ</div>`;
   }
+
   return `<div class="p-receipt">
     ${head}
     ${head?'<hr class="p-receipt-hr">':''}
@@ -1300,11 +1325,27 @@ function buildReceipt(r, showLetterhead){
     <hr class="p-receipt-hr">
     <div class="p-receipt-meta"><span>${esc(toFa(r.date)||'-')}</span><span>${esc(toFa(r.time)||'-')}</span></div>
     <hr class="p-receipt-hr-dash">
-    <div class="p-receipt-product-lbl">${productLabel}</div>
-    <div class="p-receipt-product-name">${esc(fullProduct)||'-'}</div>
-    ${qtyRow}${kgRow}
+    
+    <div style="text-align:center; margin-bottom:10px;">
+      <div style="font-size:0.85rem;color:#666;">${productLabel}</div>
+      <div style="font-size:1.3rem; font-weight:900;">${esc(fullProduct)||'-'}</div>
+    </div>
+
+    <table class="p-receipt-table">
+      ${qtyRow}
+      ${kgRow}
+    </table>
+    
     <hr class="p-receipt-hr-dash">
-    ${partyRow}${driverRow}${invoiceRow}${basilRow}${waybillRow}
+    
+    <table class="p-receipt-table">
+      ${partyRow}
+      ${driverRow}
+      ${invoiceRow}
+      ${basilRow}
+      ${waybillRow}
+    </table>
+    
     ${notesBlock}
     ${sig}
   </div>`;
@@ -1354,12 +1395,12 @@ function buildMovementTable(list, partyLabel){
       <td>${fmtQty(r.quantity)||'-'}</td>
       <td>${esc(u)}</td>
       <td><b>${fmtKg(kg)}</b></td>
-      <td>${esc(r.party||'-')}</td>
-      <td>${esc(r.driver||'-')}</td>
-      <td>${esc(r.invoiceNumber||'-')}</td>
-      <td>${esc(r.basilNumber||'-')}</td>
-      <td>${esc(r.waybillNumber||'-')}</td>
-      <td>${esc(r.notes||'-')}</td>
+      <td>${esc(toFa(r.party||'-'))}</td>
+      <td>${esc(toFa(r.driver||'-'))}</td>
+      <td>${esc(toFa(r.invoiceNumber||'-'))}</td>
+      <td>${esc(toFa(r.basilNumber||'-'))}</td>
+      <td>${esc(toFa(r.waybillNumber||'-'))}</td>
+      <td>${esc(toFa(r.notes||'-'))}</td>
     </tr>`;
   }).join('');
   return `<table class="p-table">
