@@ -1,30 +1,50 @@
-/* storage.js — Serialization v7, GitHub sync, merge */
+/* storage.js — Serialization v7, GitHub + Local mode, merge */
 'use strict';
 
 const DATA_FILE_NAME = 'data-v7.json';
 const PENDING_KEY = 'wh_pending_state_v7';
 const GH_CONFIG_KEY = 'wh_github_config_v7';
+const STORAGE_MODE_KEY = 'wh_storage_mode_v7';
+const LOCAL_DATA_KEY = 'wh_local_data_v7';
 
 const DEFAULT_UNITS = [{v:'kg',l:'کیلوگرم',factor:1}];
 const DEFAULT_PRODUCTS = [{name:'شکر',unit:'kg',subtypes:[]}];
 
-let ghConfig = {owner:'ghandsenobar',repo:'Warehouse',token:''};
+// ⚠️ برای جلوگیری از نمایش صفحه راه‌اندازی بعد از پاک کردن کش، توکن را اینجا بگذارید
+// مثال: const DEFAULT_GH_TOKEN = 'github_pat_123456789...';
+const DEFAULT_GH_OWNER = 'ghandsenobar';
+const DEFAULT_GH_REPO = 'Warehouse';
+const DEFAULT_GH_TOKEN = ''; 
+
+let ghConfig = {owner: DEFAULT_GH_OWNER, repo: DEFAULT_GH_REPO, token: DEFAULT_GH_TOKEN};
 let ghFileSha = null;
 let ghFileSize = 0;
 let ghCanWrite = null;
 
+/* ─── Storage mode ─── */
+function getStorageMode(){ return localStorage.getItem(STORAGE_MODE_KEY) || 'github'; }
+function setStorageMode(mode){ localStorage.setItem(STORAGE_MODE_KEY, mode); }
+function isLocalMode(){ return getStorageMode() === 'local'; }
+
 function loadGhConfig(){
   try{
     const saved = JSON.parse(localStorage.getItem(GH_CONFIG_KEY)||'{}');
-    if(saved.owner) ghConfig.owner=saved.owner;
-    if(saved.repo) ghConfig.repo=saved.repo;
-    if(saved.token) ghConfig.token=saved.token;
-  }catch(e){}
+    ghConfig.owner = saved.owner || DEFAULT_GH_OWNER;
+    ghConfig.repo = saved.repo || DEFAULT_GH_REPO;
+    ghConfig.token = saved.token || DEFAULT_GH_TOKEN;
+  }catch(e){
+    ghConfig.owner = DEFAULT_GH_OWNER;
+    ghConfig.repo = DEFAULT_GH_REPO;
+    ghConfig.token = DEFAULT_GH_TOKEN;
+  }
 }
 function saveGhConfig(){
   try{ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(ghConfig)); }catch(e){}
 }
-function hasGhConfig(){ return !!(ghConfig.token && ghConfig.owner && ghConfig.repo); }
+function hasGhConfig(){
+  if(isLocalMode()) return true;
+  return !!(ghConfig.token && ghConfig.owner && ghConfig.repo);
+}
 
 /* Base64 UTF-8 helpers */
 function utf8ToBase64(str){
@@ -45,7 +65,6 @@ function base64ToUtf8(b64){
 
 /* === Serialize v7 === */
 function serializeState(state){
-  // units
   const allUnits = new Map();
   (state.unitsList||[]).forEach(u=>allUnits.set(u.v,{label:u.l,factor:u.factor}));
   (state.products||[]).forEach(p=>{if(p.unit&&!allUnits.has(p.unit))allUnits.set(p.unit,{label:p.unit,factor:null});});
@@ -56,7 +75,6 @@ function serializeState(state){
     if(v.factor!==null&&v.factor!==undefined) o.f=v.factor;
     units.push(o);
   });
-  // products
   const allProducts = new Map();
   (state.products||[]).forEach(p=>allProducts.set(p.name,{unit:p.unit||'',subtypes:(p.subtypes||[]).slice(),updatedAt:p.updatedAt||0}));
   (state.records||[]).forEach(r=>{if(r.product&&!allProducts.has(r.product))allProducts.set(r.product,{unit:r.unit||'',subtypes:[],updatedAt:0});});
@@ -67,7 +85,6 @@ function serializeState(state){
     if(v.subtypes&&v.subtypes.length) o.s=v.subtypes.slice();
     products.push(o);
   });
-  // parties
   const allSellers=new Set(state.sellers||[]);
   const allBuyers=new Set(state.buyers||[]);
   const allDrivers=new Set(state.drivers||[]);
@@ -82,7 +99,6 @@ function serializeState(state){
   allBuyers.forEach(n=>{ bId++; buyerId.set(n,bId); buyers.push({i:bId,n}); });
   const drivers=[], driverId=new Map(); let dId=0;
   allDrivers.forEach(n=>{ dId++; driverId.set(n,dId); drivers.push({i:dId,n}); });
-  // records
   const outRecords=(state.records||[]).map(r=>{
     const o={
       i:r.id, t:r.type==='in'?0:1,
@@ -103,7 +119,6 @@ function serializeState(state){
     if(r.waybillNumber) o.y=r.waybillNumber;
     if(r.notes) o.c=r.notes;
     if(r.deleted) o.x=1;
-    // ─── Audit (NEW) ───
     if(r.createdBy) o.cb=r.createdBy;
     if(r.createdByName) o.cbn=r.createdByName;
     if(r.createdAt) o.ct=r.createdAt;
@@ -111,14 +126,12 @@ function serializeState(state){
     if(r.updatedByName) o.ubn=r.updatedByName;
     return o;
   });
-  // users
   const users=(state.users||[]).map(u=>({
     i:u.id, n:u.username, ph:u.passwordHash, s:u.salt,
     dn:u.displayName||u.username, r:u.role||'operator',
     a:u.active?1:0, c:u.createdAt||0, cb:u.createdBy||'',
     ll:u.lastLogin||0
   }));
-  // audit (keep last 800)
   const audit=(state.auditLog||[]).slice(-800).map(a=>({
     t:a.t, a:a.action, by:a.userId, byn:a.userName,
     d:a.detail||'', r:a.recordId||null
@@ -150,9 +163,7 @@ function deserializeState(raw){
   };
   if(!raw||typeof raw!=='object') return empty;
 
-  // Legacy v1-v6 fallback
   if(!raw.v || raw.v<7){
-    // convert old format — reuse v6-like mapping
     const rawUnits = raw.units||[];
     const unitsList = rawUnits.length
       ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null}))
@@ -184,7 +195,6 @@ function deserializeState(raw){
         party:'', driver:r.v?(driverIdToName.get(r.v)||''):'',
         invoiceNumber:r.n||'', basilNumber:r.b||'', waybillNumber:r.y||'',
         notes:r.c||'', updatedAt:r.m||r.i, deleted:r.x===1,
-        // Legacy: no audit
         createdBy:'', createdByName:'سیستم (قدیمی)', createdAt:r.m||r.i,
         updatedBy:'', updatedByName:'سیستم (قدیمی)'
       };
@@ -204,7 +214,6 @@ function deserializeState(raw){
     };
   }
 
-  // v7
   const rawUnits=raw.units||[];
   const unitsList=rawUnits.length
     ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null}))
@@ -266,8 +275,17 @@ function deserializeState(raw){
   };
 }
 
-/* === GitHub API === */
+/* === Data API — GitHub or Local === */
 async function ghGet(){
+  if(isLocalMode()){
+    try {
+      const raw = localStorage.getItem(LOCAL_DATA_KEY);
+      if(!raw){ ghFileSha=null; ghFileSize=0; return null; }
+      ghFileSha = 'local';
+      ghFileSize = new Blob([raw]).size;
+      return JSON.parse(raw);
+    } catch(e){ return null; }
+  }
   if(!ghConfig.token) throw new Error('no token');
   const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE_NAME}?_=${Date.now()}`;
   let r;
@@ -285,6 +303,17 @@ async function ghGet(){
 }
 
 async function ghPut(payload){
+  if(isLocalMode()){
+    try {
+      const str = JSON.stringify(payload);
+      localStorage.setItem(LOCAL_DATA_KEY, str);
+      ghFileSha = 'local';
+      ghFileSize = new Blob([str]).size;
+      return;
+    } catch(e){
+      throw new Error('حافظه مرورگر پر شده است — از پشتیبان استفاده کنید و رکوردهای قدیمی را حذف کنید');
+    }
+  }
   if(!ghConfig.token) throw new Error('no token');
   const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE_NAME}`;
   const jsonStr = JSON.stringify(payload);
@@ -313,6 +342,7 @@ async function ghPut(payload){
 }
 
 async function checkTokenPermissions(){
+  if(isLocalMode()) return { canWrite: true, source: 'local' };
   if(!ghConfig.token) return null;
   try{
     const url=`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}`;

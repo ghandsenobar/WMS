@@ -190,7 +190,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
-  // Initialize Searchable Selects
   ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
@@ -218,13 +217,11 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   });
   ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
 
-  // Advanced Filters Searchable Selects
   ssAdvProduct = new SearchableSelect(document.getElementById('ss_adv_product'), { allowAdd: false, onChange: onAdvProductChange });
   ssAdvSubtype = new SearchableSelect(document.getElementById('ss_adv_subtype'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvParty = new SearchableSelect(document.getElementById('ss_adv_party'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvDriver = new SearchableSelect(document.getElementById('ss_adv_driver'), { allowAdd: false, onChange: applyAdvFilterChange });
 
-  // Search Clear logic
   const searchInput = document.getElementById('search');
   const searchClear = document.getElementById('searchClear');
   searchInput.addEventListener('input', ()=>{
@@ -232,6 +229,10 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     else searchClear.classList.remove('show');
     onSearchInput();
   });
+
+  // Pre-fill setup fields
+  document.getElementById('setupOwner').value = DEFAULT_GH_OWNER;
+  document.getElementById('setupRepo').value = DEFAULT_GH_REPO;
 
   const sess = loadSession();
   if(sess){
@@ -261,6 +262,7 @@ function clearSearch(){
   const inp = document.getElementById('search');
   inp.value = '';
   document.getElementById('searchClear').classList.remove('show');
+  updateFilterBadges();
   renderRecords();
 }
 
@@ -903,6 +905,7 @@ function updateFilterBadges(){
 
 /* ─── Filters ─── */
 function onSearchInput(){
+  updateFilterBadges();
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(renderRecords, 200);
 }
