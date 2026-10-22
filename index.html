@@ -15,7 +15,7 @@
   @page{size:A4 portrait;margin:5mm;}
   html{font-size:calc(10px * var(--pf))!important;}
   body{font-size:1rem!important;background:#fff!important;padding:0!important;margin:0!important;color:#000!important;}
-  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header{display:none!important;}
+  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header,.user-pill{display:none!important;}
   #printArea{display:block!important;width:100%;}
   #printArea *{color:#000!important;box-shadow:none!important;text-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
@@ -32,10 +32,18 @@
   .p-sig-space{height:28px;}
   .p-sig-hint{font-size:0.75rem;}
   .p-footer-note{text-align:center;font-size:0.8rem;margin-top:10px;padding-top:6px;border-top:1px dashed #888;}
-  .p-summary-block{margin-top:10px;page-break-inside:avoid;width:fit-content;max-width:100%;margin-left:auto;margin-right:auto;}
+  
+  /* Summary & Daily Tables (A4 Full Width) */
+  .p-summary-block{margin-top:10px;page-break-inside:avoid;width:100%;}
   .p-summary-title{text-align:center;font-size:0.95rem;font-weight:900;padding:4px 6px;border:1px solid #000;background:#e5e5e5!important;}
-  .p-summary-table{width:auto;border-collapse:collapse;font-size:9pt;border:1.5px solid #000;}
+  .p-summary-table{width:100%;border-collapse:collapse;font-size:9pt;border:1.5px solid #000;}
   .p-summary-table th,.p-summary-table td{padding:3px 6px!important;border:1px solid #000!important;text-align:center;font-weight:bold;}
+  
+  .p-daily-block{width:100%; margin-top:10px; page-break-inside:avoid;}
+  .p-daily-table{width:100% !important; table-layout:fixed; border-collapse:collapse; font-size:8pt; border:2px solid #000;}
+  .p-daily-table th, .p-daily-table td {word-wrap:break-word; white-space:normal !important; padding:4px 2px !important; text-align:center; vertical-align:middle; border:1px solid #555 !important; color:#000 !important;}
+  .p-daily-table th {font-size:8.5pt !important; background:#e5e5e5 !important;}
+  
   .p-empty-msg{text-align:center;padding:8px;font-size:0.9rem;border:1px dashed #777;}
   .p-section-gap{height:5px;margin:6px 0;border-top:1px dashed #666;}
   .p-receipt{width:100%;background:#fff;padding:12px 16px;line-height:1.5;}
@@ -60,7 +68,6 @@
 </head>
 <body>
 
-<!-- Splash -->
 <div id="splashScreen">
   <div class="splash-logo" id="splashLogoWrap"><img src="./icon-512.png" alt="" id="splashLogoImg"></div>
   <div class="splash-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
@@ -73,7 +80,9 @@
   <div class="splash-version">نسخه ۴.۰.۰ — چندکاربره</div>
 </div>
 
-<!-- Login screen -->
+<!-- User Pill (Fixed Top-Left) -->
+<div class="user-pill" id="userPill" hidden></div>
+
 <div id="loginScreen" hidden>
   <div class="login-box">
     <div class="login-logo">📦</div>
@@ -95,9 +104,8 @@
   </div>
 </div>
 
-<!-- Setup screen (first-time) -->
 <div id="setupScreen" hidden style="position:fixed;inset:0;background:linear-gradient(160deg,#166534,#052e16);z-index:9997;display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div class="login-box">
+  <div class="login-box" style="max-height:92vh;overflow-y:auto;">
     <div class="login-logo">⚙️</div>
     <div class="login-title">راه‌اندازی اولیه</div>
     <div class="login-sub">حساب ادمین اولیه را بسازید</div>
@@ -105,7 +113,8 @@
     <div class="login-field"><label>Repository</label><input type="text" id="setupRepo" placeholder="Warehouse"></div>
     <div class="login-field"><label>GitHub Token</label><input type="password" id="setupToken" placeholder="github_pat_..."></div>
     <div class="login-field"><label>نام کاربری ادمین</label><input type="text" id="setupUser" placeholder="admin"></div>
-    <div class="login-field"><label>رمز عبور</label><input type="password" id="setupPass" placeholder="حداقل ۶ کاراکتر"></div>
+    <div class="login-field"><label>نام نمایشی</label><input type="text" id="setupDisplay" placeholder="مدیر سیستم"></div>
+    <div class="login-field"><label>رمز عبور (حداقل ۴ رقم/حرف)</label><input type="password" id="setupPass" placeholder="••••"></div>
     <button type="button" class="login-btn" onclick="doFirstSetup()">ایجاد و ورود</button>
   </div>
 </div>
@@ -118,7 +127,6 @@
     <div class="header-actions">
       <button type="button" class="icon-btn" onclick="openDrawer()" title="تنظیمات">☰</button>
     </div>
-    <div class="user-pill" id="userPill"></div>
   </div>
 
   <div class="sync-bar" id="syncBar">
@@ -133,12 +141,10 @@
     <button type="button" class="entry-btn in-btn" id="btnIn" onclick="switchType('in')">
       <span class="entry-icon">📥</span>
       <span class="entry-label">ورود کالا</span>
-      <span class="entry-sub">ثبت ورودی</span>
     </button>
     <button type="button" class="entry-btn out-btn" id="btnOut" onclick="switchType('out')">
       <span class="entry-icon">📤</span>
       <span class="entry-label">خروج کالا</span>
-      <span class="entry-sub">ثبت خروجی</span>
     </button>
   </div>
 
@@ -162,14 +168,21 @@
         <label>ساعت</label>
         <input id="f_time" type="text" class="time-input" readonly placeholder="انتخاب ساعت">
       </div>
+      
+      <!-- Searchable Product Select -->
       <div class="field full">
         <label>کالا</label>
         <div class="field-row">
-          <select id="f_product"></select>
+          <div class="searchable-select" id="ss_product" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
           <button type="button" class="btn-add" onclick="addProduct()">+</button>
           <button type="button" class="btn-remove" onclick="removeProduct()">−</button>
         </div>
       </div>
+
       <div class="field full" id="subtypeField" hidden>
         <label>زیرمجموعه (اختیاری)</label>
         <select id="f_subtype"></select>
@@ -258,9 +271,9 @@
     </div>
 
     <div class="collapsible-section">
-      <div class="collapsible-header" onclick="toggleCollapsible('searchSection', event)">
+      <div class="collapsible-header" onclick="toggleAccordion('searchSection', this)">
         <span class="collapsible-title">🔍 جستجو و بازه تاریخ</span>
-        <button type="button" class="collapsible-toggle" id="toggleBtnSearchSection" onclick="event.stopPropagation();toggleCollapsible('searchSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="searchSection">
         <div class="records-filter" style="margin-bottom:0;">
@@ -272,9 +285,9 @@
     </div>
 
     <div class="collapsible-section">
-      <div class="collapsible-header" onclick="toggleCollapsible('advFilterSection', event)">
+      <div class="collapsible-header" onclick="toggleAccordion('advFilterSection', this)">
         <span class="collapsible-title">⚙️ فیلتر پیشرفته <span class="collapsible-badge" id="advFilterBadge" hidden>۰</span></span>
-        <button type="button" class="collapsible-toggle" id="toggleBtnAdvFilterSection" onclick="event.stopPropagation();toggleCollapsible('advFilterSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="advFilterSection">
         <div class="adv-filter-grid">
@@ -288,9 +301,9 @@
     </div>
 
     <div class="collapsible-section">
-      <div class="collapsible-header" onclick="toggleCollapsible('summarySection', event)">
+      <div class="collapsible-header" onclick="toggleAccordion('summarySection', this)">
         <span class="collapsible-title">📊 خلاصه ورود و خروج کالا</span>
-        <button type="button" class="collapsible-toggle" id="toggleBtnSummarySection" onclick="event.stopPropagation();toggleCollapsible('summarySection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="summarySection">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
@@ -357,9 +370,9 @@
     </div>
 
     <div class="collapsible-section" style="margin-top:16px;">
-      <div class="collapsible-header" onclick="toggleCollapsible('deletedRecordsSection', event)">
+      <div class="collapsible-header" onclick="toggleAccordion('deletedRecordsSection', this)">
         <span class="collapsible-title">🗑️ رکوردهای حذف‌شده <span class="collapsible-badge" id="deletedRecordsBadge" hidden>۰</span></span>
-        <button type="button" class="collapsible-toggle" id="toggleBtnDeletedRecordsSection" onclick="event.stopPropagation();toggleCollapsible('deletedRecordsSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="deletedRecordsSection">
         <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;">
@@ -377,7 +390,6 @@
   </div>
 </div>
 
-<!-- Popups & Modals -->
 <div class="cal-popup" id="calPopup"></div>
 <div class="time-popup" id="timePopup">
   <div class="time-display" id="timeDisplay">۰۰:۰۰</div>
@@ -430,7 +442,6 @@
 <div class="toast-container" id="toastContainer"></div>
 <div id="printArea"></div>
 
-<!-- Drawer (settings) -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
@@ -446,9 +457,9 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('displaySettingsSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('displaySettingsSection', this)">
         <span class="title-text">📊 چاپ و نمایش</span>
-        <button type="button" class="toggle-btn" id="toggleBtnDisplaySettingsSection" onclick="event.stopPropagation();toggleSection('displaySettingsSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="displaySettingsSection">
         <div class="field" style="margin-bottom:10px;">
@@ -467,9 +478,9 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('productsSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('productsSection', this)">
         <span class="title-text">📦 کالاها و زیرمجموعه‌ها</span>
-        <button type="button" class="toggle-btn" id="toggleBtnProductsSection" onclick="event.stopPropagation();toggleSection('productsSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="productsSection">
         <div id="manageProducts"></div>
@@ -477,9 +488,9 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('unitsSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('unitsSection', this)">
         <span class="title-text">📏 واحدهای اندازه‌گیری</span>
-        <button type="button" class="toggle-btn" id="toggleBtnUnitsSection" onclick="event.stopPropagation();toggleSection('unitsSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="unitsSection">
         <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">
@@ -490,9 +501,9 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('sellersSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('sellersSection', this)">
         <span class="title-text">🏪 فروشندگان</span>
-        <button type="button" class="toggle-btn" id="toggleBtnSellersSection" onclick="event.stopPropagation();toggleSection('sellersSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="sellersSection">
         <div id="manageSellers"></div>
@@ -500,9 +511,9 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('buyersSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('buyersSection', this)">
         <span class="title-text">🛒 خریداران</span>
-        <button type="button" class="toggle-btn" id="toggleBtnBuyersSection" onclick="event.stopPropagation();toggleSection('buyersSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="buyersSection">
         <div id="manageBuyers"></div>
@@ -510,32 +521,43 @@
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('driversSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('driversSection', this)">
         <span class="title-text">🚚 رانندگان</span>
-        <button type="button" class="toggle-btn" id="toggleBtnDriversSection" onclick="event.stopPropagation();toggleSection('driversSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="driversSection">
         <div id="manageDrivers"></div>
         <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="menuAddDriverFromSettings()">➕ افزودن</button>
       </div>
     </div>
+    
+    <!-- GitHub Connection UI -->
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('ghSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('ghSection', this)">
         <span class="title-text">☁️ اتصال GitHub</span>
-        <button type="button" class="toggle-btn" id="toggleBtnGhSection" onclick="event.stopPropagation();toggleSection('ghSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="ghSection">
-        <div class="field"><label>Username</label><input id="ghOwner" type="text"></div>
-        <div class="field"><label>Repository</label><input id="ghRepo" type="text"></div>
-        <div class="field"><label>Token</label><input id="ghToken" type="password"></div>
-        <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="saveGhConfigFromUI()">💾 ذخیره و تست</button>
-        <div id="ghInfo" style="font-size:11px;color:var(--muted);text-align:center;padding:6px;"></div>
+        <!-- Green box (shown when connected) -->
+        <div id="ghCompactBox" class="gh-compact" hidden>
+          <span class="gh-compact-status" id="ghCompactStatus">✅ متصل</span>
+          <button type="button" class="btn-gh-edit" onclick="toggleGhEdit()">✏️ ویرایش</button>
+        </div>
+        <!-- Form (shown when disconnected or editing) -->
+        <div id="ghFullFields">
+          <div class="field"><label>Username</label><input id="ghOwner" type="text"></div>
+          <div class="field"><label>Repository</label><input id="ghRepo" type="text"></div>
+          <div class="field"><label>Token</label><input id="ghToken" type="password"></div>
+          <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="saveGhConfigFromUI()">💾 ذخیره و تست</button>
+          <div id="ghInfo" style="font-size:11px;color:var(--muted);text-align:center;padding:6px;"></div>
+        </div>
       </div>
     </div>
+
     <div class="drawer-section">
-      <div class="drawer-section-title" onclick="toggleSection('backupSection', event)">
+      <div class="drawer-section-title" onclick="toggleAccordion('backupSection', this)">
         <span class="title-text">📁 پشتیبان فایلی</span>
-        <button type="button" class="toggle-btn" id="toggleBtnBackupSection" onclick="event.stopPropagation();toggleSection('backupSection')">+</button>
+        <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="backupSection">
         <button type="button" class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="backupDownload()">💾 پشتیبان‌گیری</button>
@@ -544,13 +566,13 @@
         <div id="backupInfo" style="font-size:11px;color:var(--muted);text-align:center;"></div>
       </div>
     </div>
-    <div class="drawer-section" style="border-top:1px dashed var(--border);padding-top:14px;">
+    
+    <div class="drawer-section" style="border-top:1px dashed var(--border);padding-top:14px; margin-bottom:40px;">
       <button type="button" class="btn btn-danger" style="width:100%;" onclick="logout()">🚪 خروج از حساب</button>
     </div>
   </div>
 </aside>
 
-<!-- Scripts -->
 <script src="./js/utils.js"></script>
 <script src="./js/storage.js"></script>
 <script src="./js/auth.js"></script>
