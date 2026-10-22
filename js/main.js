@@ -22,7 +22,7 @@ let summaryMode = 'grouped';
 let advFilter = { product:'', subtype:'', party:'', driver:'' };
 let _searchTimer = null;
 let currentPreviewRecordId = null;
-let ssParty = null, ssDriver = null;
+let ssProduct = null, ssParty = null, ssDriver = null;
 
 function unitLabel(v){ const u = unitsList.find(x=>x.v===v); return u ? u.l : v || '—'; }
 function unitFactor(v){ const u = unitsList.find(x=>x.v===v); return u ? u.factor : null; }
@@ -73,6 +73,10 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
+  ssProduct = new SearchableSelect(document.getElementById('ss_product'), {
+    allowAdd: false,
+    onChange: onProductChange
+  });
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
     onAdd: async (name)=>{
@@ -153,9 +157,10 @@ async function doFirstSetup(){
   const repo = document.getElementById('setupRepo').value.trim();
   const token = document.getElementById('setupToken').value.trim();
   const user = document.getElementById('setupUser').value.trim();
+  const display = document.getElementById('setupDisplay').value.trim();
   const pass = document.getElementById('setupPass').value;
-  if(!owner||!repo||!token||!user||!pass||pass.length<6){
-    alert('همه فیلدها الزامی است — رمز حداقل ۶ کاراکتر');
+  if(!owner||!repo||!token||!user||!pass||pass.length<4){
+    alert('همه فیلدها الزامی است — رمز حداقل ۴ کاراکتر');
     return;
   }
   ghConfig = { owner, repo, token };
@@ -170,7 +175,7 @@ async function doFirstSetup(){
       return;
     }
     const userObj = await createUserObject({
-      username:user, password:pass, displayName:user, role:'admin', currentUserId:''
+      username:user, password:pass, displayName:display || user, role:'admin', currentUserId:''
     });
     const newState = {
       records:[], products:[{name:'شکر',unit:'kg',subtypes:[],updatedAt:Date.now()}],
@@ -226,6 +231,7 @@ async function enterApp(user, data){
   document.getElementById('loginScreen').hidden = true;
   document.getElementById('setupScreen').hidden = true;
   document.getElementById('mainApp').hidden = false;
+  document.getElementById('userPill').hidden = false;
 
   const pill = document.getElementById('userPill');
   pill.innerHTML = `<span>👤 ${esc(user.displayName||user.username)}</span>
@@ -241,6 +247,7 @@ async function enterApp(user, data){
   renderManageLists(); renderManageProducts();
   setSummaryMode(summaryMode);
   updateSyncBar();
+  updateGhUI(); // Ensure GitHub status box shows properly
 
   if(!canCreateRecord(user.role)){
     document.getElementById('btnIn').style.display = 'none';
@@ -250,7 +257,6 @@ async function enterApp(user, data){
 
   document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
   document.getElementById('f_unit').addEventListener('change', updateAutoKg);
-  document.getElementById('f_product').addEventListener('change', onProductChange);
   document.getElementById('formCard').addEventListener('keydown', e=>{
     if(e.key!=='Enter') return;
     const tag = e.target?.tagName;
@@ -267,6 +273,7 @@ function logout(){
   clearSession();
   currentUser = null;
   document.getElementById('mainApp').hidden = true;
+  document.getElementById('userPill').hidden = true;
   document.getElementById('loginScreen').hidden = false;
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
@@ -289,7 +296,7 @@ function setDataMode(mode){ dataMode = mode; localStorage.setItem('wh_data_mode'
 function applyDarkMode(){ document.body.classList.toggle('dark', localStorage.getItem('lab_darkmode')==='1'); }
 function toggleDarkMode(on){ localStorage.setItem('lab_darkmode', on?'1':'0'); applyDarkMode(); }
 
-/* ─── Drawer ─── */
+/* ─── Drawer & Accordion ─── */
 function openDrawer(){
   document.getElementById('drawer').classList.add('show');
   document.getElementById('drawerOverlay').classList.add('show');
@@ -298,19 +305,78 @@ function openDrawer(){
   document.getElementById('ghRepo').value = ghConfig.repo||'';
   document.getElementById('ghToken').value = ghConfig.token||'';
   renderManageLists(); renderManageProducts();
+  updateGhUI();
 }
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('show');
   document.getElementById('drawerOverlay').classList.remove('show');
   document.body.style.overflow = '';
 }
-function toggleSection(id, ev){
-  if(ev && ev.target.classList.contains('toggle-btn')) return;
-  const body = document.getElementById(id);
+
+function toggleAccordion(sectionId, headerEl){
+  const body = document.getElementById(sectionId);
   if(!body) return;
-  const btn = document.getElementById('toggleBtn'+id.charAt(0).toUpperCase()+id.slice(1));
-  if(body.classList.contains('collapsed')){ body.classList.remove('collapsed'); if(btn) btn.textContent='−'; }
-  else { body.classList.add('collapsed'); if(btn) btn.textContent='+'; }
+  const isCollapsed = body.classList.contains('collapsed');
+  const parentContainer = headerEl.closest('.drawer-body') || headerEl.closest('.card');
+  
+  // Close all others in the same container
+  if(parentContainer){
+    parentContainer.querySelectorAll('.collapsible-body, .drawer-section-body').forEach(el => {
+      if(el.id !== sectionId) {
+        el.classList.add('collapsed');
+        const h = el.previousElementSibling;
+        if(h) {
+           const btn = h.querySelector('.collapsible-toggle, .toggle-btn');
+           if(btn) btn.textContent = '+';
+        }
+      }
+    });
+  }
+
+  // Toggle the requested one
+  if(isCollapsed){
+    body.classList.remove('collapsed');
+    const btn = headerEl.querySelector('.collapsible-toggle, .toggle-btn');
+    if(btn) btn.textContent = '−';
+    
+    if(sectionId === 'advFilterSection') buildAdvFilterOptions();
+    if(sectionId === 'deletedRecordsSection') renderDeletedRecords();
+  } else {
+    body.classList.add('collapsed');
+    const btn = headerEl.querySelector('.collapsible-toggle, .toggle-btn');
+    if(btn) btn.textContent = '+';
+  }
+}
+
+/* ─── GitHub UI ─── */
+function updateGhUI(){
+  const box = document.getElementById('ghCompactBox');
+  const fields = document.getElementById('ghFullFields');
+  const status = document.getElementById('ghCompactStatus');
+  const hasConfig = !!(ghConfig.owner && ghConfig.repo && ghConfig.token);
+
+  if(hasConfig){
+    box.hidden = false;
+    fields.hidden = true;
+    const sizeStr = ghFileSize ? formatBytes(ghFileSize) : '—';
+    status.innerHTML = `✅ متصل به ${esc(ghConfig.owner)}/${esc(ghConfig.repo)}<span class="gh-size">📦 حجم فایل روی سرور: ${sizeStr}</span>`;
+  } else {
+    box.hidden = true;
+    fields.hidden = false;
+  }
+}
+function toggleGhEdit(){
+  const box = document.getElementById('ghCompactBox');
+  const fields = document.getElementById('ghFullFields');
+  if(fields.hidden){
+    fields.hidden = false;
+    box.hidden = true;
+    document.getElementById('ghOwner').value = ghConfig.owner||'';
+    document.getElementById('ghRepo').value = ghConfig.repo||'';
+    document.getElementById('ghToken').value = ghConfig.token||'';
+  } else {
+    updateGhUI();
+  }
 }
 
 /* ─── Form ─── */
@@ -330,8 +396,7 @@ async function switchType(t){
     ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.value='';
     });
-    document.getElementById('f_product').value = '';
-    ssParty.clear(); ssDriver.clear();
+    ssProduct.clear(); ssParty.clear(); ssDriver.clear();
     document.getElementById('f_subtype').innerHTML = '';
     document.getElementById('subtypeField').hidden = true;
     if(unitsList.length) document.getElementById('f_unit').value = unitsList[0].v;
@@ -370,10 +435,7 @@ function applyTypeUI(){
 }
 
 function fillFormProducts(){
-  const sel = document.getElementById('f_product');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">-- انتخاب کنید --</option>' + products.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
-  if(products.some(p=>p.name===cur)) sel.value = cur;
+  if(ssProduct) ssProduct.setOptions(products.map(p=>({value:p.name, label:p.name})));
 }
 function fillUnits(){
   const sel = document.getElementById('f_unit');
@@ -393,7 +455,7 @@ function refreshDriverOptions(){
 }
 
 function updateSubtypesForProduct(preserve){
-  const prodName = document.getElementById('f_product').value;
+  const prodName = ssProduct.getValue();
   const field = document.getElementById('subtypeField');
   const sel = document.getElementById('f_subtype');
   const prod = products.find(p=>p.name===prodName);
@@ -407,7 +469,7 @@ function updateSubtypesForProduct(preserve){
 
 function onProductChange(){
   updateSubtypesForProduct(false);
-  const productName = document.getElementById('f_product').value;
+  const productName = ssProduct.getValue();
   const product = products.find(p=>p.name===productName);
   if(product && product.unit){
     const us = document.getElementById('f_unit');
@@ -442,7 +504,7 @@ async function addProduct(){
   await menuAddProductFull();
 }
 async function removeProduct(){
-  const name = document.getElementById('f_product').value;
+  const name = ssProduct.getValue();
   if(!name){ showToast('کالایی انتخاب نشده','warning'); return; }
   const idx = products.findIndex(p=>p.name===name);
   if(idx===-1) return;
@@ -460,7 +522,7 @@ async function saveRecord(){
   const invoiceNumber = document.getElementById('f_invoice').value.trim();
   const basilNumber = document.getElementById('f_basil').value.trim();
   const waybillNumber = document.getElementById('f_waybill').value.trim();
-  const product = document.getElementById('f_product').value;
+  const product = ssProduct.getValue();
   const subtype = document.getElementById('f_subtype').value.trim();
   const qty = document.getElementById('f_quantity').value.trim();
   const unit = document.getElementById('f_unit').value;
@@ -544,8 +606,7 @@ function clearForm(){
   ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value='';
   });
-  document.getElementById('f_product').value = '';
-  ssParty.clear(); ssDriver.clear();
+  ssProduct.clear(); ssParty.clear(); ssDriver.clear();
   document.getElementById('f_subtype').innerHTML = '';
   document.getElementById('subtypeField').hidden = true;
   if(unitsList.length) document.getElementById('f_unit').value = unitsList[0].v;
@@ -565,11 +626,17 @@ function editRecord(id){
   document.getElementById('f_invoice').value = r.invoiceNumber||'';
   document.getElementById('f_basil').value = r.basilNumber||'';
   document.getElementById('f_waybill').value = r.waybillNumber||'';
-  const ps = document.getElementById('f_product');
-  if(r.product && !Array.from(ps.options).some(o=>o.value===r.product)){
-    const o = document.createElement('option'); o.value=r.product; o.textContent=r.product; ps.appendChild(o);
+  
+  if(r.product) {
+    if(!products.some(p=>p.name===r.product)) {
+      products.push({name:r.product, unit:r.unit, subtypes:[], updatedAt:Date.now()});
+      fillFormProducts();
+    }
+    ssProduct.setValue(r.product);
+  } else {
+    ssProduct.clear();
   }
-  ps.value = r.product||'';
+
   document.getElementById('f_quantity').value = r.quantity||'';
   if(r.unit){
     const us = document.getElementById('f_unit');
@@ -934,7 +1001,7 @@ async function syncPull(){
     dirty = false; lastSyncAt = Date.now();
     editingId = null; currentType = null;
     applyTypeUI(); fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
-    renderRecords(); renderManageLists(); renderManageProducts();
+    renderRecords(); renderManageLists(); renderManageProducts(); updateGhUI();
     updateSyncBar('synced');
     showToast(`${toFa(records.filter(r=>!r.deleted).length)} رکورد دریافت شد`,'success');
   } catch(e){
@@ -993,7 +1060,7 @@ async function syncPush(){
     await ghPut(payload);
     dirty = false; lastSyncAt = Date.now(); ghCanWrite = true;
     clearPendingState();
-    renderRecords(); renderManageLists(); renderManageProducts();
+    renderRecords(); renderManageLists(); renderManageProducts(); updateGhUI();
     updateSyncBar('synced');
     showToast('تغییرات روی سرور ذخیره شد','success');
   } catch(e){
@@ -1018,6 +1085,13 @@ async function saveGhConfigFromUI(){
     document.getElementById('ghInfo').textContent = raw ? '✅ اتصال برقرار شد' : '⚠️ فایل یافت نشد';
     const perm = await checkTokenPermissions();
     if(perm) ghCanWrite = perm.canWrite;
+    
+    // Collapse the accordion after success
+    const ghHeader = document.getElementById('ghSection').previousElementSibling;
+    if(!document.getElementById('ghSection').classList.contains('collapsed')){
+       toggleAccordion('ghSection', ghHeader);
+    }
+    updateGhUI();
   } catch(err){
     document.getElementById('ghInfo').textContent = '❌ خطا: '+(err.message||'');
   }
@@ -1242,9 +1316,7 @@ async function printDailySummaryReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
-  const cols = data.weightedIn.length + data.weightedOut.length + data.nonWeightedIn.length + data.nonWeightedOut.length + 2;
-  const rule = cols<=4 ? '@page{size:A4 portrait;margin:6mm;}' : '@page{size:A4 landscape;margin:6mm;}';
-  runPrint(h + buildDailySummaryPrintBlock(data) + s, rule);
+  runPrint(h + buildDailySummaryPrintBlock(data) + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 
 /* ─── Summary computation ─── */
@@ -1358,7 +1430,8 @@ function buildDailySummaryPrintBlock(data){
   const hasW = weightedIn.length+weightedOut.length>0;
   const hasN = nonWeightedIn.length+nonWeightedOut.length>0;
   const wIn=weightedIn.length, wOut=weightedOut.length, nIn=nonWeightedIn.length, nOut=nonWeightedOut.length;
-  const header1 = `<tr><th rowspan="3" style="border:2px solid #000;">تاریخ</th>
+  
+  const header1 = `<tr><th rowspan="3" style="border:2px solid #000; width:10%;">تاریخ</th>
     ${hasW?`<th colspan="${wIn+wOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای وزنی</th>`:''}
     ${hasN?`<th colspan="${nIn+nOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای شمارشی</th>`:''}</tr>`;
   const header2 = `<tr>
@@ -1395,9 +1468,9 @@ function buildDailySummaryPrintBlock(data){
     nonWeightedIn.map(k=>`<td style="border:1px solid #666;">${totals.nIn[k]>0?fmtQty(totals.nIn[k]):'—'}</td>`).join('') +
     nonWeightedOut.map(k=>`<td style="border:1px solid #666;">${totals.nOut[k]>0?fmtQty(totals.nOut[k]):'—'}</td>`).join('') +
     '</tr>';
-  return `<div class="p-summary-block">
+  return `<div class="p-daily-block">
     <div class="p-summary-title">روند روزانه ورود و خروج کالا</div>
-    <table class="p-daily-table" style="width:auto;border-collapse:collapse;font-size:8pt;border:2px solid #000;">
+    <table class="p-daily-table">
       <thead>${header1}${header2}${header3}</thead>
       <tbody>${body}</tbody>
       <tbody>${foot}</tbody>
@@ -1442,6 +1515,45 @@ async function menuAddProductFull(){
   products.push({ name, unit, subtypes, updatedAt: Date.now() });
   markDirty(); fillFormProducts(); renderManageProducts(); updateSubtypesForProduct();
 }
+
+async function editProductInSettings(index){
+  if(!canEditRecord(currentRole())) return;
+  const p = products[index]; if(!p) return;
+  const oldName = p.name;
+  
+  const n = await customPrompt('نام کالا:', p.name);
+  if(!n || !n.trim()) return;
+  const newName = n.trim();
+  
+  if(newName !== oldName && products.some(x=>x.name === newName)) {
+    showToast('نام کالای دیگریست', 'warning'); return;
+  }
+
+  const unitListStr = unitsList.map((u,i)=>`${i+1}. ${u.v} (${u.l})`).join('\n');
+  const currentUnitIdx = unitsList.findIndex(u=>u.v===p.unit) + 1;
+  const idxStr = await customPrompt('شماره واحد پیش‌فرض:\n'+unitListStr, String(currentUnitIdx||1));
+  if(!idxStr) return;
+  const idx2 = parseInt(toLatinDigits(idxStr)) - 1;
+  const newUnit = unitsList[idx2]?.v || unitsList[0]?.v || 'kg';
+
+  const currentSubsStr = (p.subtypes || []).join(', ');
+  const subsStr = await customPrompt('زیرمجموعه‌ها (با کاما):', currentSubsStr);
+  const newSubs = subsStr ? subsStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+  // Apply changes
+  products[index] = { name: newName, unit: newUnit, subtypes: newSubs, updatedAt: Date.now() };
+  deletedProducts = deletedProducts.filter(x => x !== newName);
+
+  if(oldName !== newName) {
+    records.forEach(r => { if(r.product === oldName) r.product = newName; });
+  }
+
+  markDirty();
+  fillFormProducts();
+  renderManageProducts();
+  renderRecords();
+}
+
 async function deleteProductFromSettings(index){
   const p = products[index]; if(!p) return;
   const ok = await customConfirm(`کالای «${p.name}» حذف شود؟`, {okText:'حذف', danger:true});
@@ -1459,6 +1571,7 @@ function renderManageProducts(){
     return `<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:var(--subtle-bg);border:1px solid var(--border);margin-bottom:6px;">
       <div style="flex:1;min-width:0;"><div style="font-size:12.5px;font-weight:bold;">📦 ${esc(p.name)} <span style="font-size:10px;color:var(--muted);font-weight:normal;">${esc(unitLabel(p.unit))}</span></div>${subHtml}</div>
       <div style="display:flex;gap:4px;">
+        <button class="btn btn-sm btn-warning" onclick="editProductInSettings(${i})">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="deleteProductFromSettings(${i})">🗑️</button>
       </div>
     </div>`;

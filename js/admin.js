@@ -163,7 +163,7 @@ async function saveUser(){
   const active = document.getElementById('umActive').checked;
 
   if(!username){ showToast('نام کاربری الزامی','warning'); return; }
-  if(!editId && (!password || password.length<6)){ showToast('رمز حداقل ۶ کاراکتر','warning'); return; }
+  if(!editId && (!password || password.length<4)){ showToast('رمز حداقل ۶ کاراکتر','warning'); return; }
 
   if(editId){
     const user = users.find(u=>u.id===editId);
