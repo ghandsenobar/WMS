@@ -854,7 +854,6 @@ function markDirty(){
   };
 
   if (typeof isLocalMode === 'function' && isLocalMode()) {
-    // حالت محلی: ذخیره فوری
     const payload = serializeState(statePayload);
     if (typeof ghPut === 'function') {
       ghPut(payload).catch(e => {
@@ -862,7 +861,6 @@ function markDirty(){
       });
     }
   } else {
-    // حالت گیت‌هاب: ذخیره در Pending
     if (typeof savePendingState === 'function') savePendingState(statePayload);
   }
   
@@ -890,8 +888,8 @@ function updateSyncBar(state, msg){
     return;
   }
 
-  const canPush = canPush(currentRole());
-  if(pushBtn) pushBtn.disabled = !canPush;
+  const hasPushAccess = canPush(currentRole());
+  if(pushBtn) pushBtn.disabled = !hasPushAccess;
   if(state==='loading'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'...'); if(pullBtn) pullBtn.disabled=true; return; }
   if(state==='saving'){ st.className='sync-bar-status loading'; st.textContent='🔄 '+(msg||'در حال ذخیره...'); if(pullBtn) pullBtn.disabled=true; if(pushBtn) pushBtn.disabled=true; return; }
   if(state==='error'){ st.className='sync-bar-status error'; st.textContent='❌ '+(msg||'خطا'); if(pullBtn) pullBtn.disabled=false; return; }
@@ -1572,7 +1570,6 @@ async function restoreFromFile(ev){
     const text = await file.text();
     let data;
     
-    // ۱. بررسی اینکه فایل JSON معتبری هست یا نه
     try {
       data = JSON.parse(text);
     } catch (parseError) {
@@ -1580,7 +1577,6 @@ async function restoreFromFile(ev){
       return;
     }
 
-    // ۲. بررسی اینکه اصلاً داده‌ای توش هست یا نه (ساپورت نسخه قدیم و جدید)
     if(!data || (!data.records && !data.products && !data.units && !data.unitsList)) {
       await customAlert('⚠️ این فایل ساختار یک فایل پشتیبان انبار را ندارد.\n\n(احتمالاً فایل اشتباهی رو انتخاب کردی)');
       return;
@@ -1589,17 +1585,14 @@ async function restoreFromFile(ev){
     const ok = await customConfirm('⚠️ آیا از ادغام این فایل با داده‌های فعلی مطمئن هستی؟', {okText:'بله، ادغام کن'});
     if(!ok) return;
 
-    // ۳. تبدیل داده‌های قدیمی به فرمت جدید
     const parsed = deserializeState(data);
     
-    // ۴. ادغام داده‌ها
     records = mergeRecordsById(records, parsed.records, permanentlyDeletedIds);
     products = mergeProductsList(products, parsed.products);
     sellers = mergeUnique(sellers, parsed.sellers || []);
     buyers = mergeUnique(buyers, parsed.buyers || []);
     drivers = mergeUnique(drivers, parsed.drivers || []);
     
-    // ۵. ادغام واحدها
     const unitMap = new Map();
     [...unitsList, ...(parsed.unitsList || [])].forEach(u => {
       if(u && u.v && !unitMap.has(u.v)) unitMap.set(u.v, u);
