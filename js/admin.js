@@ -12,27 +12,45 @@ let lastSyncAt = null;
 let _editingCreatorRecordId = null;
 
 window.addEventListener('DOMContentLoaded', () => {
-  initUIBindings();
-  loadGhConfig();
-  applyDarkMode();
-  const sess = loadSession();
-  if (sess) {
-    adminTryRestore(sess);
-  }
+  // هر مرحله جدا محافظت شده تا یک خطا بقیه init را قطع نکند
+  try { initUIBindings(); } catch (e) { console.error('initUIBindings failed:', e); }
+  try { loadGhConfig(); } catch (e) { console.error('loadGhConfig failed:', e); }
+  try { applyDarkMode(); } catch (e) { console.error('applyDarkMode failed:', e); }
+  try {
+    const sess = loadSession();
+    if (sess) {
+      adminTryRestore(sess);
+    }
+  } catch (e) { console.error('loadSession failed:', e); }
 });
 
 async function adminTryRestore(sess) {
+  const errEl = document.getElementById('loginError');
   try {
-    if (!hasGhConfig()) { document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'تنظیمات دیتابیس یافت نشد'; return; }
+    if (!hasGhConfig()) {
+      errEl.hidden = false;
+      errEl.textContent = 'تنظیمات دیتابیس یافت نشد';
+      return;
+    }
     const raw = await ghGet();
-    if (!raw) { document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'داده‌ای روی سرور نیست'; return; }
+    if (!raw) {
+      errEl.hidden = false;
+      errEl.textContent = 'داده‌ای روی سرور نیست';
+      return;
+    }
     const data = deserializeState(raw);
     const user = data.users.find(u => u.id === sess.userId);
-    if (!user || user.role !== 'admin' || !user.active) { clearSession(); document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'دسترسی مدیریت لازم است'; return; }
+    if (!user || user.role !== 'admin' || !user.active) {
+      clearSession();
+      errEl.hidden = false;
+      errEl.textContent = 'دسترسی مدیریت لازم است';
+      return;
+    }
     enterAdmin(user, data);
   } catch (e) {
-    document.getElementById('loginError').hidden = false;
-    document.getElementById('loginError').textContent = 'خطا: ' + (e.message || '');
+    // خطای شبکه/پارس — Session حفظ می‌شود تا رفرش بعدی دوباره تلاش کند
+    errEl.hidden = false;
+    errEl.textContent = 'خطا: ' + (e.message || '');
   }
 }
 
