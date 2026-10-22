@@ -105,15 +105,18 @@
 <div id="setupScreen" hidden style="position:fixed;inset:0;background:linear-gradient(160deg,#166534,#052e16);z-index:9997;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div class="login-box" style="max-height:92vh;overflow-y:auto;">
     <div class="login-logo">⚙️</div>
-    <div class="login-title">راه‌اندازی اولیه</div>
-    <div class="login-sub">حساب ادمین اولیه را بسازید</div>
+    <div class="login-title">اتصال به دیتابیس</div>
+    <div class="login-sub" style="color:var(--warning); font-weight:bold; margin-bottom:10px;">اگر قبلاً حساب ساخته‌اید، توکن را وارد کنید تا به صفحه ورود هدایت شوید.</div>
     <div class="login-field"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="ghandsenobar" value="ghandsenobar"></div>
     <div class="login-field"><label>Repository</label><input type="text" id="setupRepo" placeholder="Warehouse" value="Warehouse"></div>
     <div class="login-field"><label>GitHub Token</label><input type="password" id="setupToken" placeholder="github_pat_..."></div>
-    <div class="login-field"><label>نام کاربری ادمین</label><input type="text" id="setupUser" placeholder="admin"></div>
-    <div class="login-field"><label>نام نمایشی</label><input type="text" id="setupDisplay" placeholder="مدیر سیستم"></div>
-    <div class="login-field"><label>رمز عبور (حداقل ۴ رقم/حرف)</label><input type="password" id="setupPass" placeholder="••••"></div>
-    <button type="button" class="login-btn" onclick="doFirstSetup()">ایجاد و ورود</button>
+    <div style="border-top:1px dashed var(--border); margin:15px 0; padding-top:15px;">
+      <div class="login-sub" style="margin-bottom:10px;">فقط برای کاربر جدید (راه‌اندازی اولیه):</div>
+      <div class="login-field"><label>نام کاربری ادمین جدید</label><input type="text" id="setupUser" placeholder="admin"></div>
+      <div class="login-field"><label>نام نمایشی</label><input type="text" id="setupDisplay" placeholder="مدیر سیستم"></div>
+      <div class="login-field"><label>رمز عبور (حداقل ۴ رقم/حرف)</label><input type="password" id="setupPass" placeholder="••••"></div>
+    </div>
+    <button type="button" class="login-btn" onclick="doFirstSetup()">اتصال / ایجاد و ورود</button>
   </div>
 </div>
 
@@ -275,7 +278,7 @@
 
     <div class="collapsible-section">
       <div class="collapsible-header" onclick="toggleAccordion('searchSection', this)">
-        <span class="collapsible-title">🔍 جستجو و بازه تاریخ <span class="collapsible-badge" id="searchBadge" hidden>!</span></span>
+        <span class="collapsible-title">🔍 جستجو و بازه تاریخ <span class="collapsible-badge" id="searchBadge" hidden>فعال</span></span>
         <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="searchSection">
@@ -418,9 +421,24 @@
         <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="collapsible-body collapsed" id="deletedRecordsSection">
-        <div class="records-table-scroll">
+        <div class="records-table-scroll" id="deletedTableScroll">
           <table>
-            <thead><tr><th>تاریخ</th><th>ساعت</th><th>نوع</th><th>کالا</th><th>تعداد</th><th>واحد</th><th>طرف</th><th>راننده</th><th>حذف‌شده در</th><th></th></tr></thead>
+            <thead><tr>
+              <th data-field="date">تاریخ</th>
+              <th data-field="time">ساعت</th>
+              <th data-field="type">نوع</th>
+              <th data-field="product">کالا</th>
+              <th data-field="subtype">زیرمجموعه</th>
+              <th data-field="quantity">تعداد</th>
+              <th data-field="unit">واحد</th>
+              <th data-field="weight">وزن</th>
+              <th data-field="party">طرف</th>
+              <th data-field="driver">راننده</th>
+              <th data-field="notes">توضیحات</th>
+              <th data-field="creator">ثبت‌کننده</th>
+              <th>حذف‌شده در</th>
+              <th></th>
+            </tr></thead>
             <tbody id="deletedBody"></tbody>
           </table>
         </div>
@@ -464,7 +482,7 @@
 </div>
 
 <div class="receipt-preview-overlay" id="receiptPreviewOverlay" style="position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;z-index:2500;padding:16px;">
-  <div style="background:#fff;border-radius:16px;width:min(500px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
+  <div style="background:#fff;border-radius:16px;width:min(500px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;color:#000;">
     <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;">
       <span style="font-weight:bold;">👁️ پیش‌نمایش رسید</span>
       <button type="button" onclick="closeReceiptPreview()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;">✕</button>
