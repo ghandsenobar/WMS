@@ -28,6 +28,7 @@ let ssAdvProduct = null, ssAdvSubtype = null, ssAdvParty = null, ssAdvDriver = n
 let letterheadCompany = '';
 let letterheadFactory = '';
 let visibleFields = {};
+let _isFormListenersAttached = false; // Flag to prevent duplicate listeners
 
 function unitLabel(v){ const u = unitsList.find(x=>x.v===v); return u ? u.l : v || '—'; }
 function unitFactor(v){ const u = unitsList.find(x=>x.v===v); return u ? u.factor : null; }
@@ -469,8 +470,8 @@ async function enterApp(user, data){
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
   
-  letterheadCompany = data.letterheadCompany || letterheadCompany || '';
-  letterheadFactory = data.letterheadFactory || letterheadFactory || '';
+  letterheadCompany = data.letterheadCompany || localStorage.getItem('wh_letterhead_company') || '';
+  letterheadFactory = data.letterheadFactory || localStorage.getItem('wh_letterhead_factory') || '';
   localStorage.setItem('wh_letterhead_company', letterheadCompany);
   localStorage.setItem('wh_letterhead_factory', letterheadFactory);
   updateHeaderUI();
@@ -504,21 +505,19 @@ async function enterApp(user, data){
     document.getElementById('syncPushBtn').disabled = true;
   }
 
-  const formCard = document.getElementById('formCard');
-  const newFormCard = formCard.cloneNode(true);
-  formCard.parentNode.replaceChild(newFormCard, formCard);
-  
-  document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
-  newFormCard.addEventListener('keydown', e=>{
-    if(e.key!=='Enter') return;
-    const tag = e.target?.tagName;
-    if(tag==='BUTTON' || tag==='SELECT' || tag==='TEXTAREA') return;
-    e.preventDefault(); saveRecord();
-  });
-
-  window.onbeforeunload = e=>{
-    if(dirty){ e.preventDefault(); e.returnValue=''; return ''; }
-  };
+  if (!_isFormListenersAttached) {
+    _isFormListenersAttached = true;
+    document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
+    document.getElementById('formCard').addEventListener('keydown', e => {
+      if(e.key !== 'Enter') return;
+      const tag = e.target?.tagName;
+      if(tag === 'BUTTON' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      e.preventDefault(); saveRecord();
+    });
+    window.onbeforeunload = e => {
+      if(dirty){ e.preventDefault(); e.returnValue=''; return ''; }
+    };
+  }
 }
 
 function logout(){
@@ -550,7 +549,7 @@ function openDrawer(){
   document.getElementById('ghToken').value = ghConfig.token||'';
   renderManageLists(); renderManageProducts();
   updateGhUI();
-  updateHeaderUI(); // for inputs
+  updateHeaderUI(); 
 }
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('show');
@@ -759,14 +758,14 @@ async function menuAddParty(){
   if(list.includes(v)){showToast('قبلاً وجود دارد','warning');return;}
   if(isIn) deletedSellers = deletedSellers.filter(x=>x!==v);
   else     deletedBuyers  = deletedBuyers.filter(x=>x!==v);
-  list.push(v);markDirty();fillParties();renderManageLists();
+  list.push(v);markDirty();refreshPartyOptions();renderManageLists();
 }
 async function menuAddDriver(){
   const n=await customPrompt('نام راننده جدید:','',{placeholder:'مثلاً: آقای احمدی'});
   if(!n)return;const v=n.trim();if(!v)return;
   if(drivers.includes(v)){showToast('قبلاً وجود دارد','warning');return;}
   deletedDrivers = deletedDrivers.filter(x=>x!==v);
-  drivers.push(v);markDirty();fillDrivers();renderManageLists();
+  drivers.push(v);markDirty();refreshDriverOptions();renderManageLists();
 }
 
 /* ─── Save ─── */

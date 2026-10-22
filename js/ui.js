@@ -87,6 +87,7 @@ function showToast(msg, type='success', duration){
 class SearchableSelect{
   constructor(el, opts={}){
     this.el = el;
+    if(!this.el) return;
     this.input = el.querySelector('.ss-input');
     this.hidden = el.querySelector('.ss-value');
     this.dropdown = el.querySelector('.ss-dropdown');
@@ -122,13 +123,15 @@ class SearchableSelect{
   }
   _filter(){
     const q = (this.input.value||'').trim().toLowerCase();
-    this.filtered = this.options.filter(o =>
-      !q || o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q)
-    );
+    this.filtered = this.options.filter(o => {
+      const lbl = String(o.label || '');
+      const val = String(o.value || '');
+      return !q || lbl.toLowerCase().includes(q) || val.toLowerCase().includes(q);
+    });
     this._render();
   }
   _open(){
-    if(!this.dropdown.hidden) return;
+    if(!this.dropdown || !this.dropdown.hidden) return;
     if(typeof closeCalendar === 'function') closeCalendar();
     if(typeof closeTimePicker === 'function') closeTimePicker();
     document.querySelectorAll('.ss-dropdown').forEach(d => { if(d !== this.dropdown) d.hidden = true; });
@@ -137,8 +140,9 @@ class SearchableSelect{
     this.dropdown.hidden = false;
     this.selectedIndex = this.filtered.findIndex(o => o.value === this.hidden.value);
   }
-  _close(){ this.dropdown.hidden = true; this.selectedIndex = -1; }
+  _close(){ if(this.dropdown) this.dropdown.hidden = true; this.selectedIndex = -1; }
   _render(){
+    if(!this.list) return;
     const q = (this.input.value||'').trim();
     const canCreate = this.allowAdd && q && !this.options.some(o => o.value === q);
     let html = '';
@@ -172,7 +176,7 @@ class SearchableSelect{
     });
   }
   _onKey(e){
-    if(this.dropdown.hidden){
+    if(!this.dropdown || this.dropdown.hidden){
       if(e.key==='ArrowDown'){ this._open(); e.preventDefault(); }
       return;
     }
@@ -233,7 +237,8 @@ function openCalendarFor(input){
   popup.style.top = top+'px'; popup.style.left = left+'px';
 }
 function closeCalendar(){
-  document.getElementById('calPopup').style.display = 'none';
+  const el = document.getElementById('calPopup');
+  if(el) el.style.display = 'none';
   _calTarget = null;
 }
 function calNav(dir){
@@ -327,7 +332,8 @@ function openTimeFor(input){
   setTimeout(()=>{ scrollToTimeSelected('hourCol',_tempH); scrollToTimeSelected('minCol',_tempM); }, 50);
 }
 function closeTimePicker(){
-  document.getElementById('timePopup').style.display = 'none';
+  const el = document.getElementById('timePopup');
+  if(el) el.style.display = 'none';
   _timeTarget = null;
 }
 function buildTimeCols(){
