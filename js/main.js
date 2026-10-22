@@ -238,25 +238,86 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   if(sess){
     await tryRestoreSession(sess);
   } else {
+    // Show Login screen by default
+    document.getElementById('loginScreen').hidden = false;
+    
+    // Check if we have a config to hide the warning
     if(!hasGhConfig()){
-      document.getElementById('setupScreen').hidden = false;
-      return;
+      document.getElementById('loginNoConfigWarning').style.display = 'block';
+      document.getElementById('loginBtn').style.opacity = '0.5';
+      document.getElementById('loginBtn').style.pointerEvents = 'none';
     }
-    try {
-      const raw = await ghGet();
-      if(!raw || !raw.users || raw.users.length===0){
-        document.getElementById('setupScreen').hidden = false;
-        return;
-      }
-      document.getElementById('loginScreen').hidden = false;
-      document.getElementById('loginUsername').focus();
-    } catch(err){
-      document.getElementById('loginScreen').hidden = false;
-      document.getElementById('loginError').hidden = false;
-      document.getElementById('loginError').textContent = 'خطا در اتصال به سرور. تنظیمات را بررسی کنید.';
+    
+    // Pre-fill Setup form with current config if exists
+    document.getElementById('setupOwner').value = ghConfig.owner || 'ghandsenobar';
+    document.getElementById('setupRepo').value = ghConfig.repo || 'Warehouse';
+    document.getElementById('setupToken').value = ghConfig.token || '';
+
+    // Optional: Auto-open setup if no config at all
+    if(!hasGhConfig()) {
+       openSetupScreen();
     }
   }
 });
+
+function openSetupScreen(){
+  document.getElementById('loginScreen').hidden = true;
+  document.getElementById('setupScreen').hidden = false;
+  document.getElementById('setupAdminFields').hidden = true;
+  document.getElementById('setupGhFields').style.opacity = '1';
+  document.getElementById('setupGhFields').style.pointerEvents = 'auto';
+  document.getElementById('ghStatusMsg').textContent = '';
+}
+function closeSetupScreen(){
+  document.getElementById('setupScreen').hidden = true;
+  document.getElementById('loginScreen').hidden = false;
+  if(!hasGhConfig()){
+    document.getElementById('loginNoConfigWarning').style.display = 'block';
+  } else {
+    document.getElementById('loginNoConfigWarning').style.display = 'none';
+    document.getElementById('loginBtn').style.opacity = '1';
+    document.getElementById('loginBtn').style.pointerEvents = 'auto';
+  }
+}
+
+async function testDbConnection(){
+  const owner = document.getElementById('setupOwner').value.trim();
+  const repo = document.getElementById('setupRepo').value.trim();
+  const token = document.getElementById('setupToken').value.trim();
+  if(!owner || !repo || !token){
+    showToast('اطلاعات اتصال (Username, Repo, Token) الزامی است', 'warning');
+    return;
+  }
+
+  ghConfig = { owner, repo, token };
+  saveGhConfig();
+  ghFileSha = null;
+
+  const msg = document.getElementById('ghStatusMsg');
+  msg.textContent = '⏳ در حال بررسی اتصال...';
+  msg.style.color = 'var(--primary)';
+
+  try {
+    const raw = await ghGet();
+    if(raw && raw.users && raw.users.length > 0){
+      msg.textContent = '✅ اتصال برقرار شد. دیتابیس یافت شد.';
+      msg.style.color = 'var(--success)';
+      showToast('دیتابیس موجود است. به صفحه ورود منتقل می‌شوید.', 'success');
+      setTimeout(() => closeSetupScreen(), 1500);
+    } else {
+      msg.textContent = '✅ اتصال برقرار شد. دیتابیس خالی است.';
+      msg.style.color = 'var(--success)';
+      document.getElementById('setupAdminFields').hidden = false;
+      document.getElementById('setupGhFields').style.opacity = '0.5';
+      document.getElementById('setupGhFields').style.pointerEvents = 'none';
+      showToast('لطفاً اولین کاربر (مدیر) را بسازید.', 'info');
+    }
+  } catch(err) {
+    msg.textContent = '❌ خطا در اتصال: ' + (err.message || '');
+    msg.style.color = 'var(--danger)';
+    document.getElementById('setupAdminFields').hidden = true;
+  }
+}
 
 function clearSearch(){
   const inp = document.getElementById('search');
@@ -269,14 +330,18 @@ function clearSearch(){
 async function doLogin(){
   const errEl = document.getElementById('loginError');
   errEl.hidden = true;
+  
+  if(!hasGhConfig()){
+    errEl.hidden = false;
+    errEl.textContent = 'تنظیمات اتصال به دیتابیس انجام نشده است. از لینک زیر صفحه ورود استفاده کنید.';
+    return;
+  }
+
   const u = document.getElementById('loginUsername').value.trim();
   const p = document.getElementById('loginPassword').value;
   if(!u || !p){ errEl.hidden=false; errEl.textContent='نام کاربری و رمز عبور را وارد کنید'; return; }
 
   try {
-    if(!hasGhConfig()){
-      errEl.hidden=false; errEl.textContent='تنظیمات دیتابیس یافت نشد'; return;
-    }
     const raw = await ghGet();
     if(!raw){ errEl.hidden=false; errEl.textContent='داده‌ای روی سرور یافت نشد'; return; }
     const data = deserializeState(raw);
@@ -293,40 +358,16 @@ async function doLogin(){
 }
 
 async function doFirstSetup(){
-  const owner = document.getElementById('setupOwner').value.trim();
-  const repo = document.getElementById('setupRepo').value.trim();
-  const token = document.getElementById('setupToken').value.trim();
+  const user = document.getElementById('setupUser').value.trim();
+  const display = document.getElementById('setupDisplay').value.trim();
+  const pass = document.getElementById('setupPass').value;
   
-  if(!owner||!repo||!token){
-    alert('اطلاعات اتصال به دیتابیس (Username, Repo, Token) الزامی است');
+  if(!user||!pass||pass.length<4){
+    showToast('نام کاربری و رمز عبور (حداقل ۴ کاراکتر) الزامی است', 'warning');
     return;
   }
 
-  ghConfig = { owner, repo, token };
-  saveGhConfig();
-  ghFileSha = null;
-  
   try {
-    const raw = await ghGet();
-    // اگر دیتابیس از قبل وجود داشت و کاربر داشت، مستقیم برو به لاگین!
-    if(raw && raw.users && raw.users.length>0){
-      showToast('اتصال موفق! دیتابیس یافت شد. لطفاً وارد شوید.', 'success', 5000);
-      document.getElementById('setupScreen').hidden = true;
-      document.getElementById('loginScreen').hidden = false;
-      document.getElementById('loginUsername').focus();
-      return; 
-    }
-
-    // اگر کاربر نداشت، یعنی واقعاً نصب اولیه است. حالا مشخصات ادمین جدید را می‌خواهیم
-    const user = document.getElementById('setupUser').value.trim();
-    const display = document.getElementById('setupDisplay').value.trim();
-    const pass = document.getElementById('setupPass').value;
-    
-    if(!user||!pass||pass.length<4){
-      alert('برای ایجاد حساب مدیر جدید، نام کاربری و رمز عبور (حداقل ۴ کاراکتر) الزامی است');
-      return;
-    }
-
     const userObj = await createUserObject({
       username:user, password:pass, displayName:display || user, role:'admin', currentUserId:''
     });
@@ -343,7 +384,7 @@ async function doFirstSetup(){
     saveSession(userObj.id, userObj.username, userObj.role);
     await enterApp(userObj, deserializeState(payload));
   } catch(err){
-    alert('خطا در اتصال به دیتابیس: ' + (err.message||'نامشخص'));
+    showToast('خطا در ساخت ادمین: ' + (err.message||'نامشخص'), 'error');
   }
 }
 
@@ -429,6 +470,15 @@ function logout(){
   document.getElementById('loginScreen').hidden = false;
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
+  if(!hasGhConfig()){
+    document.getElementById('loginNoConfigWarning').style.display = 'block';
+    document.getElementById('loginBtn').style.opacity = '0.5';
+    document.getElementById('loginBtn').style.pointerEvents = 'none';
+  } else {
+    document.getElementById('loginNoConfigWarning').style.display = 'none';
+    document.getElementById('loginBtn').style.opacity = '1';
+    document.getElementById('loginBtn').style.pointerEvents = 'auto';
+  }
 }
 
 /* ─── Drawer & Accordion ─── */
