@@ -22,7 +22,7 @@ let summaryMode = 'grouped';
 let advFilter = { product:'', subtype:'', party:'', driver:'' };
 let _searchTimer = null;
 let currentPreviewRecordId = null;
-let ssProduct = null, ssParty = null, ssDriver = null;
+let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null;
 
 function unitLabel(v){ const u = unitsList.find(x=>x.v===v); return u ? u.l : v || '—'; }
 function unitFactor(v){ const u = unitsList.find(x=>x.v===v); return u ? u.factor : null; }
@@ -45,6 +45,18 @@ function productFullName(r){
   return r.subtype ? `${r.product||''} ${r.subtype}` : (r.product||'-');
 }
 function currentRole(){ return currentUser?.role || 'viewer'; }
+
+/* ─── Filter by DataMode ─── */
+function isWeightedRecord(r) {
+  const f = unitFactor(r.unit);
+  return f !== null && f !== undefined;
+}
+function matchesDataMode(r) {
+  const isW = isWeightedRecord(r);
+  if (dataMode === 'weighted') return isW;
+  if (dataMode === 'numeric') return !isW;
+  return true;
+}
 
 /* ─── Bootstrap ─── */
 window.addEventListener('DOMContentLoaded', async ()=>{
@@ -100,6 +112,10 @@ window.addEventListener('DOMContentLoaded', async ()=>{
         markDirty(); refreshDriverOptions();
       }
     }
+  });
+  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), {
+    allowAdd: false,
+    onChange: ()=>updateAutoKg()
   });
 
   const sess = loadSession();
@@ -247,7 +263,7 @@ async function enterApp(user, data){
   renderManageLists(); renderManageProducts();
   setSummaryMode(summaryMode);
   updateSyncBar();
-  updateGhUI(); // Ensure GitHub status box shows properly
+  updateGhUI();
 
   if(!canCreateRecord(user.role)){
     document.getElementById('btnIn').style.display = 'none';
@@ -256,7 +272,6 @@ async function enterApp(user, data){
   }
 
   document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
-  document.getElementById('f_unit').addEventListener('change', updateAutoKg);
   document.getElementById('formCard').addEventListener('keydown', e=>{
     if(e.key!=='Enter') return;
     const tag = e.target?.tagName;
@@ -319,7 +334,6 @@ function toggleAccordion(sectionId, headerEl){
   const isCollapsed = body.classList.contains('collapsed');
   const parentContainer = headerEl.closest('.drawer-body') || headerEl.closest('.card');
   
-  // Close all others in the same container
   if(parentContainer){
     parentContainer.querySelectorAll('.collapsible-body, .drawer-section-body').forEach(el => {
       if(el.id !== sectionId) {
@@ -333,7 +347,6 @@ function toggleAccordion(sectionId, headerEl){
     });
   }
 
-  // Toggle the requested one
   if(isCollapsed){
     body.classList.remove('collapsed');
     const btn = headerEl.querySelector('.collapsible-toggle, .toggle-btn');
@@ -396,10 +409,10 @@ async function switchType(t){
     ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.value='';
     });
-    ssProduct.clear(); ssParty.clear(); ssDriver.clear();
+    ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear();
     document.getElementById('f_subtype').innerHTML = '';
     document.getElementById('subtypeField').hidden = true;
-    if(unitsList.length) document.getElementById('f_unit').value = unitsList[0].v;
+    if(unitsList.length) ssUnit.setValue(unitsList[0].v);
     setNow(); updateAutoKg();
   }
   applyTypeUI();
@@ -438,10 +451,7 @@ function fillFormProducts(){
   if(ssProduct) ssProduct.setOptions(products.map(p=>({value:p.name, label:p.name})));
 }
 function fillUnits(){
-  const sel = document.getElementById('f_unit');
-  const cur = sel.value;
-  sel.innerHTML = unitsList.map(u=>`<option value="${esc(u.v)}">${esc(u.l)}</option>`).join('');
-  if(unitsList.some(u=>u.v===cur)) sel.value = cur;
+  if(ssUnit) ssUnit.setOptions(unitsList.map(u=>({value:u.v, label:u.l})));
 }
 function refreshPartyOptions(){
   const list = currentType==='in' ? sellers : (currentType==='out' ? buyers : []);
@@ -472,8 +482,7 @@ function onProductChange(){
   const productName = ssProduct.getValue();
   const product = products.find(p=>p.name===productName);
   if(product && product.unit){
-    const us = document.getElementById('f_unit');
-    if(Array.from(us.options).some(o=>o.value===product.unit)) us.value = product.unit;
+    ssUnit.setValue(product.unit);
   }
   updateAutoKg();
 }
@@ -483,7 +492,7 @@ function updateAutoKg(){
   const valEl = document.getElementById('autoKgValue');
   const formulaEl = document.getElementById('autoKgFormula');
   const qtyStr = document.getElementById('f_quantity').value.trim();
-  const unit = document.getElementById('f_unit').value;
+  const unit = ssUnit.getValue();
   const f = unitFactor(unit);
   if(f===null||f===undefined){
     box.classList.add('no-factor');
@@ -525,7 +534,7 @@ async function saveRecord(){
   const product = ssProduct.getValue();
   const subtype = document.getElementById('f_subtype').value.trim();
   const qty = document.getElementById('f_quantity').value.trim();
-  const unit = document.getElementById('f_unit').value;
+  const unit = ssUnit.getValue();
   const party = ssParty.getValue();
   const driver = ssDriver.getValue();
 
@@ -606,10 +615,10 @@ function clearForm(){
   ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value='';
   });
-  ssProduct.clear(); ssParty.clear(); ssDriver.clear();
+  ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear();
   document.getElementById('f_subtype').innerHTML = '';
   document.getElementById('subtypeField').hidden = true;
-  if(unitsList.length) document.getElementById('f_unit').value = unitsList[0].v;
+  if(unitsList.length) ssUnit.setValue(unitsList[0].v);
   updateAutoKg();
   if(editingId===null) setNow();
 }
@@ -638,13 +647,13 @@ function editRecord(id){
   }
 
   document.getElementById('f_quantity').value = r.quantity||'';
+  
   if(r.unit){
-    const us = document.getElementById('f_unit');
-    if(!Array.from(us.options).some(o=>o.value===r.unit)){
-      const o = document.createElement('option'); o.value=r.unit; o.textContent=r.unit; us.appendChild(o);
-    }
-    us.value = r.unit;
+    ssUnit.setValue(r.unit);
+  } else {
+    ssUnit.clear();
   }
+  
   updateSubtypesForProduct(false);
   if(r.subtype){
     const subSel = document.getElementById('f_subtype');
@@ -692,6 +701,7 @@ function matchFilter(r){
   if(advFilter.subtype && r.subtype!==advFilter.subtype) return false;
   if(advFilter.party && r.party!==advFilter.party) return false;
   if(advFilter.driver && r.driver!==advFilter.driver) return false;
+  if(!matchesDataMode(r)) return false;
   if(q){
     const tokens = q.split(/\s+/).filter(Boolean);
     const fields = [r.product, r.subtype, r.party, r.driver, r.invoiceNumber, r.basilNumber, r.waybillNumber, r.notes, r.date, r.time, r.createdByName].filter(Boolean).map(String);
@@ -1086,7 +1096,6 @@ async function saveGhConfigFromUI(){
     const perm = await checkTokenPermissions();
     if(perm) ghCanWrite = perm.canWrite;
     
-    // Collapse the accordion after success
     const ghHeader = document.getElementById('ghSection').previousElementSibling;
     if(!document.getElementById('ghSection').classList.contains('collapsed')){
        toggleAccordion('ghSection', ghHeader);
@@ -1431,14 +1440,18 @@ function buildDailySummaryPrintBlock(data){
   const hasN = nonWeightedIn.length+nonWeightedOut.length>0;
   const wIn=weightedIn.length, wOut=weightedOut.length, nIn=nonWeightedIn.length, nOut=nonWeightedOut.length;
   
+  // Added 2 columns for daily totals
   const header1 = `<tr><th rowspan="3" style="border:2px solid #000; width:10%;">تاریخ</th>
     ${hasW?`<th colspan="${wIn+wOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای وزنی</th>`:''}
-    ${hasN?`<th colspan="${nIn+nOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای شمارشی</th>`:''}</tr>`;
+    ${hasN?`<th colspan="${nIn+nOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای شمارشی</th>`:''}
+    <th colspan="2" style="border:2px solid #000;background:#e5e5e5!important;">جمع روز</th></tr>`;
   const header2 = `<tr>
     ${wIn?`<th colspan="${wIn}" style="background:#f0f0f0!important;">ورودی</th>`:''}
     ${wOut?`<th colspan="${wOut}" style="background:#f0f0f0!important;">خروجی</th>`:''}
     ${nIn?`<th colspan="${nIn}" style="background:#f0f0f0!important;">ورودی</th>`:''}
     ${nOut?`<th colspan="${nOut}" style="background:#f0f0f0!important;">خروجی</th>`:''}
+    <th rowspan="2" style="background:#f0f0f0!important;">ورود</th>
+    <th rowspan="2" style="background:#f0f0f0!important;">خروج</th>
   </tr>`;
   const header3 = '<tr>' +
     weightedIn.map(k=>`<th style="background:#f9f9f9!important;font-size:8pt;">${esc(keyInfo.get(k)?.product||k)}${keyInfo.get(k)?.subtype?'<br><span style="font-size:7pt;font-weight:normal;">'+esc(keyInfo.get(k).subtype)+'</span>':''}</th>`).join('') +
@@ -1447,17 +1460,25 @@ function buildDailySummaryPrintBlock(data){
     nonWeightedOut.map(k=>`<th style="background:#f9f9f9!important;font-size:8pt;">${esc(keyInfo.get(k)?.product||k)}</th>`).join('') +
     '</tr>';
   let body = '';
-  const totals = { wIn:{}, wOut:{}, nIn:{}, nOut:{} };
+  const totals = { wIn:{}, wOut:{}, nIn:{}, nOut:{}, in:0, out:0 };
   weightedIn.forEach(k=>totals.wIn[k]=0);
   weightedOut.forEach(k=>totals.wOut[k]=0);
   nonWeightedIn.forEach(k=>totals.nIn[k]=0);
   nonWeightedOut.forEach(k=>totals.nOut[k]=0);
   dates.forEach(d=>{
+    let rowInTotal = 0, rowOutTotal = 0;
     let row = `<tr><td style="border:1px solid #666;background:#f0f0f0!important;font-weight:900;">${esc(toFa(d))}</td>`;
-    weightedIn.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.in||0; totals.wIn[k]+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
-    weightedOut.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.out||0; totals.wOut[k]+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
-    nonWeightedIn.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.in||0; totals.nIn[k]+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
-    nonWeightedOut.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.out||0; totals.nOut[k]+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
+    
+    weightedIn.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.in||0; totals.wIn[k]+=v; rowInTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
+    weightedOut.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.out||0; totals.wOut[k]+=v; rowOutTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
+    nonWeightedIn.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.in||0; totals.nIn[k]+=v; rowInTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
+    nonWeightedOut.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.out||0; totals.nOut[k]+=v; rowOutTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
+    
+    totals.in += rowInTotal;
+    totals.out += rowOutTotal;
+    row += `<td style="border:1px solid #666;font-weight:900;background:#f0f0f0!important;">${rowInTotal>0?fmtKg(rowInTotal):'—'}</td>`;
+    row += `<td style="border:1px solid #666;font-weight:900;background:#f0f0f0!important;">${rowOutTotal>0?fmtKg(rowOutTotal):'—'}</td>`;
+    
     row += '</tr>';
     body += row;
   });
@@ -1467,6 +1488,8 @@ function buildDailySummaryPrintBlock(data){
     weightedOut.map(k=>`<td style="border:1px solid #666;">${totals.wOut[k]>0?fmtKg(totals.wOut[k]):'—'}</td>`).join('') +
     nonWeightedIn.map(k=>`<td style="border:1px solid #666;">${totals.nIn[k]>0?fmtQty(totals.nIn[k]):'—'}</td>`).join('') +
     nonWeightedOut.map(k=>`<td style="border:1px solid #666;">${totals.nOut[k]>0?fmtQty(totals.nOut[k]):'—'}</td>`).join('') +
+    `<td style="border:1px solid #666;">${totals.in>0?fmtKg(totals.in):'—'}</td>` +
+    `<td style="border:1px solid #666;">${totals.out>0?fmtKg(totals.out):'—'}</td>` +
     '</tr>';
   return `<div class="p-daily-block">
     <div class="p-summary-title">روند روزانه ورود و خروج کالا</div>
@@ -1540,7 +1563,6 @@ async function editProductInSettings(index){
   const subsStr = await customPrompt('زیرمجموعه‌ها (با کاما):', currentSubsStr);
   const newSubs = subsStr ? subsStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
 
-  // Apply changes
   products[index] = { name: newName, unit: newUnit, subtypes: newSubs, updatedAt: Date.now() };
   deletedProducts = deletedProducts.filter(x => x !== newName);
 

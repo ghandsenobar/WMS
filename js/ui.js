@@ -101,6 +101,11 @@ class SearchableSelect{
   }
   setOptions(opts){
     this.options = (opts||[]).map(o => typeof o === 'string' ? {value:o, label:o} : o);
+    // Update label if currently selected value exists
+    if(this.hidden.value){
+      const found = this.options.find(o => o.value === this.hidden.value);
+      if(found) this.input.value = found.label;
+    }
     this._filter();
   }
   getValue(){ return this.hidden.value; }
@@ -124,6 +129,12 @@ class SearchableSelect{
     this._render();
   }
   _open(){
+    if(!this.dropdown.hidden) return;
+    // Close other popups
+    if(typeof closeCalendar === 'function') closeCalendar();
+    if(typeof closeTimePicker === 'function') closeTimePicker();
+    document.querySelectorAll('.ss-dropdown').forEach(d => { if(d !== this.dropdown) d.hidden = true; });
+    
     this._filter();
     this.dropdown.hidden = false;
     this.selectedIndex = this.filtered.findIndex(o => o.value === this.hidden.value);
@@ -197,6 +208,9 @@ class SearchableSelect{
 /* ─── Calendar ─── */
 let _calTarget = null, _calYear, _calMonth;
 function openCalendarFor(input){
+  closeTimePicker();
+  document.querySelectorAll('.ss-dropdown').forEach(d => d.hidden = true);
+  
   _calTarget = input;
   const raw = toLatinDigits(input.value||'').trim();
   if(raw){
@@ -291,6 +305,8 @@ function renderCalendar(){
 let _timeTarget=null, _tempH=0, _tempM=0;
 function openTimeFor(input){
   closeCalendar();
+  document.querySelectorAll('.ss-dropdown').forEach(d => d.hidden = true);
+  
   _timeTarget = input;
   const raw = toLatinDigits(input.value||'').trim();
   if(raw && /^\d{1,2}:\d{1,2}$/.test(raw)){
@@ -378,7 +394,7 @@ function initUIBindings(){
     }
     const preview = document.getElementById('receiptPreviewOverlay');
     if(preview && preview.classList.contains('show')){
-      if(typeof closeReceiptPreview==='function') closeReceiptPreview();
+      if(typeof closeReceiptPreview === 'function') closeReceiptPreview();
     }
   });
 }
