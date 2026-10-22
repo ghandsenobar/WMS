@@ -22,7 +22,7 @@ let summaryMode = 'grouped';
 let advFilter = { product:'', subtype:'', party:'', driver:'' };
 let _searchTimer = null;
 let currentPreviewRecordId = null;
-let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null;
+let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null, ssSubtype = null;
 let ssAdvProduct = null, ssAdvSubtype = null, ssAdvParty = null, ssAdvDriver = null;
 
 let letterheadCompany = '';
@@ -88,8 +88,6 @@ function loadDisplaySettings(){
   const m = localStorage.getItem('wh_data_mode')||'weighted';
   dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
   summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
-  letterheadCompany = localStorage.getItem('wh_letterhead_company') || 'شرکت صنایع غذایی سایه سار صنوبر آریا';
-  letterheadFactory = localStorage.getItem('wh_letterhead_factory') || 'کارخانه قند صنوبر';
   
   try{
     const raw = localStorage.getItem('wh_visible_fields');
@@ -107,18 +105,39 @@ function loadDisplaySettings(){
   applyPrintFontScale();
   const fs = document.getElementById('fontScaleSelect'); if(fs) fs.value = String(printFontScale);
   const dm = document.getElementById('dataModeSelect'); if(dm) dm.value = dataMode;
-  const lc = document.getElementById('letterheadCompany'); if(lc) lc.value = letterheadCompany;
-  const lf = document.getElementById('letterheadFactory'); if(lf) lf.value = letterheadFactory;
   
   renderFieldsList();
   applyFieldVisibility();
 }
-function saveLetterhead(){
-  letterheadCompany = document.getElementById('letterheadCompany').value.trim();
-  letterheadFactory = document.getElementById('letterheadFactory').value.trim();
-  localStorage.setItem('wh_letterhead_company', letterheadCompany);
-  localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+
+function updateHeaderUI() {
+  const c = document.getElementById('appHeaderCompany');
+  const f = document.getElementById('appHeaderFactory');
+  const ci = document.getElementById('letterheadCompanyInput');
+  const fi = document.getElementById('letterheadFactoryInput');
+  
+  if(c) c.textContent = letterheadCompany || 'نام شرکت (برای ویرایش کلیک کنید)';
+  if(f) f.textContent = letterheadFactory || 'نام کارخانه (برای ویرایش کلیک کنید)';
+  if(ci) ci.value = letterheadCompany;
+  if(fi) fi.value = letterheadFactory;
 }
+
+async function editLetterhead(type) {
+  const current = type === 'company' ? letterheadCompany : letterheadFactory;
+  const title = type === 'company' ? 'نام شرکت (سربرگ)' : 'نام کارخانه (سربرگ)';
+  const val = await customPrompt(title, current, {placeholder: 'نام را وارد کنید'});
+  if (val !== null) {
+    updateLetterhead(type, val);
+  }
+}
+
+function updateLetterhead(type, val) {
+  if (type === 'company') letterheadCompany = val.trim();
+  else letterheadFactory = val.trim();
+  updateHeaderUI();
+  markDirty();
+}
+
 function applyPrintFontScale(){ document.documentElement.style.setProperty('--pf', String(printFontScale/100)); }
 function setPrintFontScale(scale){ printFontScale = scale; localStorage.setItem('wh_print_font_scale', String(scale)); applyPrintFontScale(); }
 function setDataMode(mode){ dataMode = mode; localStorage.setItem('wh_data_mode', mode); renderRecords(); }
@@ -193,6 +212,9 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   // Initialize Searchable Selects
   ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
+  ssSubtype = new SearchableSelect(document.getElementById('ss_subtype'), { allowAdd: false, onChange: ()=>{} });
+  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
+  
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
     onAdd: async (name)=>{
@@ -217,7 +239,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       }
     }
   });
-  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
 
   // Advanced Filters Searchable Selects
   ssAdvProduct = new SearchableSelect(document.getElementById('ss_adv_product'), { allowAdd: false, onChange: onAdvProductChange });
@@ -236,21 +257,18 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   const sess = loadSession();
   if(sess){
-    // Show restoring status on login screen
     document.getElementById('autoLoginStatus').style.display = 'block';
     document.getElementById('loginBtn').style.opacity = '0.5';
     document.getElementById('loginBtn').style.pointerEvents = 'none';
     
     await tryRestoreSession(sess);
     
-    // If still on login screen after restore attempt, reset button
     if(!document.getElementById('loginScreen').hidden) {
       document.getElementById('autoLoginStatus').style.display = 'none';
       document.getElementById('loginBtn').style.opacity = '1';
       document.getElementById('loginBtn').style.pointerEvents = 'auto';
     }
   } else {
-    // No session, just ensure login is visible and check config
     document.getElementById('loginScreen').hidden = false;
     if(!hasGhConfig()){
       document.getElementById('loginNoConfigWarning').style.display = 'block';
@@ -385,7 +403,8 @@ async function doFirstSetup(){
       unitsList:[...DEFAULT_UNITS], users:[userObj], auditLog:[],
       permanentlyDeletedIds:[], deletedProducts:[], deletedSellers:[],
       deletedBuyers:[], deletedDrivers:[], deletedUnits:[],
-      dataEpoch:1, currentUser:userObj
+      dataEpoch:1, currentUser:userObj,
+      letterheadCompany: "", letterheadFactory: ""
     };
     const payload = serializeState(newState);
     await ghPut(payload);
@@ -402,17 +421,15 @@ async function tryRestoreSession(sess){
     if(!hasGhConfig()){ return; }
     raw = await ghGet();
   } catch(err) {
-    // Network error: do NOT clear session, just log and stay on login screen
-    console.warn('Session restore failed due to network:', err);
+    console.warn('Session restore failed:', err);
     return; 
   }
 
-  if(!raw){ return; } // No data, stay on login
+  if(!raw){ return; }
 
   const data = deserializeState(raw);
   const user = data.users.find(u=>u.id===sess.userId);
   
-  // If user is missing or deactivated, clear session.
   if(!user || !user.active || user.role!==sess.role){ 
     clearSession(); 
     return; 
@@ -421,9 +438,8 @@ async function tryRestoreSession(sess){
   try {
     await enterApp(user, data);
   } catch(err) {
-    console.error('App loading error during restore:', err);
+    console.error('App loading error:', err);
     showToast('خطا در بارگذاری داده ها. لطفاً رفرش کنید.', 'error');
-    // Do NOT clear session here, might be a temporary rendering bug
   }
 }
 
@@ -444,6 +460,11 @@ async function enterApp(user, data){
   deletedDrivers = data.deletedDrivers || [];
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
+  
+  letterheadCompany = data.letterheadCompany || '';
+  letterheadFactory = data.letterheadFactory || '';
+  updateHeaderUI();
+  
   dirty = false; lastSyncAt = Date.now();
 
   document.getElementById('loginScreen').hidden = true;
@@ -473,7 +494,6 @@ async function enterApp(user, data){
     document.getElementById('syncPushBtn').disabled = true;
   }
 
-  // Remove old listeners to prevent duplicates if function is called multiple times
   const formCard = document.getElementById('formCard');
   const newFormCard = formCard.cloneNode(true);
   formCard.parentNode.replaceChild(newFormCard, formCard);
@@ -520,6 +540,7 @@ function openDrawer(){
   document.getElementById('ghToken').value = ghConfig.token||'';
   renderManageLists(); renderManageProducts();
   updateGhUI();
+  updateHeaderUI(); // for inputs
 }
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('show');
@@ -608,8 +629,7 @@ async function switchType(t){
     ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.value='';
     });
-    ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear();
-    document.getElementById('f_subtype').innerHTML = '';
+    ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear(); ssSubtype.clear();
     document.getElementById('subtypeField').hidden = true;
     if(unitsList.length) ssUnit.setValue(unitsList[0].v);
     setNow(); updateAutoKg();
@@ -666,14 +686,16 @@ function refreshDriverOptions(){
 function updateSubtypesForProduct(preserve){
   const prodName = ssProduct.getValue();
   const field = document.getElementById('subtypeField');
-  const sel = document.getElementById('f_subtype');
   const prod = products.find(p=>p.name===prodName);
   const subs = (prod && prod.subtypes) ? prod.subtypes.filter(s=>s && s.trim()) : [];
-  if(subs.length===0){ field.hidden = true; sel.innerHTML = ''; return; }
+  if(subs.length===0){ field.hidden = true; if(ssSubtype) ssSubtype.clear(); return; }
   field.hidden = false;
-  const cur = preserve ? sel.value : '';
-  sel.innerHTML = '<option value="">-- اختیاری --</option>' + subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-  if(cur && subs.includes(cur)) sel.value = cur;
+  if(ssSubtype) {
+    ssSubtype.setOptions(subs.map(s=>({value:s, label:s})));
+    const cur = preserve ? ssSubtype.getValue() : '';
+    if (cur && subs.includes(cur)) ssSubtype.setValue(cur);
+    else ssSubtype.clear();
+  }
 }
 
 function onProductChange(){
@@ -707,18 +729,16 @@ function updateAutoKg(){
   formulaEl.textContent = `${fmtQty(qty)} × ${toFa(f)} = ${fmtKg(kg)}`;
 }
 
-async function addProduct(){
+async function addParty(){
   if(!currentType){ showToast('اول ورود/خروج را انتخاب کنید','warning'); return; }
-  await menuAddProductFull();
+  await menuAddParty();
+  refreshPartyOptions();
 }
-async function removeProduct(){
-  const name = ssProduct.getValue();
-  if(!name){ showToast('کالایی انتخاب نشده','warning'); return; }
-  const idx = products.findIndex(p=>p.name===name);
-  if(idx===-1) return;
-  await deleteProductFromSettings(idx);
+async function addDriver(){
+  if(!currentType){ showToast('اول ورود/خروج را انتخاب کنید','warning'); return; }
+  await menuAddDriver();
+  refreshDriverOptions();
 }
-async function addUnitQuick(){ await menuAddUnit(); fillUnits(); updateAutoKg(); }
 
 /* ─── Save ─── */
 async function saveRecord(){
@@ -731,7 +751,7 @@ async function saveRecord(){
   const basilNumber = document.getElementById('f_basil').value.trim();
   const waybillNumber = document.getElementById('f_waybill').value.trim();
   const product = ssProduct.getValue();
-  const subtype = document.getElementById('f_subtype').value.trim();
+  const subtype = ssSubtype.getValue();
   const qty = document.getElementById('f_quantity').value.trim();
   const unit = ssUnit.getValue();
   const party = ssParty.getValue();
@@ -814,8 +834,7 @@ function clearForm(){
   ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value='';
   });
-  ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear();
-  document.getElementById('f_subtype').innerHTML = '';
+  ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear(); ssSubtype.clear();
   document.getElementById('subtypeField').hidden = true;
   if(unitsList.length) ssUnit.setValue(unitsList[0].v);
   updateAutoKg();
@@ -854,16 +873,11 @@ function editRecord(id){
   }
   
   updateSubtypesForProduct(false);
-  if(r.subtype){
-    const subSel = document.getElementById('f_subtype');
-    if(subSel){
-      if(!Array.from(subSel.options).some(o=>o.value===r.subtype)){
-        const o = document.createElement('option'); o.value=r.subtype; o.textContent=r.subtype; subSel.appendChild(o);
-      }
-      subSel.value = r.subtype;
-      document.getElementById('subtypeField').hidden = false;
-    }
+  if(r.subtype && ssSubtype){
+    ssSubtype.setValue(r.subtype);
+    document.getElementById('subtypeField').hidden = false;
   }
+  
   if(r.party) ssParty.setValue(r.party);
   if(r.driver) ssDriver.setValue(r.driver);
   updateAutoKg();
@@ -979,7 +993,7 @@ function renderRecords(){
   renderDeletedRecords();
   updateDeletedUI();
   updateSyncBar();
-  applyFieldVisibility(); // Ensure visibility applied after render
+  applyFieldVisibility();
 }
 
 function updateFilterBadges(){
@@ -999,7 +1013,7 @@ function updateFilterBadges(){
 
 /* ─── Filters ─── */
 function onSearchInput(){
-  updateFilterBadges(); // آپدیت فوری نشانگر
+  updateFilterBadges();
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(renderRecords, 200);
 }
@@ -1154,7 +1168,7 @@ function markDirty(){
   const statePayload = {
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser
+    dataEpoch, currentUser, letterheadCompany, letterheadFactory
   };
 
   if (typeof isLocalMode === 'function' && isLocalMode()) {
@@ -1235,6 +1249,9 @@ async function syncPull(){
     deletedProducts = data.deletedProducts; deletedSellers = data.deletedSellers;
     deletedBuyers = data.deletedBuyers; deletedDrivers = data.deletedDrivers;
     deletedUnits = data.deletedUnits; dataEpoch = data.dataEpoch;
+    letterheadCompany = data.letterheadCompany || '';
+    letterheadFactory = data.letterheadFactory || '';
+    updateHeaderUI();
     dirty = false; lastSyncAt = Date.now();
     editingId = null; currentType = null;
     applyTypeUI(); fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
@@ -1291,7 +1308,7 @@ async function syncPush(){
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser
+    dataEpoch, currentUser, letterheadCompany, letterheadFactory
   });
   try {
     await ghPut(payload);
@@ -1952,7 +1969,7 @@ function backupDownload(){
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser
+    dataEpoch, currentUser, letterheadCompany, letterheadFactory
   });
   payload.exportedAt = new Date().toISOString();
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});

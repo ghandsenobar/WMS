@@ -9,6 +9,7 @@ let dataEpoch = 1;
 let currentUser = null;
 let dirty = false;
 let lastSyncAt = null;
+let _editingCreatorRecordId = null;
 
 window.addEventListener('DOMContentLoaded', () => {
   initUIBindings();
@@ -229,6 +230,23 @@ function renderRecordsPanel() {
       <div>🗑️ حذف‌شده: <b>${toFa(records.length - vis.length)}</b></div>
     </div>`;
   
+  // Populate Bulk Change Selects
+  const uniqueCreators = [...new Set(records.map(r => r.createdByName).filter(Boolean))].sort();
+  const oldSel = document.getElementById('bulkOldCreator');
+  const newSel = document.getElementById('bulkNewCreator');
+  
+  const curOld = oldSel.value;
+  const curNew = newSel.value;
+
+  oldSel.innerHTML = '<option value="">همه رکوردها</option>' + uniqueCreators.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if (uniqueCreators.includes(curOld)) oldSel.value = curOld;
+
+  newSel.innerHTML = '<option value="">انتخاب کنید...</option>' + users.map(u => {
+      const name = u.displayName || u.username;
+      return `<option value="${esc(name)}">${esc(name)}</option>`;
+  }).join('');
+  if (users.some(u => (u.displayName || u.username) === curNew)) newSel.value = curNew;
+
   const recent = [...records].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 15);
   const body = document.getElementById('recentRecordsBody');
   body.innerHTML = recent.map((r, i) => `
@@ -240,31 +258,65 @@ function renderRecordsPanel() {
       <td>${fmtQty(r.quantity)}</td>
       <td>${esc(toFa(r.createdByName) || '-')}</td>
       <td>${esc(r.updatedByName || '-')} <br><span style="font-size:10.5px;color:var(--muted);">${formatTime(r.updatedAt)}</span></td>
-      <td><button class="btn btn-sm btn-warning" onclick="editCreator('${r.id}')" title="ویرایش ثبت‌کننده">✏️</button></td>
+      <td><button class="btn btn-sm btn-warning" onclick="openCreatorModal('${r.id}')" title="ویرایش ثبت‌کننده">✏️</button></td>
     </tr>
   `).join('');
 }
 
-async function editCreator(id) {
+function openCreatorModal(id) {
   const r = records.find(x => x.id === id);
   if (!r) return;
-  const newName = await customPrompt('نام جدید ثبت‌کننده:', r.createdByName || '');
-  if (!newName || !newName.trim()) return;
-  r.createdByName = newName.trim();
-  r.updatedByName = currentUser.displayName || currentUser.username;
-  r.updatedAt = Date.now();
-  dirty = true;
-  auditLog.push({ t: Date.now(), action: 'update', userId: currentUser.id, userName: currentUser.displayName || currentUser.username, detail: `تغییر ثبت‌کننده رکورد ${r.id} به ${newName}`, recordId: r.id });
-  renderRecordsPanel();
-  updateAdminSyncStatus();
-  showToast('نام ثبت‌کننده تغییر کرد', 'success');
+  _editingCreatorRecordId = id;
+  
+  const sel = document.getElementById('editCreatorSelect');
+  const currentName = r.createdByName || '';
+  
+  sel.innerHTML = users.map(u => {
+    const name = u.displayName || u.username;
+    return `<option value="${esc(name)}" ${name === currentName ? 'selected' : ''}>${esc(name)}</option>`;
+  }).join('');
+  
+  document.getElementById('creatorModalOverlay').classList.add('show');
+}
+
+function closeCreatorModal() {
+  document.getElementById('creatorModalOverlay').classList.remove('show');
+  _editingCreatorRecordId = null;
+}
+
+function saveCreatorChange() {
+  if (!_editingCreatorRecordId) return;
+  const newName = document.getElementById('editCreatorSelect').value;
+  const r = records.find(x => x.id === _editingCreatorRecordId);
+  
+  if (r && newName) {
+    r.createdByName = newName;
+    r.updatedByName = currentUser.displayName || currentUser.username;
+    r.updatedAt = Date.now();
+    
+    // Also update the createdBy ID if the user exists in the users list
+    const targetUser = users.find(u => (u.displayName || u.username) === newName);
+    if (targetUser) r.createdBy = targetUser.id;
+
+    dirty = true;
+    auditLog.push({ t: Date.now(), action: 'update', userId: currentUser.id, userName: currentUser.displayName || currentUser.username, detail: `تغییر ثبت‌کننده رکورد ${r.id} به ${newName}`, recordId: r.id });
+    
+    renderRecordsPanel();
+    updateAdminSyncStatus();
+    showToast('نام ثبت‌کننده تغییر کرد', 'success');
+  }
+  closeCreatorModal();
 }
 
 async function bulkChangeCreator() {
-  const oldName = document.getElementById('bulkOldCreator').value.trim();
-  const newName = document.getElementById('bulkNewCreator').value.trim();
+  const oldName = document.getElementById('bulkOldCreator').value;
+  const newName = document.getElementById('bulkNewCreator').value;
+  
   if (!newName) { showToast('نام جدید الزامی است', 'warning'); return; }
   
+  const targetUser = users.find(u => (u.displayName || u.username) === newName);
+  if (!targetUser) { showToast('کاربر انتخاب شده معتبر نیست', 'warning'); return; }
+
   const count = records.filter(r => !oldName || r.createdByName === oldName).length;
   if (count === 0) { showToast('رکوردی با این نام یافت نشد', 'info'); return; }
   
@@ -274,6 +326,7 @@ async function bulkChangeCreator() {
   records.forEach(r => {
     if (!oldName || r.createdByName === oldName) {
       r.createdByName = newName;
+      r.createdBy = targetUser.id;
       r.updatedByName = currentUser.displayName || currentUser.username;
       r.updatedAt = Date.now();
     }
@@ -281,8 +334,6 @@ async function bulkChangeCreator() {
   
   dirty = true;
   auditLog.push({ t: Date.now(), action: 'update', userId: currentUser.id, userName: currentUser.displayName || currentUser.username, detail: `تغییر گروهی ثبت‌کننده به ${newName}`, recordId: null });
-  document.getElementById('bulkOldCreator').value = '';
-  document.getElementById('bulkNewCreator').value = '';
   renderRecordsPanel();
   updateAdminSyncStatus();
   showToast(`ثبت‌کننده ${toFa(count)} رکورد تغییر کرد`, 'success');
