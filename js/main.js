@@ -23,6 +23,11 @@ let advFilter = { product:'', subtype:'', party:'', driver:'' };
 let _searchTimer = null;
 let currentPreviewRecordId = null;
 let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null;
+let ssAdvProduct = null, ssAdvSubtype = null, ssAdvParty = null, ssAdvDriver = null;
+
+let letterheadCompany = '';
+let letterheadFactory = '';
+let visibleFields = {};
 
 function unitLabel(v){ const u = unitsList.find(x=>x.v===v); return u ? u.l : v || '—'; }
 function unitFactor(v){ const u = unitsList.find(x=>x.v===v); return u ? u.factor : null; }
@@ -58,6 +63,106 @@ function matchesDataMode(r) {
   return true;
 }
 
+const ALL_FIELDS = [
+  { key: 'date',    label: 'تاریخ',        mandatory: true  },
+  { key: 'time',    label: 'ساعت',         mandatory: false },
+  { key: 'product', label: 'کالا',          mandatory: true  },
+  { key: 'subtype', label: 'زیرمجموعه',      mandatory: false },
+  { key: 'quantity',label: 'تعداد',         mandatory: false },
+  { key: 'unit',    label: 'واحد',          mandatory: false },
+  { key: 'weight',  label: 'وزن',           mandatory: false },
+  { key: 'party',   label: 'طرف حساب',      mandatory: false },
+  { key: 'driver',  label: 'راننده',        mandatory: false },
+  { key: 'invoice', label: 'شماره فاکتور',   mandatory: false },
+  { key: 'basil',   label: 'شماره باسکول',   mandatory: false },
+  { key: 'waybill', label: 'شماره بارنامه',  mandatory: false },
+  { key: 'notes',   label: 'توضیحات',       mandatory: false },
+  { key: 'creator', label: 'ثبت‌کننده',      mandatory: false }
+];
+
+function initVisibleFieldsDefault(){const o={};ALL_FIELDS.forEach(f=>o[f.key]=true);return o;}
+function loadDisplaySettings(){
+  const s = parseInt(localStorage.getItem('wh_print_font_scale')||'100', 10);
+  printFontScale = [75,100,150,200].includes(s) ? s : 100;
+  const m = localStorage.getItem('wh_data_mode')||'weighted';
+  dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
+  summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
+  letterheadCompany = localStorage.getItem('wh_letterhead_company') || 'شرکت صنایع غذایی سایه سار صنوبر آریا';
+  letterheadFactory = localStorage.getItem('wh_letterhead_factory') || 'کارخانه قند صنوبر';
+  
+  try{
+    const raw = localStorage.getItem('wh_visible_fields');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      const def = initVisibleFieldsDefault();
+      ALL_FIELDS.forEach(f=>{
+        if(f.mandatory){def[f.key]=true;}
+        else if(parsed && typeof parsed[f.key]==='boolean'){def[f.key]=parsed[f.key];}
+      });
+      visibleFields=def;
+    }else{visibleFields=initVisibleFieldsDefault();}
+  }catch(e){visibleFields=initVisibleFieldsDefault();}
+
+  applyPrintFontScale();
+  const fs = document.getElementById('fontScaleSelect'); if(fs) fs.value = String(printFontScale);
+  const dm = document.getElementById('dataModeSelect'); if(dm) dm.value = dataMode;
+  const lc = document.getElementById('letterheadCompany'); if(lc) lc.value = letterheadCompany;
+  const lf = document.getElementById('letterheadFactory'); if(lf) lf.value = letterheadFactory;
+  
+  renderFieldsList();
+  applyFieldVisibility();
+}
+function saveLetterhead(){
+  letterheadCompany = document.getElementById('letterheadCompany').value.trim();
+  letterheadFactory = document.getElementById('letterheadFactory').value.trim();
+  localStorage.setItem('wh_letterhead_company', letterheadCompany);
+  localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+}
+function applyPrintFontScale(){ document.documentElement.style.setProperty('--pf', String(printFontScale/100)); }
+function setPrintFontScale(scale){ printFontScale = scale; localStorage.setItem('wh_print_font_scale', String(scale)); applyPrintFontScale(); }
+function setDataMode(mode){ dataMode = mode; localStorage.setItem('wh_data_mode', mode); renderRecords(); }
+function applyDarkMode(){ document.body.classList.toggle('dark', localStorage.getItem('lab_darkmode')==='1'); }
+function toggleDarkMode(on){ localStorage.setItem('lab_darkmode', on?'1':'0'); applyDarkMode(); }
+
+function isFieldVisible(key){
+  if(key === 'weight' && dataMode === 'numeric') return false;
+  const f = ALL_FIELDS.find(x=>x.key===key);
+  if(f && f.mandatory) return true;
+  return !!visibleFields[key];
+}
+function toggleFieldVisibility(key, checked){
+  const f = ALL_FIELDS.find(x=>x.key===key);
+  if(f && f.mandatory) return;
+  visibleFields[key] = !!checked;
+  localStorage.setItem('wh_visible_fields',JSON.stringify(visibleFields));
+  applyFieldVisibility();
+  renderRecords();
+}
+function renderFieldsList(){
+  const container = document.getElementById('fieldsList');
+  if(!container) return;
+  container.innerHTML = ALL_FIELDS.map(f=>{
+    const isMandatory = f.mandatory;
+    const disabled = isMandatory;
+    let checked;
+    if(isMandatory) checked = true;
+    else checked = !!visibleFields[f.key];
+    let note = '';
+    if(isMandatory) note = '<span class="field-note mandatory" style="color:var(--primary);">(الزامی)</span>';
+    return `<label class="field-checkbox${disabled?' disabled':''}">
+      <input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleFieldVisibility('${f.key}', this.checked)">
+      <span class="field-label">${esc(f.label)}</span>${note}
+    </label>`;
+  }).join('');
+}
+function applyFieldVisibility(){
+  document.querySelectorAll('.records-table-scroll').forEach(container=>{
+    ALL_FIELDS.forEach(f=>{
+      container.classList.toggle('hide-field-'+f.key, !isFieldVisible(f.key));
+    });
+  });
+}
+
 /* ─── Bootstrap ─── */
 window.addEventListener('DOMContentLoaded', async ()=>{
   (function(){
@@ -85,10 +190,8 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
-  ssProduct = new SearchableSelect(document.getElementById('ss_product'), {
-    allowAdd: false,
-    onChange: onProductChange
-  });
+  // Initialize Searchable Selects
+  ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
     onAdd: async (name)=>{
@@ -113,9 +216,21 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       }
     }
   });
-  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), {
-    allowAdd: false,
-    onChange: ()=>updateAutoKg()
+  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
+
+  // Advanced Filters Searchable Selects
+  ssAdvProduct = new SearchableSelect(document.getElementById('ss_adv_product'), { allowAdd: false, onChange: onAdvProductChange });
+  ssAdvSubtype = new SearchableSelect(document.getElementById('ss_adv_subtype'), { allowAdd: false, onChange: applyAdvFilterChange });
+  ssAdvParty = new SearchableSelect(document.getElementById('ss_adv_party'), { allowAdd: false, onChange: applyAdvFilterChange });
+  ssAdvDriver = new SearchableSelect(document.getElementById('ss_adv_driver'), { allowAdd: false, onChange: applyAdvFilterChange });
+
+  // Search Clear logic
+  const searchInput = document.getElementById('search');
+  const searchClear = document.getElementById('searchClear');
+  searchInput.addEventListener('input', ()=>{
+    if(searchInput.value.length > 0) searchClear.classList.add('show');
+    else searchClear.classList.remove('show');
+    onSearchInput();
   });
 
   const sess = loadSession();
@@ -141,6 +256,13 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     }
   }
 });
+
+function clearSearch(){
+  const inp = document.getElementById('search');
+  inp.value = '';
+  document.getElementById('searchClear').classList.remove('show');
+  renderRecords();
+}
 
 async function doLogin(){
   const errEl = document.getElementById('loginError');
@@ -293,23 +415,6 @@ function logout(){
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
 }
-
-/* ─── Display settings ─── */
-function loadDisplaySettings(){
-  const s = parseInt(localStorage.getItem('wh_print_font_scale')||'100', 10);
-  printFontScale = [75,100,150,200].includes(s) ? s : 100;
-  const m = localStorage.getItem('wh_data_mode')||'weighted';
-  dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
-  summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
-  applyPrintFontScale();
-  const fs = document.getElementById('fontScaleSelect'); if(fs) fs.value = String(printFontScale);
-  const dm = document.getElementById('dataModeSelect'); if(dm) dm.value = dataMode;
-}
-function applyPrintFontScale(){ document.documentElement.style.setProperty('--pf', String(printFontScale/100)); }
-function setPrintFontScale(scale){ printFontScale = scale; localStorage.setItem('wh_print_font_scale', String(scale)); applyPrintFontScale(); }
-function setDataMode(mode){ dataMode = mode; localStorage.setItem('wh_data_mode', mode); renderRecords(); }
-function applyDarkMode(){ document.body.classList.toggle('dark', localStorage.getItem('lab_darkmode')==='1'); }
-function toggleDarkMode(on){ localStorage.setItem('lab_darkmode', on?'1':'0'); applyDarkMode(); }
 
 /* ─── Drawer & Accordion ─── */
 function openDrawer(){
@@ -737,20 +842,20 @@ function renderRecords(){
       <button class="btn btn-danger btn-sm" onclick="delRecord(${r.id})" title="حذف">🗑️</button>
     ` : `<button class="btn btn-info btn-sm" onclick="viewRecord(${r.id})" title="مشاهده/چاپ">👁️</button>`;
     return `<tr class="${rowCls}" ${isUnsaved?'title="ذخیره‌نشده"':''}>
-      <td>${esc(toFa(r.date))}</td>
-      <td>${esc(toFa(r.time))}</td>
-      <td><b>${esc(r.product||'-')}</b></td>
-      <td>${esc(r.subtype||'-')}</td>
-      <td>${fmtQty(r.quantity)}</td>
-      <td>${esc(u)}</td>
-      <td style="color:var(--primary);font-weight:bold;">${fmtKg(kg)}</td>
-      <td>${esc(r.party||'-')}</td>
-      <td>${esc(r.driver||'-')}</td>
-      <td>${esc(r.invoiceNumber||'-')}</td>
-      <td>${esc(r.basilNumber||'-')}</td>
-      <td>${esc(r.waybillNumber||'-')}</td>
-      <td>${esc(r.notes||'')}</td>
-      <td><span class="audit-info" title="${esc(auditTitle)}">👤 ${esc(r.createdByName||'-')}</span></td>
+      <td data-field="date">${esc(toFa(r.date))}</td>
+      <td data-field="time">${esc(toFa(r.time))}</td>
+      <td data-field="product"><b>${esc(r.product||'-')}</b></td>
+      <td data-field="subtype">${esc(r.subtype||'-')}</td>
+      <td data-field="quantity">${fmtQty(r.quantity)}</td>
+      <td data-field="unit">${esc(u)}</td>
+      <td data-field="weight" style="color:var(--primary);font-weight:bold;">${fmtKg(kg)}</td>
+      <td data-field="party">${esc(r.party||'-')}</td>
+      <td data-field="driver">${esc(r.driver||'-')}</td>
+      <td data-field="invoice">${esc(r.invoiceNumber||'-')}</td>
+      <td data-field="basil">${esc(r.basilNumber||'-')}</td>
+      <td data-field="waybill">${esc(r.waybillNumber||'-')}</td>
+      <td data-field="notes">${esc(r.notes||'')}</td>
+      <td data-field="creator"><span class="audit-info" title="${esc(auditTitle)}">👤 ${esc(r.createdByName||'-')}</span></td>
       <td><div style="display:flex;gap:4px;justify-content:flex-end;">${btns}</div></td>
     </tr>`;
   };
@@ -774,11 +879,26 @@ function renderRecords(){
     document.getElementById('outEmpty').style.display = 'block';
   }
 
+  updateFilterBadges();
   renderSummary();
   buildAdvFilterOptions();
   renderDeletedRecords();
   updateDeletedUI();
   updateSyncBar();
+}
+
+function updateFilterBadges(){
+  const q = (document.getElementById('search')?.value||'').trim();
+  const searchBadge = document.getElementById('searchBadge');
+  if(searchBadge){
+    searchBadge.hidden = !q;
+  }
+  const advActive = Object.values(advFilter).filter(v=>v && v.trim()).length;
+  const advFilterBadge = document.getElementById('advFilterBadge');
+  if(advFilterBadge){
+    advFilterBadge.hidden = advActive === 0;
+    if(advActive > 0) advFilterBadge.textContent = toFa(advActive);
+  }
 }
 
 /* ─── Filters ─── */
@@ -787,18 +907,17 @@ function onSearchInput(){
   _searchTimer = setTimeout(renderRecords, 200);
 }
 function onAdvProductChange(){
-  advFilter.product = document.getElementById('adv_product').value;
+  advFilter.product = ssAdvProduct.getValue();
   advFilter.subtype = '';
   buildAdvFilterOptions();
   renderRecords();
 }
 function applyAdvFilterChange(){
-  advFilter.product = document.getElementById('adv_product').value;
-  advFilter.subtype = document.getElementById('adv_subtype').value;
-  advFilter.party = document.getElementById('adv_party').value;
-  advFilter.driver = document.getElementById('adv_driver').value;
+  advFilter.product = ssAdvProduct.getValue();
+  advFilter.subtype = ssAdvSubtype.getValue();
+  advFilter.party = ssAdvParty.getValue();
+  advFilter.driver = ssAdvDriver.getValue();
   updateAdvFilterChips();
-  updateAdvFilterBadge();
   renderRecords();
 }
 function buildAdvFilterOptions(){
@@ -816,30 +935,36 @@ function buildAdvFilterOptions(){
     if(r.party) partiesSet.add(r.party);
     if(r.driver) driversSet.add(r.driver);
   });
-  const pSel = document.getElementById('adv_product');
-  pSel.innerHTML = '<option value="">همه</option>' + Array.from(productsSet).sort((a,b)=>a.localeCompare(b,'fa')).map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
-  if(productsSet.has(advFilter.product)) pSel.value = advFilter.product; else advFilter.product = '';
-  const sSel = document.getElementById('adv_subtype');
-  sSel.innerHTML = '<option value="">همه</option>';
+  
+  const pArr = Array.from(productsSet).sort((a,b)=>a.localeCompare(b,'fa'));
+  ssAdvProduct.setOptions([{value:'',label:'همه'}, ...pArr.map(p=>({value:p, label:p}))]);
+  if(productsSet.has(advFilter.product)) ssAdvProduct.setValue(advFilter.product); else { advFilter.product = ''; ssAdvProduct.clear(); }
+
+  const sArr = [];
   if(advFilter.product && subtypesByProduct.has(advFilter.product)){
-    const subs = Array.from(subtypesByProduct.get(advFilter.product)).sort((a,b)=>a.localeCompare(b,'fa'));
-    sSel.innerHTML += subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-    if(subs.includes(advFilter.subtype)) sSel.value = advFilter.subtype; else advFilter.subtype = '';
-  } else advFilter.subtype = '';
-  const ptSel = document.getElementById('adv_party');
-  ptSel.innerHTML = '<option value="">همه</option>' + Array.from(partiesSet).sort((a,b)=>a.localeCompare(b,'fa')).map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
-  if(partiesSet.has(advFilter.party)) ptSel.value = advFilter.party; else advFilter.party = '';
-  const dSel = document.getElementById('adv_driver');
-  dSel.innerHTML = '<option value="">همه</option>' + Array.from(driversSet).sort((a,b)=>a.localeCompare(b,'fa')).map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
-  if(driversSet.has(advFilter.driver)) dSel.value = advFilter.driver; else advFilter.driver = '';
-  updateAdvFilterChips(); updateAdvFilterBadge();
+    Array.from(subtypesByProduct.get(advFilter.product)).sort((a,b)=>a.localeCompare(b,'fa')).forEach(s => sArr.push(s));
+  }
+  ssAdvSubtype.setOptions([{value:'',label:'همه'}, ...sArr.map(s=>({value:s, label:s}))]);
+  if(sArr.includes(advFilter.subtype)) ssAdvSubtype.setValue(advFilter.subtype); else { advFilter.subtype = ''; ssAdvSubtype.clear(); }
+
+  const ptArr = Array.from(partiesSet).sort((a,b)=>a.localeCompare(b,'fa'));
+  ssAdvParty.setOptions([{value:'',label:'همه'}, ...ptArr.map(p=>({value:p, label:p}))]);
+  if(partiesSet.has(advFilter.party)) ssAdvParty.setValue(advFilter.party); else { advFilter.party = ''; ssAdvParty.clear(); }
+
+  const dArr = Array.from(driversSet).sort((a,b)=>a.localeCompare(b,'fa'));
+  ssAdvDriver.setOptions([{value:'',label:'همه'}, ...dArr.map(p=>({value:p, label:p}))]);
+  if(driversSet.has(advFilter.driver)) ssAdvDriver.setValue(advFilter.driver); else { advFilter.driver = ''; ssAdvDriver.clear(); }
+
+  updateAdvFilterChips(); 
 }
-function removeAdvFilter(key){ advFilter[key]=''; buildAdvFilterOptions(); renderRecords(); }
-function updateAdvFilterBadge(){
-  const cnt = Object.values(advFilter).filter(v=>v && v.trim()).length;
-  const b = document.getElementById('advFilterBadge');
-  if(!b) return;
-  b.hidden = cnt===0; if(cnt>0) b.textContent = toFa(cnt);
+function removeAdvFilter(key){ 
+  advFilter[key]=''; 
+  if(key==='product') ssAdvProduct.clear();
+  if(key==='subtype') ssAdvSubtype.clear();
+  if(key==='party') ssAdvParty.clear();
+  if(key==='driver') ssAdvDriver.clear();
+  buildAdvFilterOptions(); 
+  renderRecords(); 
 }
 function updateAdvFilterChips(){
   const c = document.getElementById('advFilterChips');
@@ -1142,8 +1267,8 @@ function buildReceipt(r, showLetterhead){
   const fullProduct = productFullName(r);
   let head = '';
   if(showLetterhead){
-    head = `<div class="p-receipt-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
-            <div class="p-receipt-factory">کارخانه قند صنوبر — واحد انبار</div>`;
+    head = `<div class="p-receipt-company">${esc(letterheadCompany)}</div>
+            <div class="p-receipt-factory">${esc(letterheadFactory)} — واحد انبار</div>`;
   }
   const qtyRow = (r.quantity && String(r.quantity).trim()) ? 
     `<div class="p-receipt-row"><span class="p-receipt-lbl">تعداد</span><span class="p-receipt-val">${fmtQty(r.quantity)} ${esc(unit)}</span></div>` : '';
@@ -1203,7 +1328,7 @@ function runPrint(html, rule){
     setTimeout(cleanup, 3000);
   }, 200);
 }
-function buildPrintHeader(){ return `<div class="p-letterhead"><div class="p-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div><div class="p-factory">کارخانه قند صنوبر</div></div>`; }
+function buildPrintHeader(){ return `<div class="p-letterhead"><div class="p-company">${esc(letterheadCompany)}</div><div class="p-factory">${esc(letterheadFactory)}</div></div>`; }
 function buildSignature(){
   return `<div class="p-signature">
     <div class="p-sig-box"><div class="p-sig-label">نام و امضاء انباردار</div><div class="p-sig-space"></div><div class="p-sig-hint">(امضاء)</div></div>
@@ -1440,7 +1565,6 @@ function buildDailySummaryPrintBlock(data){
   const hasN = nonWeightedIn.length+nonWeightedOut.length>0;
   const wIn=weightedIn.length, wOut=weightedOut.length, nIn=nonWeightedIn.length, nOut=nonWeightedOut.length;
   
-  // Added 2 columns for daily totals
   const header1 = `<tr><th rowspan="3" style="border:2px solid #000; width:10%;">تاریخ</th>
     ${hasW?`<th colspan="${wIn+wOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای وزنی</th>`:''}
     ${hasN?`<th colspan="${nIn+nOut}" style="border:2px solid #000;background:#e5e5e5!important;">کالاهای شمارشی</th>`:''}
@@ -1512,7 +1636,7 @@ function exportCSV(type){
     const u = r.unit ? unitLabel(r.unit) : (p ? unitLabel(p.unit) : '');
     rows.push([i+1, toLatinDigits(r.date||''), toLatinDigits(r.time||''), r.product||'', r.subtype||'', toLatinDigits(r.quantity||''), u, getRecordKg(r), r.party||'', r.driver||'', r.invoiceNumber||'', r.basilNumber||'', r.waybillNumber||'', r.notes||'', r.createdByName||'']);
   });
-  const csv = rows.map(r=>r.map(c=>{ const s = String(c==null?'':c); return /[,"\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',')).join('\r\n');
+  const csv = rows.map(r=>r.map(c=>{ const s = String(c==null?'':c); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',')).join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = `warehouse-${type}-${Date.now()}.csv`;
@@ -1587,14 +1711,22 @@ async function deleteProductFromSettings(index){
 function renderManageProducts(){
   const el = document.getElementById('manageProducts'); if(!el) return;
   if(!products.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">خالی</div>'; return; }
-  el.innerHTML = products.map((p,i)=>{
+  
+  const q = (document.getElementById('searchProductList')?.value || '').trim().toLowerCase();
+  const filtered = products.map((p, i) => ({p, originalIndex: i})).filter(item => 
+    !q || item.p.name.toLowerCase().includes(q)
+  );
+
+  if(!filtered.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">یافت نشد</div>'; return; }
+
+  el.innerHTML = filtered.map(({p, originalIndex}) => {
     const subs = (p.subtypes||[]).filter(s=>s&&s.trim());
     const subHtml = subs.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">${subs.map(s=>`<span style="font-size:10.5px;background:var(--card);color:var(--primary-dark);padding:2px 8px;border-radius:10px;border:1px solid var(--border);font-weight:bold;">${esc(s)}</span>`).join('')}</div>` : '';
     return `<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:var(--subtle-bg);border:1px solid var(--border);margin-bottom:6px;">
       <div style="flex:1;min-width:0;"><div style="font-size:12.5px;font-weight:bold;">📦 ${esc(p.name)} <span style="font-size:10px;color:var(--muted);font-weight:normal;">${esc(unitLabel(p.unit))}</span></div>${subHtml}</div>
       <div style="display:flex;gap:4px;">
-        <button class="btn btn-sm btn-warning" onclick="editProductInSettings(${i})">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteProductFromSettings(${i})">🗑️</button>
+        <button class="btn btn-sm btn-warning" onclick="editProductInSettings(${originalIndex})">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProductFromSettings(${originalIndex})">🗑️</button>
       </div>
     </div>`;
   }).join('');
@@ -1620,9 +1752,14 @@ async function menuAddUnit(){
 
 function renderManageLists(){
   renderUnitsList();
-  renderPartyList('manageSellers', sellers, 'seller');
-  renderPartyList('manageBuyers', buyers, 'buyer');
-  renderPartyList('manageDrivers', drivers, 'driver');
+  
+  const qS = (document.getElementById('searchSellerList')?.value || '').trim().toLowerCase();
+  const qB = (document.getElementById('searchBuyerList')?.value || '').trim().toLowerCase();
+  const qD = (document.getElementById('searchDriverList')?.value || '').trim().toLowerCase();
+
+  renderPartyList('manageSellers', sellers, 'seller', qS);
+  renderPartyList('manageBuyers', buyers, 'buyer', qB);
+  renderPartyList('manageDrivers', drivers, 'driver', qD);
 }
 function renderUnitsList(){
   const uc = document.getElementById('manageUnits'); if(!uc) return;
@@ -1636,13 +1773,20 @@ function renderUnitsList(){
     </div>`;
   }).join('') + '<div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;">برای ویرایش واحدها به پنل مدیریت بروید</div>';
 }
-function renderPartyList(id, list, kind){
+function renderPartyList(id, list, kind, query){
   const el = document.getElementById(id); if(!el) return;
   if(!list.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px;">خالی</div>'; return; }
-  el.innerHTML = list.map((name,i)=>`
+  
+  const filtered = list.map((name, i) => ({name, originalIndex: i})).filter(item => 
+    !query || item.name.toLowerCase().includes(query)
+  );
+  
+  if(!filtered.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px;">یافت نشد</div>'; return; }
+
+  el.innerHTML = filtered.map(({name, originalIndex})=>`
     <div style="display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:4px;">
       <input type="text" value="${esc(name)}" style="padding:6px;font-size:11.5px;" readonly>
-      <button class="btn btn-sm btn-danger" onclick="removePartyGlobal('${kind}',${i})">🗑️</button>
+      <button class="btn btn-sm btn-danger" onclick="removePartyGlobal('${kind}',${originalIndex})">🗑️</button>
     </div>
   `).join('');
 }

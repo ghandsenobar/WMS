@@ -146,7 +146,7 @@ function showUserModal(user){
   document.getElementById('umUsername').disabled = !!user;
   document.getElementById('umDisplay').value = user ? (user.displayName||'') : '';
   document.getElementById('umPassword').value = '';
-  document.getElementById('umPassword').placeholder = user ? 'برای تغییر، پر کنید' : 'حداقل ۶ کاراکتر';
+  document.getElementById('umPassword').placeholder = user ? 'برای تغییر، پر کنید' : 'حداقل ۴ کاراکتر';
   document.getElementById('umRole').value = user ? user.role : 'operator';
   document.getElementById('umActive').checked = user ? user.active !== false : true;
   document.getElementById('userModalOverlay').classList.add('show');
@@ -163,7 +163,7 @@ async function saveUser(){
   const active = document.getElementById('umActive').checked;
 
   if(!username){ showToast('نام کاربری الزامی','warning'); return; }
-  if(!editId && (!password || password.length<4)){ showToast('رمز حداقل ۶ کاراکتر','warning'); return; }
+  if(!editId && (!password || password.length<4)){ showToast('رمز حداقل ۴ کاراکتر','warning'); return; }
 
   if(editId){
     const user = users.find(u=>u.id===editId);
@@ -174,7 +174,7 @@ async function saveUser(){
     user.role = role;
     user.active = active;
     if(password){
-      if(password.length<6){ showToast('رمز کوتاه','warning'); return; }
+      if(password.length<4){ showToast('رمز کوتاه','warning'); return; }
       user.salt = generateSalt();
       user.passwordHash = await hashPassword(password, user.salt);
     }
@@ -214,7 +214,7 @@ async function deleteUser(id){
   showToast('حذف شد','success');
 }
 
-/* ─── Records panel ─── */
+/* ─── Records panel (Bulk Edit) ─── */
 function renderRecordsPanel(){
   const vis = records.filter(r=>!r.deleted);
   document.getElementById('recordsStats').innerHTML = `
@@ -234,8 +234,52 @@ function renderRecordsPanel(){
       <td>${fmtQty(r.quantity)}</td>
       <td>${esc(r.createdByName||'-')}</td>
       <td>${esc(r.updatedByName||'-')} <br><span style="font-size:10.5px;color:var(--muted);">${formatTime(r.updatedAt)}</span></td>
+      <td><button class="btn btn-sm btn-warning" onclick="editCreator('${r.id}')" title="ویرایش ثبت‌کننده">✏️</button></td>
     </tr>
   `).join('');
+}
+
+async function editCreator(id){
+  const r = records.find(x=>x.id===id);
+  if(!r) return;
+  const newName = await customPrompt('نام جدید ثبت‌کننده:', r.createdByName || '');
+  if(!newName || !newName.trim()) return;
+  r.createdByName = newName.trim();
+  r.updatedByName = currentUser.displayName || currentUser.username;
+  r.updatedAt = Date.now();
+  dirty = true;
+  auditLog.push({ t:Date.now(), action:'update', userId:currentUser.id, userName:currentUser.displayName||currentUser.username, detail:`تغییر ثبت‌کننده رکورد ${r.id} به ${newName}`, recordId:r.id });
+  renderRecordsPanel();
+  updateAdminSyncStatus();
+  showToast('نام ثبت‌کننده تغییر کرد','success');
+}
+
+async function bulkChangeCreator(){
+  const oldName = document.getElementById('bulkOldCreator').value.trim();
+  const newName = document.getElementById('bulkNewCreator').value.trim();
+  if(!newName){ showToast('نام جدید الزامی است','warning'); return; }
+  
+  const count = records.filter(r => !oldName || r.createdByName === oldName).length;
+  if(count === 0){ showToast('رکوردی با این نام یافت نشد','info'); return; }
+  
+  const ok = await customConfirm(`نام ثبت‌کننده ${toFa(count)} رکورد تغییر کند؟`, {okText:'بله، تغییر بده'});
+  if(!ok) return;
+
+  records.forEach(r => {
+    if(!oldName || r.createdByName === oldName) {
+      r.createdByName = newName;
+      r.updatedByName = currentUser.displayName || currentUser.username;
+      r.updatedAt = Date.now();
+    }
+  });
+  
+  dirty = true;
+  auditLog.push({ t:Date.now(), action:'update', userId:currentUser.id, userName:currentUser.displayName||currentUser.username, detail:`تغییر گروهی ثبت‌کننده به ${newName}`, recordId:null });
+  document.getElementById('bulkOldCreator').value = '';
+  document.getElementById('bulkNewCreator').value = '';
+  renderRecordsPanel();
+  updateAdminSyncStatus();
+  showToast(`ثبت‌کننده ${toFa(count)} رکورد تغییر کرد`, 'success');
 }
 
 /* ─── Audit ─── */
@@ -343,7 +387,6 @@ async function adminRestore(ev){
     users = parsed.users && parsed.users.length ? parsed.users : users;
     auditLog = [...auditLog, ...parsed.auditLog].slice(-800);
     
-    // ادغام واحدها، فروشندگان، خریداران و رانندگان
     const unitMap = new Map();
     [...unitsList, ...(parsed.unitsList || [])].forEach(u => {
       if(u && u.v && !unitMap.has(u.v)) unitMap.set(u.v, u);

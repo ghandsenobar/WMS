@@ -101,7 +101,6 @@ class SearchableSelect{
   }
   setOptions(opts){
     this.options = (opts||[]).map(o => typeof o === 'string' ? {value:o, label:o} : o);
-    // Update label if currently selected value exists
     if(this.hidden.value){
       const found = this.options.find(o => o.value === this.hidden.value);
       if(found) this.input.value = found.label;
@@ -130,7 +129,6 @@ class SearchableSelect{
   }
   _open(){
     if(!this.dropdown.hidden) return;
-    // Close other popups
     if(typeof closeCalendar === 'function') closeCalendar();
     if(typeof closeTimePicker === 'function') closeTimePicker();
     document.querySelectorAll('.ss-dropdown').forEach(d => { if(d !== this.dropdown) d.hidden = true; });
