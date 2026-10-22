@@ -52,6 +52,7 @@
       <button class="admin-nav-btn" data-panel="database" onclick="showPanel('database')"><span class="admin-nav-icon">💾</span> دیتابیس</button>
       <button class="admin-nav-btn" data-panel="system" onclick="showPanel('system')"><span class="admin-nav-icon">⚙️</span> سیستم</button>
     </aside>
+    
     <main class="admin-content" id="adminContent">
       
       <div class="admin-panel active" id="panel-dashboard">
@@ -78,11 +79,21 @@
         
         <div class="admin-section">
           <div class="admin-section-title">تغییر گروهی نام ثبت‌کننده</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="text" id="bulkOldCreator" placeholder="از نام..." style="flex:1;min-width:150px;padding:8px;">
-            <input type="text" id="bulkNewCreator" placeholder="به نام..." style="flex:1;min-width:150px;padding:8px;">
-            <button class="btn btn-warning" onclick="bulkChangeCreator()">🔄 اعمال تغییرات</button>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div class="field">
+              <label>از ثبت‌کننده:</label>
+              <select id="bulkOldCreator" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);">
+                <option value="">همه رکوردها</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>به ثبت‌کننده (کاربر):</label>
+              <select id="bulkNewCreator" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);">
+                <option value="">انتخاب کنید...</option>
+              </select>
+            </div>
           </div>
+          <button class="btn btn-warning" style="width:100%;" onclick="bulkChangeCreator()">🔄 اعمال تغییرات گروهی</button>
         </div>
 
         <div class="admin-section">
@@ -104,7 +115,7 @@
       <div class="admin-panel" id="panel-audit">
         <h2 class="admin-panel-title">📜 لاگ عملیات</h2>
         <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
-          <select id="auditFilter" onchange="renderAudit()" style="max-width:200px;padding:8px;border-radius:8px;">
+          <select id="auditFilter" onchange="renderAudit()" style="max-width:200px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);">
             <option value="">همه عملیات</option>
             <option value="create">ثبت</option>
             <option value="update">ویرایش</option>
@@ -161,6 +172,7 @@
   </div>
 </div>
 
+<!-- General Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <div class="modal-msg" id="modalMsg"></div>
@@ -173,6 +185,7 @@
   </div>
 </div>
 
+<!-- User Modal -->
 <div class="modal-overlay" id="userModalOverlay">
   <div class="modal-box" style="max-width:520px;">
     <h3 style="margin-bottom:14px;" id="userModalTitle">کاربر جدید</h3>
@@ -180,11 +193,26 @@
     <div class="field" style="margin-bottom:10px;"><label>نام کاربری</label><input id="umUsername" type="text"></div>
     <div class="field" style="margin-bottom:10px;"><label>نام نمایشی</label><input id="umDisplay" type="text"></div>
     <div class="field" style="margin-bottom:10px;" id="passField"><label>رمز عبور</label><input id="umPassword" type="password" placeholder="حداقل ۴ کاراکتر"></div>
-    <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole" style="padding:10px;border-radius:8px;"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
+    <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
     <div class="field" style="margin-bottom:16px;"><label><input type="checkbox" id="umActive" checked style="width:auto;margin-left:8px;"> فعال باشد</label></div>
     <div class="modal-btns">
       <button class="modal-btn modal-cancel" onclick="closeUserModal()">لغو</button>
       <button class="modal-btn modal-ok" onclick="saveUser()">💾 ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Creator Edit Modal -->
+<div class="modal-overlay" id="creatorModalOverlay">
+  <div class="modal-box" style="max-width:400px;">
+    <h3 style="margin-bottom:14px;">ویرایش ثبت‌کننده رکورد</h3>
+    <div class="field" style="margin-bottom:16px;">
+      <label>انتخاب کاربر جدید</label>
+      <select id="editCreatorSelect" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);"></select>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-cancel" onclick="closeCreatorModal()">لغو</button>
+      <button class="modal-btn modal-ok" onclick="saveCreatorChange()">💾 ذخیره</button>
     </div>
   </div>
 </div>

@@ -15,7 +15,7 @@
   @page{size:A4 portrait;margin:5mm;}
   html{font-size:calc(10px * var(--pf))!important;}
   body{font-size:1rem!important;background:#fff!important;padding:0!important;margin:0!important;color:#000!important;}
-  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,.app-header,.user-pill{display:none!important;}
+  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header,.user-pill,#setupScreen{display:none!important;}
   #printArea{display:block!important;width:100%;}
   #printArea *{color:#000!important;box-shadow:none!important;text-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
@@ -88,7 +88,6 @@
     <div class="login-title">ورود به سیستم انبار</div>
     <div class="login-sub">کارخانه قند صنوبر — نسخه چندکاربره</div>
     
-    <!-- Auto Login Status -->
     <div id="autoLoginStatus" style="display:none; text-align:center; color:var(--primary); font-size:12px; font-weight:bold; margin-bottom:15px;">
       <span class="sync-spin" style="display:inline-block; margin-left:5px;">🔄</span> در حال بازیابی نشست...
     </div>
@@ -121,7 +120,6 @@
     <div class="login-logo">⚙️</div>
     <div class="login-title">تنظیمات اتصال</div>
     
-    <!-- GitHub Configuration Section -->
     <div id="setupGhFields">
       <div class="login-sub" style="margin-bottom:15px; font-size:12px;">اطلاعات گیت‌هاب خود را وارد کنید تا اتصال برقرار شود.</div>
       <div class="login-field"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="ghandsenobar"></div>
@@ -133,7 +131,6 @@
       <button type="button" class="login-btn" onclick="testDbConnection()" style="background:var(--primary);">🔗 تست و اتصال</button>
     </div>
 
-    <!-- Admin Creation Section (Hidden by default) -->
     <div id="setupAdminFields" hidden style="border-top:1px dashed var(--border); margin-top:20px; padding-top:20px;">
       <div class="login-sub" style="color:var(--warning); font-weight:bold; margin-bottom:15px; font-size:12px; background:rgba(245,158,11,.1); padding:10px; border-radius:8px;">
         ✨ این دیتابیس جدید است. لطفاً اولین کاربر (مدیر سیستم) را بسازید.
@@ -152,8 +149,8 @@
 
 <div class="container" id="mainApp" hidden>
   <div class="app-header">
-    <div class="company-name">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
-    <div class="factory-name">کارخانه قند صنوبر</div>
+    <div class="company-name" id="appHeaderCompany" onclick="editLetterhead('company')" style="cursor:pointer;" title="برای ویرایش کلیک کنید"></div>
+    <div class="factory-name" id="appHeaderFactory" onclick="editLetterhead('factory')" style="cursor:pointer;" title="برای ویرایش کلیک کنید"></div>
     <div class="app-title">📦 سیستم مدیریت انبار</div>
     <div class="header-actions">
       <button type="button" class="icon-btn" onclick="openDrawer()" title="تنظیمات">☰</button>
@@ -202,21 +199,22 @@
       
       <div class="field full">
         <label>کالا</label>
-        <div class="field-row">
-          <div class="searchable-select" id="ss_product" style="flex:1;">
-            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
-            <input type="hidden" class="ss-value">
-            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
-          </div>
-          <button type="button" class="btn-add" onclick="addProduct()">+</button>
-          <button type="button" class="btn-remove" onclick="removeProduct()">−</button>
+        <div class="searchable-select" id="ss_product">
+          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+          <input type="hidden" class="ss-value">
+          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
         </div>
       </div>
 
       <div class="field full" id="subtypeField" hidden>
         <label>زیرمجموعه (اختیاری)</label>
-        <select id="f_subtype"></select>
+        <div class="searchable-select" id="ss_subtype">
+          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+          <input type="hidden" class="ss-value">
+          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+        </div>
       </div>
+      
       <div class="field">
         <label>تعداد</label>
         <input id="f_quantity" type="number" step="any" min="0" placeholder="مثلاً: ۱۰۰">
@@ -224,13 +222,10 @@
       
       <div class="field">
         <label>واحد</label>
-        <div class="field-row">
-          <div class="searchable-select" id="ss_unit" style="flex:1;">
-            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
-            <input type="hidden" class="ss-value">
-            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
-          </div>
-          <button type="button" class="btn-add" onclick="addUnitQuick()" title="افزودن واحد جدید">+</button>
+        <div class="searchable-select" id="ss_unit">
+          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+          <input type="hidden" class="ss-value">
+          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
         </div>
       </div>
       
@@ -246,22 +241,31 @@
           </div>
         </div>
       </div>
+      
       <div class="field">
         <label id="f_party_label">طرف حساب</label>
-        <div class="searchable-select" id="ss_party">
-          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
-          <input type="hidden" class="ss-value">
-          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+        <div class="field-row">
+          <div class="searchable-select" id="ss_party" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
+          <button type="button" class="btn-add" onclick="addParty()" title="افزودن سریع">+</button>
         </div>
       </div>
+      
       <div class="field">
         <label>راننده</label>
-        <div class="searchable-select" id="ss_driver">
-          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
-          <input type="hidden" class="ss-value">
-          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+        <div class="field-row">
+          <div class="searchable-select" id="ss_driver" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
+          <button type="button" class="btn-add" onclick="addDriver()" title="افزودن سریع">+</button>
         </div>
       </div>
+      
       <div class="field full">
         <label>شماره فاکتور</label>
         <input id="f_invoice" placeholder="مثلاً: ۱۴۰۴۰۷۱۵-۰۰۱">
@@ -566,11 +570,11 @@
         </div>
         <div class="field" style="margin-bottom:10px;">
           <label>🏢 نام شرکت (سربرگ)</label>
-          <input id="letterheadCompany" type="text" oninput="saveLetterhead()">
+          <input id="letterheadCompanyInput" type="text" onchange="updateLetterhead('company', this.value)">
         </div>
         <div class="field" style="margin-bottom:10px;">
           <label>🏭 نام کارخانه (سربرگ)</label>
-          <input id="letterheadFactory" type="text" oninput="saveLetterhead()">
+          <input id="letterheadFactoryInput" type="text" onchange="updateLetterhead('factory', this.value)">
         </div>
         <div class="field">
           <label>👁️ ستون‌های نمایش داده شده</label>
