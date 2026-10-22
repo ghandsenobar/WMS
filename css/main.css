@@ -134,8 +134,8 @@ textarea{resize:vertical;min-height:52px;}
 /* Searchable Select - Fix Z-Index and Display */
 .searchable-select{position:relative;width:100%;}
 .ss-input{padding-left:32px!important;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");background-repeat:no-repeat;background-position:left 10px center;}
-.ss-dropdown{position:absolute;top:100%;right:0;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.2);max-height:260px;overflow-y:auto;z-index:99999;padding:4px;}
-.ss-dropdown[hidden]{display:none!important;}
+.ss-dropdown{position:absolute;top:100%;right:0;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.2);max-height:260px;overflow-y:auto;z-index:99999;padding:4px; display:none;}
+.ss-dropdown:not([hidden]) { display:block; }
 .ss-item{padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
 .ss-item:hover,.ss-item.active{background:var(--primary);color:#fff;}
 .ss-item.create{color:var(--success);font-weight:bold;border-top:1px dashed var(--border);margin-top:4px;}
