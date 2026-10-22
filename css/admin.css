@@ -5,8 +5,36 @@
   gap: 16px;
   min-height: calc(100vh - 100px);
 }
+
+/* Fix mobile layout for admin panel */
 @media(max-width: 900px) {
-  .admin-layout { grid-template-columns: 1fr; }
+  .admin-layout { 
+    grid-template-columns: 1fr; 
+    gap: 10px;
+  }
+  .admin-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+  }
+  .admin-nav-btn {
+    justify-content: center;
+    padding: 10px 5px;
+    font-size: 12px;
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+  .admin-nav-icon {
+    font-size: 20px;
+  }
+}
+@media(max-width: 500px) {
+  .admin-sidebar {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .admin-sidebar {
@@ -17,6 +45,9 @@
   height: fit-content;
   position: sticky;
   top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .admin-nav-btn {
   display: flex;
@@ -24,9 +55,8 @@
   gap: 10px;
   width: 100%;
   padding: 12px 14px;
-  margin-bottom: 6px;
-  background: transparent;
-  border: none;
+  background: var(--subtle-bg);
+  border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
   font-size: 13.5px;
@@ -35,8 +65,8 @@
   text-align: right;
   transition: all 0.2s;
 }
-.admin-nav-btn:hover { background: var(--subtle-bg); }
-.admin-nav-btn.active { background: var(--primary); color: #fff; }
+.admin-nav-btn:hover { background: var(--border); }
+.admin-nav-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .admin-nav-icon { font-size: 18px; }
 
 .admin-content {
