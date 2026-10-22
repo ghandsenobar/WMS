@@ -15,7 +15,7 @@
   @page{size:A4 portrait;margin:5mm;}
   html{font-size:calc(10px * var(--pf))!important;}
   body{font-size:1rem!important;background:#fff!important;padding:0!important;margin:0!important;color:#000!important;}
-  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header,.user-pill{display:none!important;}
+  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header,.user-pill,#setupScreen{display:none!important;}
   #printArea{display:block!important;width:100%;}
   #printArea *{color:#000!important;box-shadow:none!important;text-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
@@ -81,11 +81,17 @@
 
 <div class="user-pill" id="userPill" hidden></div>
 
+<!-- Login Screen -->
 <div id="loginScreen" hidden>
   <div class="login-box">
     <div class="login-logo">📦</div>
     <div class="login-title">ورود به سیستم انبار</div>
     <div class="login-sub">کارخانه قند صنوبر — نسخه چندکاربره</div>
+    
+    <div id="loginNoConfigWarning" style="display:none; background:rgba(245,158,11,.1); border:1px solid var(--warning); color:var(--warning); padding:10px; border-radius:8px; font-size:12px; margin-bottom:15px; text-align:center; font-weight:bold;">
+      ⚠️ اتصال به دیتابیس برقرار نیست. لطفاً ابتدا از لینک زیر تنظیمات اتصال را وارد کنید.
+    </div>
+
     <div class="login-error" id="loginError" hidden></div>
     <div class="login-field">
       <label>نام کاربری</label>
@@ -96,27 +102,46 @@
       <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••">
     </div>
     <button type="button" class="login-btn" id="loginBtn" onclick="doLogin()">ورود</button>
-    <div style="text-align:center;margin-top:14px;font-size:11.5px;color:var(--muted);">
-      <a href="./admin.html" style="color:var(--primary);text-decoration:none;">🔐 پنل مدیریت</a>
+    
+    <div style="text-align:center; margin-top:20px; font-size:12px; display:flex; flex-direction:column; gap:12px;">
+      <a href="./admin.html" style="color:var(--primary); text-decoration:none; font-weight:bold;">🔐 پنل مدیریت</a>
+      <a href="#" onclick="openSetupScreen()" style="color:var(--muted); text-decoration:none; font-size:11.5px;">⚙️ تنظیمات اتصال به دیتابیس (برای بار اول)</a>
     </div>
   </div>
 </div>
 
+<!-- Setup / Connection Screen -->
 <div id="setupScreen" hidden style="position:fixed;inset:0;background:linear-gradient(160deg,#166534,#052e16);z-index:9997;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div class="login-box" style="max-height:92vh;overflow-y:auto;">
     <div class="login-logo">⚙️</div>
-    <div class="login-title">اتصال به دیتابیس</div>
-    <div class="login-sub" style="color:var(--warning); font-weight:bold; margin-bottom:10px;">اگر قبلاً حساب ساخته‌اید، توکن را وارد کنید تا به صفحه ورود هدایت شوید.</div>
-    <div class="login-field"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="ghandsenobar" value="ghandsenobar"></div>
-    <div class="login-field"><label>Repository</label><input type="text" id="setupRepo" placeholder="Warehouse" value="Warehouse"></div>
-    <div class="login-field"><label>GitHub Token</label><input type="password" id="setupToken" placeholder="github_pat_..."></div>
-    <div style="border-top:1px dashed var(--border); margin:15px 0; padding-top:15px;">
-      <div class="login-sub" style="margin-bottom:10px;">فقط برای کاربر جدید (راه‌اندازی اولیه):</div>
-      <div class="login-field"><label>نام کاربری ادمین جدید</label><input type="text" id="setupUser" placeholder="admin"></div>
+    <div class="login-title">تنظیمات اتصال</div>
+    
+    <!-- GitHub Configuration Section -->
+    <div id="setupGhFields">
+      <div class="login-sub" style="margin-bottom:15px; font-size:12px;">اطلاعات گیت‌هاب خود را وارد کنید تا اتصال برقرار شود.</div>
+      <div class="login-field"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="ghandsenobar"></div>
+      <div class="login-field"><label>Repository</label><input type="text" id="setupRepo" placeholder="Warehouse"></div>
+      <div class="login-field"><label>GitHub Token</label><input type="password" id="setupToken" placeholder="github_pat_..."></div>
+      
+      <div id="ghStatusMsg" style="font-size:12px; text-align:center; margin-bottom:10px; font-weight:bold;"></div>
+      
+      <button type="button" class="login-btn" onclick="testDbConnection()" style="background:var(--primary);">🔗 تست و اتصال</button>
+    </div>
+
+    <!-- Admin Creation Section (Hidden by default) -->
+    <div id="setupAdminFields" hidden style="border-top:1px dashed var(--border); margin-top:20px; padding-top:20px;">
+      <div class="login-sub" style="color:var(--warning); font-weight:bold; margin-bottom:15px; font-size:12px; background:rgba(245,158,11,.1); padding:10px; border-radius:8px;">
+        ✨ این دیتابیس جدید است. لطفاً اولین کاربر (مدیر سیستم) را بسازید.
+      </div>
+      <div class="login-field"><label>نام کاربری ادمین</label><input type="text" id="setupUser" placeholder="admin"></div>
       <div class="login-field"><label>نام نمایشی</label><input type="text" id="setupDisplay" placeholder="مدیر سیستم"></div>
       <div class="login-field"><label>رمز عبور (حداقل ۴ رقم/حرف)</label><input type="password" id="setupPass" placeholder="••••"></div>
+      <button type="button" class="login-btn" onclick="doFirstSetup()" style="background:var(--success);">✅ ایجاد ادمین و ورود</button>
     </div>
-    <button type="button" class="login-btn" onclick="doFirstSetup()">اتصال / ایجاد و ورود</button>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a href="#" onclick="closeSetupScreen()" style="color:var(--muted); text-decoration:none; font-size:12px;">← بازگشت به صفحه ورود</a>
+    </div>
   </div>
 </div>
 

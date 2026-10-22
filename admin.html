@@ -53,10 +53,12 @@
       <button class="admin-nav-btn" data-panel="system" onclick="showPanel('system')"><span class="admin-nav-icon">⚙️</span> سیستم</button>
     </aside>
     <main class="admin-content" id="adminContent">
+      
       <div class="admin-panel active" id="panel-dashboard">
         <h2 class="admin-panel-title">📊 داشبورد</h2>
         <div class="stat-grid" id="statGrid"></div>
       </div>
+      
       <div class="admin-panel" id="panel-users">
         <h2 class="admin-panel-title">👥 مدیریت کاربران</h2>
         <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
@@ -70,6 +72,7 @@
           </table>
         </div>
       </div>
+      
       <div class="admin-panel" id="panel-records">
         <h2 class="admin-panel-title">📋 رکوردها (نمای کلی)</h2>
         
@@ -86,6 +89,7 @@
           <div class="admin-section-title">آمار سریع</div>
           <div id="recordsStats"></div>
         </div>
+        
         <div class="admin-section">
           <div class="admin-section-title">رکوردهای آخر (۱۵ مورد)</div>
           <div style="overflow-x:auto;">
@@ -96,10 +100,11 @@
           </div>
         </div>
       </div>
+      
       <div class="admin-panel" id="panel-audit">
         <h2 class="admin-panel-title">📜 لاگ عملیات</h2>
         <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
-          <select id="auditFilter" onchange="renderAudit()" style="max-width:200px;">
+          <select id="auditFilter" onchange="renderAudit()" style="max-width:200px;padding:8px;border-radius:8px;">
             <option value="">همه عملیات</option>
             <option value="create">ثبت</option>
             <option value="update">ویرایش</option>
@@ -111,6 +116,7 @@
         </div>
         <div id="auditList" style="background:var(--card);border-radius:8px;border:1px solid var(--border);max-height:600px;overflow-y:auto;"></div>
       </div>
+      
       <div class="admin-panel" id="panel-database">
         <h2 class="admin-panel-title">💾 مدیریت دیتابیس</h2>
         <div class="admin-section">
@@ -142,6 +148,7 @@
           </div>
         </div>
       </div>
+      
       <div class="admin-panel" id="panel-system">
         <h2 class="admin-panel-title">⚙️ اطلاعات سیستم</h2>
         <div class="admin-section">
@@ -149,6 +156,7 @@
           <div id="systemInfo"></div>
         </div>
       </div>
+      
     </main>
   </div>
 </div>
@@ -172,8 +180,8 @@
     <div class="field" style="margin-bottom:10px;"><label>نام کاربری</label><input id="umUsername" type="text"></div>
     <div class="field" style="margin-bottom:10px;"><label>نام نمایشی</label><input id="umDisplay" type="text"></div>
     <div class="field" style="margin-bottom:10px;" id="passField"><label>رمز عبور</label><input id="umPassword" type="password" placeholder="حداقل ۴ کاراکتر"></div>
-    <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
-    <div class="field" style="margin-bottom:16px;"><label><input type="checkbox" id="umActive" checked style="width:auto;"> فعال</label></div>
+    <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole" style="padding:10px;border-radius:8px;"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
+    <div class="field" style="margin-bottom:16px;"><label><input type="checkbox" id="umActive" checked style="width:auto;margin-left:8px;"> فعال باشد</label></div>
     <div class="modal-btns">
       <button class="modal-btn modal-cancel" onclick="closeUserModal()">لغو</button>
       <button class="modal-btn modal-ok" onclick="saveUser()">💾 ذخیره</button>
