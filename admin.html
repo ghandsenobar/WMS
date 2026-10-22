@@ -72,6 +72,16 @@
       </div>
       <div class="admin-panel" id="panel-records">
         <h2 class="admin-panel-title">📋 رکوردها (نمای کلی)</h2>
+        
+        <div class="admin-section">
+          <div class="admin-section-title">تغییر گروهی نام ثبت‌کننده</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="bulkOldCreator" placeholder="از نام..." style="flex:1;min-width:150px;padding:8px;">
+            <input type="text" id="bulkNewCreator" placeholder="به نام..." style="flex:1;min-width:150px;padding:8px;">
+            <button class="btn btn-warning" onclick="bulkChangeCreator()">🔄 اعمال تغییرات</button>
+          </div>
+        </div>
+
         <div class="admin-section">
           <div class="admin-section-title">آمار سریع</div>
           <div id="recordsStats"></div>
@@ -80,7 +90,7 @@
           <div class="admin-section-title">رکوردهای آخر (۱۵ مورد)</div>
           <div style="overflow-x:auto;">
             <table class="admin-table">
-              <thead><tr><th>#</th><th>نوع</th><th>تاریخ</th><th>کالا</th><th>تعداد</th><th>ثبت‌کننده</th><th>آخرین ویرایش</th></tr></thead>
+              <thead><tr><th>#</th><th>نوع</th><th>تاریخ</th><th>کالا</th><th>تعداد</th><th>ثبت‌کننده</th><th>آخرین ویرایش</th><th>عملیات</th></tr></thead>
               <tbody id="recentRecordsBody"></tbody>
             </table>
           </div>
@@ -143,7 +153,6 @@
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <div class="modal-msg" id="modalMsg"></div>
@@ -156,14 +165,13 @@
   </div>
 </div>
 
-<!-- User modal -->
 <div class="modal-overlay" id="userModalOverlay">
   <div class="modal-box" style="max-width:520px;">
     <h3 style="margin-bottom:14px;" id="userModalTitle">کاربر جدید</h3>
     <input type="hidden" id="userEditId">
     <div class="field" style="margin-bottom:10px;"><label>نام کاربری</label><input id="umUsername" type="text"></div>
     <div class="field" style="margin-bottom:10px;"><label>نام نمایشی</label><input id="umDisplay" type="text"></div>
-    <div class="field" style="margin-bottom:10px;" id="passField"><label>رمز عبور</label><input id="umPassword" type="password" placeholder="حداقل ۶ کاراکتر"></div>
+    <div class="field" style="margin-bottom:10px;" id="passField"><label>رمز عبور</label><input id="umPassword" type="password" placeholder="حداقل ۴ کاراکتر"></div>
     <div class="field" style="margin-bottom:10px;"><label>نقش</label><select id="umRole"><option value="operator">اپراتور</option><option value="viewer">بیننده</option><option value="admin">مدیر</option></select></div>
     <div class="field" style="margin-bottom:16px;"><label><input type="checkbox" id="umActive" checked style="width:auto;"> فعال</label></div>
     <div class="modal-btns">
