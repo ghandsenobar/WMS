@@ -33,7 +33,6 @@
   .p-sig-hint{font-size:0.75rem;}
   .p-footer-note{text-align:center;font-size:0.8rem;margin-top:10px;padding-top:6px;border-top:1px dashed #888;}
   
-  /* Summary & Daily Tables (A4 Full Width) */
   .p-summary-block{margin-top:10px;page-break-inside:avoid;width:100%;}
   .p-summary-title{text-align:center;font-size:0.95rem;font-weight:900;padding:4px 6px;border:1px solid #000;background:#e5e5e5!important;}
   .p-summary-table{width:100%;border-collapse:collapse;font-size:9pt;border:1.5px solid #000;}
@@ -95,7 +94,7 @@
     </div>
     <div class="login-field">
       <label>رمز عبور</label>
-      <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••">
+      <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••">
     </div>
     <button type="button" class="login-btn" id="loginBtn" onclick="doLogin()">ورود</button>
     <div style="text-align:center;margin-top:14px;font-size:11.5px;color:var(--muted);">
@@ -191,13 +190,20 @@
         <label>تعداد</label>
         <input id="f_quantity" type="number" step="any" min="0" placeholder="مثلاً: ۱۰۰">
       </div>
+      
+      <!-- Searchable Unit Select -->
       <div class="field">
         <label>واحد</label>
         <div class="field-row">
-          <select id="f_unit"></select>
+          <div class="searchable-select" id="ss_unit" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
           <button type="button" class="btn-add" onclick="addUnitQuick()" title="افزودن واحد جدید">+</button>
         </div>
       </div>
+      
       <div class="full">
         <div class="auto-kg-box" id="autoKgBox">
           <div>
@@ -538,12 +544,10 @@
         <button type="button" class="collapsible-toggle">+</button>
       </div>
       <div class="drawer-section-body collapsed" id="ghSection">
-        <!-- Green box (shown when connected) -->
         <div id="ghCompactBox" class="gh-compact" hidden>
           <span class="gh-compact-status" id="ghCompactStatus">✅ متصل</span>
           <button type="button" class="btn-gh-edit" onclick="toggleGhEdit()">✏️ ویرایش</button>
         </div>
-        <!-- Form (shown when disconnected or editing) -->
         <div id="ghFullFields">
           <div class="field"><label>Username</label><input id="ghOwner" type="text"></div>
           <div class="field"><label>Repository</label><input id="ghRepo" type="text"></div>
