@@ -1,7 +1,7 @@
 /* sw.js — Service Worker برای WMS v4.0.0 */
 'use strict';
 
-const CACHE_VERSION = 'wms-v4.0.0';
+const CACHE_VERSION = 'wms-v4.0.0.ver.0.2';
 const CACHE_STATIC  = CACHE_VERSION + '-static';
 const CACHE_ICONS   = CACHE_VERSION + '-icons';
 
