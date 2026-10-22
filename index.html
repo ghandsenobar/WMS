@@ -15,7 +15,7 @@
   @page{size:A4 portrait;margin:5mm;}
   html{font-size:calc(10px * var(--pf))!important;}
   body{font-size:1rem!important;background:#fff!important;padding:0!important;margin:0!important;color:#000!important;}
-  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,#loginScreen,.app-header,.user-pill,#setupScreen{display:none!important;}
+  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,.app-header,.user-pill{display:none!important;}
   #printArea{display:block!important;width:100%;}
   #printArea *{color:#000!important;box-shadow:none!important;text-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
@@ -81,13 +81,18 @@
 
 <div class="user-pill" id="userPill" hidden></div>
 
-<!-- Login Screen -->
-<div id="loginScreen" hidden>
+<!-- Login Screen (Default Visible) -->
+<div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">📦</div>
     <div class="login-title">ورود به سیستم انبار</div>
     <div class="login-sub">کارخانه قند صنوبر — نسخه چندکاربره</div>
     
+    <!-- Auto Login Status -->
+    <div id="autoLoginStatus" style="display:none; text-align:center; color:var(--primary); font-size:12px; font-weight:bold; margin-bottom:15px;">
+      <span class="sync-spin" style="display:inline-block; margin-left:5px;">🔄</span> در حال بازیابی نشست...
+    </div>
+
     <div id="loginNoConfigWarning" style="display:none; background:rgba(245,158,11,.1); border:1px solid var(--warning); color:var(--warning); padding:10px; border-radius:8px; font-size:12px; margin-bottom:15px; text-align:center; font-weight:bold;">
       ⚠️ اتصال به دیتابیس برقرار نیست. لطفاً ابتدا از لینک زیر تنظیمات اتصال را وارد کنید.
     </div>
