@@ -1,40 +1,14 @@
 /* admin.css — Admin panel specific styles */
+
+/* اطمینان از اینکه hidden واقعاً مخفی می‌کند حتی در برابر inline display */
+[hidden] { display: none !important; }
+
+/* ─── قواعد پایه (اول) ─── */
 .admin-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 16px;
   min-height: calc(100vh - 100px);
-}
-
-/* Fix mobile layout for admin panel */
-@media(max-width: 900px) {
-  .admin-layout { 
-    grid-template-columns: 1fr; 
-    gap: 10px;
-  }
-  .admin-sidebar {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    padding: 10px;
-  }
-  .admin-nav-btn {
-    justify-content: center;
-    padding: 10px 5px;
-    font-size: 12px;
-    flex-direction: column;
-    text-align: center;
-    gap: 4px;
-  }
-  .admin-nav-icon {
-    font-size: 20px;
-  }
-}
-@media(max-width: 500px) {
-  .admin-sidebar {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .admin-sidebar {
@@ -49,6 +23,7 @@
   flex-direction: column;
   gap: 6px;
 }
+
 .admin-nav-btn {
   display: flex;
   align-items: center;
@@ -159,3 +134,34 @@
 .stat-card { background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.02)); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
 .stat-label { font-size: 11.5px; color: var(--muted); font-weight: bold; margin-bottom: 6px; }
 .stat-value { font-size: 22px; font-weight: 900; color: var(--primary); }
+
+/* ─── مدیا کوئری‌ها (باید آخر بیایند تا بر قواعد پایه غالب شوند) ─── */
+@media(max-width: 900px) {
+  .admin-layout { 
+    grid-template-columns: 1fr; 
+    gap: 10px;
+  }
+  .admin-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+  }
+  .admin-nav-btn {
+    justify-content: center;
+    padding: 10px 5px;
+    font-size: 12px;
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+  .admin-nav-icon {
+    font-size: 20px;
+  }
+}
+@media(max-width: 500px) {
+  .admin-sidebar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
