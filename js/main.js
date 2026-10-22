@@ -236,26 +236,26 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   const sess = loadSession();
   if(sess){
-    await tryRestoreSession(sess);
-  } else {
-    // Show Login screen by default
-    document.getElementById('loginScreen').hidden = false;
+    // Show restoring status on login screen
+    document.getElementById('autoLoginStatus').style.display = 'block';
+    document.getElementById('loginBtn').style.opacity = '0.5';
+    document.getElementById('loginBtn').style.pointerEvents = 'none';
     
-    // Check if we have a config to hide the warning
+    await tryRestoreSession(sess);
+    
+    // If still on login screen after restore attempt, reset button
+    if(!document.getElementById('loginScreen').hidden) {
+      document.getElementById('autoLoginStatus').style.display = 'none';
+      document.getElementById('loginBtn').style.opacity = '1';
+      document.getElementById('loginBtn').style.pointerEvents = 'auto';
+    }
+  } else {
+    // No session, just ensure login is visible and check config
+    document.getElementById('loginScreen').hidden = false;
     if(!hasGhConfig()){
       document.getElementById('loginNoConfigWarning').style.display = 'block';
       document.getElementById('loginBtn').style.opacity = '0.5';
       document.getElementById('loginBtn').style.pointerEvents = 'none';
-    }
-    
-    // Pre-fill Setup form with current config if exists
-    document.getElementById('setupOwner').value = ghConfig.owner || 'ghandsenobar';
-    document.getElementById('setupRepo').value = ghConfig.repo || 'Warehouse';
-    document.getElementById('setupToken').value = ghConfig.token || '';
-
-    // Optional: Auto-open setup if no config at all
-    if(!hasGhConfig()) {
-       openSetupScreen();
     }
   }
 });
@@ -341,6 +341,11 @@ async function doLogin(){
   const p = document.getElementById('loginPassword').value;
   if(!u || !p){ errEl.hidden=false; errEl.textContent='نام کاربری و رمز عبور را وارد کنید'; return; }
 
+  const btn = document.getElementById('loginBtn');
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ در حال ورود...';
+
   try {
     const raw = await ghGet();
     if(!raw){ errEl.hidden=false; errEl.textContent='داده‌ای روی سرور یافت نشد'; return; }
@@ -354,6 +359,9 @@ async function doLogin(){
   } catch(err){
     errEl.hidden=false;
     errEl.textContent = 'خطا در ورود: ' + (err.message||'نامشخص');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
   }
 }
 
@@ -389,17 +397,33 @@ async function doFirstSetup(){
 }
 
 async function tryRestoreSession(sess){
+  let raw = null;
   try {
-    if(!hasGhConfig()){ clearSession(); document.getElementById('loginScreen').hidden=false; return; }
-    const raw = await ghGet();
-    if(!raw){ clearSession(); document.getElementById('loginScreen').hidden=false; return; }
-    const data = deserializeState(raw);
-    const user = data.users.find(u=>u.id===sess.userId);
-    if(!user || !user.active || user.role!==sess.role){ clearSession(); document.getElementById('loginScreen').hidden=false; return; }
+    if(!hasGhConfig()){ return; }
+    raw = await ghGet();
+  } catch(err) {
+    // Network error: do NOT clear session, just log and stay on login screen
+    console.warn('Session restore failed due to network:', err);
+    return; 
+  }
+
+  if(!raw){ return; } // No data, stay on login
+
+  const data = deserializeState(raw);
+  const user = data.users.find(u=>u.id===sess.userId);
+  
+  // If user is missing or deactivated, clear session.
+  if(!user || !user.active || user.role!==sess.role){ 
+    clearSession(); 
+    return; 
+  }
+
+  try {
     await enterApp(user, data);
-  } catch(err){
-    clearSession();
-    document.getElementById('loginScreen').hidden=false;
+  } catch(err) {
+    console.error('App loading error during restore:', err);
+    showToast('خطا در بارگذاری داده ها. لطفاً رفرش کنید.', 'error');
+    // Do NOT clear session here, might be a temporary rendering bug
   }
 }
 
@@ -449,17 +473,22 @@ async function enterApp(user, data){
     document.getElementById('syncPushBtn').disabled = true;
   }
 
+  // Remove old listeners to prevent duplicates if function is called multiple times
+  const formCard = document.getElementById('formCard');
+  const newFormCard = formCard.cloneNode(true);
+  formCard.parentNode.replaceChild(newFormCard, formCard);
+  
   document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
-  document.getElementById('formCard').addEventListener('keydown', e=>{
+  newFormCard.addEventListener('keydown', e=>{
     if(e.key!=='Enter') return;
     const tag = e.target?.tagName;
     if(tag==='BUTTON' || tag==='SELECT' || tag==='TEXTAREA') return;
     e.preventDefault(); saveRecord();
   });
 
-  window.addEventListener('beforeunload', e=>{
+  window.onbeforeunload = e=>{
     if(dirty){ e.preventDefault(); e.returnValue=''; return ''; }
-  });
+  };
 }
 
 function logout(){
