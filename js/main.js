@@ -483,7 +483,6 @@ async function enterApp(user, data){
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
   
-  // --- Merge letterhead (server vs local) ---
   const mc = mergeLetterheadValue(letterheadCompany, letterheadCompanyAt, data.letterheadCompany || '', data.letterheadCompanyAt || 0);
   letterheadCompany = mc.val; letterheadCompanyAt = mc.at;
   const mf = mergeLetterheadValue(letterheadFactory, letterheadFactoryAt, data.letterheadFactory || '', data.letterheadFactoryAt || 0);
@@ -494,7 +493,6 @@ async function enterApp(user, data){
   localStorage.setItem('wh_letterhead_factory', letterheadFactory);
   localStorage.setItem('wh_letterhead_factory_at', String(letterheadFactoryAt));
   
-  // --- Merge visibleFields ---
   const mvf = mergeVisibleFieldsValue(visibleFields, visibleFieldsAt, data.visibleFields || {}, data.visibleFieldsAt || 0);
   const mergedFields = mvf.fields;
   const def = initVisibleFieldsDefault();
@@ -1368,7 +1366,6 @@ async function syncPush(){
     deletedUnits = Array.from(new Set([...deletedUnits, ...remote.deletedUnits]));
   }
   
-  // Merge all data
   records = mergeRecordsById(records, remote?remote.records:[], permanentlyDeletedIds);
   products = mergeProductsRespectingTombstones(products, remote?remote.products:[], deletedProducts);
   sellers = mergeWithTombstones(sellers, remote?remote.sellers:[], deletedSellers);
@@ -1376,12 +1373,10 @@ async function syncPush(){
   drivers = mergeWithTombstones(drivers, remote?remote.drivers:[], deletedDrivers);
   unitsList = mergeUnitsRespectingTombstones(unitsList, remote?remote.unitsList:[], deletedUnits);
   
-  // Merge users (remote is authoritative for existing IDs)
   if(remote && remote.users && remote.users.length) {
     users = mergeUsers(users, remote.users);
   }
   
-  // Merge letterhead with timestamps
   if (remote) {
     const mc = mergeLetterheadValue(letterheadCompany, letterheadCompanyAt, remote.letterheadCompany || '', remote.letterheadCompanyAt || 0);
     letterheadCompany = mc.val; letterheadCompanyAt = mc.at;
@@ -1409,7 +1404,6 @@ async function syncPush(){
     applyFieldVisibility();
   }
   
-  // Merge auditLog
   if(remote && remote.auditLog){
     const key = a=>a.t+'|'+a.action+'|'+a.userId+'|'+(a.detail||'');
     const seen = new Set(auditLog.map(key));
@@ -1591,6 +1585,41 @@ function buildSignature(){
   </div>
   <div class="p-footer-note">توجه: تمامی مقادیر وزنی بر حسب کیلوگرم — این گزارش به‌صورت خودکار تهیه شده است.</div>`;
 }
+
+/* ─── Build filter note for printed reports ─── */
+function getFilterInfoText(){
+  const parts = [];
+  const from = (document.getElementById('records_from')?.value || '').trim();
+  const to = (document.getElementById('records_to')?.value || '').trim();
+  if(from && to && from === to) {
+    parts.push(`تاریخ: ${from}`);
+  } else if(from || to) {
+    if(from) parts.push(`از تاریخ: ${from}`);
+    if(to) parts.push(`تا تاریخ: ${to}`);
+  } else {
+    parts.push('بازه تاریخ: همه');
+  }
+  const q = (document.getElementById('search')?.value || '').trim();
+  if(q) parts.push(`جستجو: «${q}»`);
+  if(advFilter.product) parts.push(`کالا: ${advFilter.product}`);
+  if(advFilter.subtype) parts.push(`زیرمجموعه: ${advFilter.subtype}`);
+  if(advFilter.party) parts.push(`طرف حساب: ${advFilter.party}`);
+  if(advFilter.driver) parts.push(`راننده: ${advFilter.driver}`);
+  if(dataMode === 'weighted') parts.push('حالت داده: فقط وزنی');
+  else if(dataMode === 'numeric') parts.push('حالت داده: فقط عددی');
+  if(summaryMode === 'detailed') parts.push('نمایش خلاصه: تفکیکی');
+  else parts.push('نمایش خلاصه: کلی');
+  return parts.join(' • ');
+}
+function buildFiltersNoteHTML(){
+  const text = getFilterInfoText();
+  if(!text) return '';
+  return `<div class="p-filters-note">
+    <div class="p-filters-title">🔎 فیلترها و بازه اعمال شده در این گزارش:</div>
+    <div class="p-filters-body">${esc(text)}</div>
+  </div>`;
+}
+
 function buildMovementTable(list, partyLabel){
   if(!list.length) return '<div class="p-empty-msg">موردی یافت نشد</div>';
   let totalKg = 0;
@@ -1664,7 +1693,8 @@ async function printInReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
-  runPrint(h + `<div class="p-section-title">گزارش ورود کالا (${toFa(list.length)})</div>` + buildMovementTable(list,'فروشنده') + buildSummaryPrintBlock() + s, '@page{size:A4 portrait;margin:6mm;}');
+  const note = buildFiltersNoteHTML();
+  runPrint(h + `<div class="p-section-title">گزارش ورود کالا (${toFa(list.length)})</div>` + buildMovementTable(list,'فروشنده') + buildSummaryPrintBlock() + note + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 async function printOutReport(){
   const list = getVisibleRecords().filter(r=>r.type==='out').filter(matchFilter).sort(sortFn);
@@ -1673,7 +1703,8 @@ async function printOutReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
-  runPrint(h + `<div class="p-section-title">گزارش خروج کالا (${toFa(list.length)})</div>` + buildMovementTable(list,'خریدار') + buildSummaryPrintBlock() + s, '@page{size:A4 portrait;margin:6mm;}');
+  const note = buildFiltersNoteHTML();
+  runPrint(h + `<div class="p-section-title">گزارش خروج کالا (${toFa(list.length)})</div>` + buildMovementTable(list,'خریدار') + buildSummaryPrintBlock() + note + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 async function printFullReport(){
   const inL = getVisibleRecords().filter(r=>r.type==='in').filter(matchFilter).sort(sortFn);
@@ -1683,11 +1714,12 @@ async function printFullReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
+  const note = buildFiltersNoteHTML();
   let body = `<div class="p-section-title">گزارش جامع انبار</div>`;
   if(inL.length){ body += `<div class="p-section-title">بخش ورود (${toFa(inL.length)})</div>` + buildMovementTable(inL,'فروشنده'); }
   if(inL.length && outL.length) body += '<div class="p-section-gap"></div>';
   if(outL.length){ body += `<div class="p-section-title">بخش خروج (${toFa(outL.length)})</div>` + buildMovementTable(outL,'خریدار'); }
-  runPrint(h + body + buildSummaryPrintBlock() + s, '@page{size:A4 portrait;margin:6mm;}');
+  runPrint(h + body + buildSummaryPrintBlock() + note + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 async function printSummaryReport(){
   const list = buildSummaryData();
@@ -1696,7 +1728,8 @@ async function printSummaryReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
-  runPrint(h + buildSummaryPrintBlock() + s, '@page{size:A4 portrait;margin:6mm;}');
+  const note = buildFiltersNoteHTML();
+  runPrint(h + buildSummaryPrintBlock() + note + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 async function printDailySummaryReport(){
   const data = buildDailySummaryData();
@@ -1705,7 +1738,8 @@ async function printDailySummaryReport(){
   if(choice===false) return;
   const h = choice===true ? buildPrintHeader() : '';
   const s = choice===true ? buildSignature() : '';
-  runPrint(h + buildDailySummaryPrintBlock(data) + s, '@page{size:A4 portrait;margin:6mm;}');
+  const note = buildFiltersNoteHTML();
+  runPrint(h + buildDailySummaryPrintBlock(data) + note + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 
 function buildSummaryData(){
