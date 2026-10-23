@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>انبار کارخانه قند صنوبر</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#166534">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="انبار صنوبر">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="stylesheet" href="./css/main.css">
+<style id="print-rules" media="print">
+  @page{size:A4 portrait;margin:5mm;}
+  html{font-size:calc(10px * var(--pf))!important;}
+  body{font-size:1rem!important;background:#fff!important;padding:0!important;margin:0!important;color:#000!important;}
+  .container,#splashScreen,.drawer,.drawer-overlay,.modal-overlay,.cal-popup,.time-popup,.sync-bar,.receipt-preview-overlay,.toast-container,.app-header,.user-pill,#updateBanner{display:none!important;}
+  #printArea{display:block!important;width:100%;}
+  #printArea *{color:#000!important;box-shadow:none!important;text-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  .p-letterhead{text-align:center;padding-bottom:5px;margin-bottom:5px;border-bottom:2px solid #000;}
+  .p-company{font-size:1.2rem;font-weight:900;}
+  .p-factory{font-size:1rem;font-weight:bold;}
+  .p-section-title{padding:4px 8px;font-size:1rem;font-weight:900;margin:6px 0 4px;text-align:center;border:1.5px solid #000;background:#e5e5e5!important;page-break-after:avoid;}
+  .p-table{width:100%;border-collapse:collapse;margin-top:3px;font-size:8pt;table-layout:fixed;border:1.5px solid #000;}
+  .p-table th{padding:3px 2px!important;border:1px solid #000!important;font-size:7.5pt;font-weight:900;text-align:center;background:#e5e5e5!important;}
+  .p-table td{padding:2px 2px!important;border:1px solid #555!important;text-align:center;font-size:7.5pt;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;}
+  .p-table tr.footer-row td{background:#d4d4d4!important;font-weight:900;border-top:2px solid #000!important;}
+  .p-signature{margin-top:10px;display:flex;justify-content:space-around;gap:14px;page-break-inside:avoid;}
+  .p-sig-box{flex:1;text-align:center;border-top:1px solid #000;padding-top:4px;min-height:36px;}
+  .p-sig-label{font-size:0.9rem;font-weight:bold;}
+  .p-sig-space{height:28px;}
+  .p-sig-hint{font-size:0.75rem;}
+  .p-footer-note{text-align:center;font-size:0.8rem;margin-top:10px;padding-top:6px;border-top:1px dashed #888;}
+  .p-summary-block{margin-top:10px;page-break-inside:avoid;width:100%;}
+  .p-summary-title{text-align:center;font-size:0.95rem;font-weight:900;padding:4px 6px;border:1px solid #000;background:#e5e5e5!important;}
+  .p-summary-table{width:100%;border-collapse:collapse;font-size:9pt;border:1.5px solid #000;}
+  .p-summary-table th,.p-summary-table td{padding:3px 6px!important;border:1px solid #000!important;text-align:center;font-weight:bold;}
+  .p-daily-block{width:100%; margin-top:10px; page-break-inside:avoid;}
+  .p-daily-table{width:100% !important; table-layout:fixed; border-collapse:collapse; font-size:8pt; border:2px solid #000;}
+  .p-daily-table th, .p-daily-table td {word-wrap:break-word; white-space:normal !important; padding:4px 2px !important; text-align:center; vertical-align:middle; border:1px solid #555 !important; color:#000 !important;}
+  .p-daily-table th {font-size:8.5pt !important; background:#e5e5e5 !important;}
+  .p-empty-msg{text-align:center;padding:8px;font-size:0.9rem;border:1px dashed #777;}
+  .p-section-gap{height:5px;margin:6px 0;border-top:1px dashed #666;}
+  .p-receipt{width:100%;background:#fff;padding:12px 16px;line-height:1.5;}
+  .p-receipt-company{font-size:1.25rem;font-weight:900;text-align:center;}
+  .p-receipt-factory{font-size:0.95rem;text-align:center;font-weight:bold;}
+  .p-receipt-title{text-align:center;font-size:1.45rem;font-weight:900;padding:10px 0 4px;}
+  .p-receipt-no{text-align:center;font-size:0.95rem;}
+  .p-receipt-hr{border:none;border-top:2px solid #000;margin:8px 0;}
+  .p-receipt-hr-dash{border:none;border-top:1px dashed #555;margin:8px 0;}
+  .p-receipt-meta{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:bold;padding:3px 0;}
+  .p-receipt-product-lbl{font-size:0.95rem;color:#555;font-weight:bold;text-align:center;}
+  .p-receipt-product-name{font-size:1.5rem;font-weight:900;text-align:center;padding:8px 0;}
+  .p-receipt-row{display:flex;justify-content:space-between;padding:4px 0;font-size:1.15rem;gap:12px;}
+  .p-receipt-lbl{font-weight:bold;font-size:1rem;}
+  .p-receipt-val{font-weight:900;border-bottom:1px dotted #888;}
+  .p-receipt-signatures{display:flex;gap:30px;margin-top:22px;}
+  .p-receipt-sig{flex:1;text-align:center;}
+  .p-receipt-sig-title{font-size:1rem;font-weight:900;margin-bottom:34px;}
+  .p-receipt-sig-line{border-top:1.5px solid #000;padding-top:3px;font-size:0.75rem;}
+  .p-receipt-footer{text-align:center;font-size:0.8rem;margin-top:12px;padding-top:6px;border-top:1px dashed #666;}
+  .p-filters-note {margin-top: 10px; padding: 8px 12px; border: 1.5px dashed #333; font-size: 0.85rem; line-height: 1.8; text-align: right; background: #f9f9f9 !important; page-break-inside: avoid; break-inside: avoid;}
+  .p-filters-note .p-filters-title {font-weight: 900; margin-bottom: 4px; font-size: 0.9rem;}
+  .p-filters-note .p-filters-body {font-weight: bold;}
+</style>
+</head>
+<body>
+
+<div id="updateBanner" hidden style="position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.25);font-family:Tahoma,sans-serif;">
+  <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:bold;flex:1;min-width:0;">
+    <span style="font-size:18px;">🔔</span>
+    <span>نسخه جدید برنامه در دسترس است</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-shrink:0;">
+    <button type="button" onclick="checkForUpdate()" style="background:#fff;color:#d97706;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer;white-space:nowrap;">🔄 مشاهده</button>
+    <button type="button" onclick="dismissUpdateBanner()" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:7px 11px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;">✕</button>
+  </div>
+</div>
+
+<div id="splashScreen">
+  <div class="splash-logo" id="splashLogoWrap"><img src="./icon-512.png" alt="" id="splashLogoImg"></div>
+  <div class="splash-company">شرکت صنایع غذایی سایه سار صنوبر آریا</div>
+  <div class="splash-factory">کارخانه قند صنوبر</div>
+  <div class="splash-title">سیستم مدیریت انبار</div>
+  <div class="splash-designer">
+    <span class="splash-designer-label">طراح و توسعه‌دهنده</span>
+    <span class="splash-designer-name">علی صنوبری</span>
+  </div>
+  <div class="splash-version">نسخه ۴.۲.۰ — چندکاربره</div>
+</div>
+
+<div class="user-pill" id="userPill" hidden></div>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">📦</div>
+    <div class="login-title">ورود به سیستم انبار</div>
+    <div class="login-sub">کارخانه قند صنوبر — نسخه چندکاربره</div>
+    
+    <div id="autoLoginStatus" style="display:none; text-align:center; color:var(--primary); font-size:12px; font-weight:bold; margin-bottom:15px;">
+      <span class="sync-spin" style="display:inline-block; margin-left:5px;">🔄</span> در حال بازیابی نشست...
+    </div>
+
+    <div id="loginNoConfigWarning" style="display:none; background:rgba(245,158,11,.1); border:1px solid var(--warning); color:var(--warning); padding:10px; border-radius:8px; font-size:12px; margin-bottom:15px; text-align:center; font-weight:bold;">
+      ⚠️ اتصال به دیتابیس برقرار نیست. لطفاً ابتدا از لینک زیر تنظیمات اتصال را وارد کنید.
+    </div>
+
+    <div class="login-error" id="loginError" hidden></div>
+    <div class="login-field">
+      <label>نام کاربری</label>
+      <input type="text" id="loginUsername" autocomplete="username" placeholder="username">
+    </div>
+    <div class="login-field">
+      <label>رمز عبور</label>
+      <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••">
+    </div>
+    <button type="button" class="login-btn" id="loginBtn" onclick="doLogin()">ورود</button>
+    
+    <div style="text-align:center; margin-top:20px; font-size:12px;">
+      <a href="#" onclick="openSetupScreen()" style="color:var(--muted); text-decoration:none; font-size:11.5px;">⚙️ تنظیمات اتصال به دیتابیس (برای بار اول)</a>
+    </div>
+  </div>
+</div>
+
+<div id="setupScreen" hidden style="position:fixed;inset:0;background:linear-gradient(160deg,#166534,#052e16);z-index:9997;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div class="login-box" style="max-height:92vh;overflow-y:auto;">
+    <div class="login-logo">⚙️</div>
+    <div class="login-title">تنظیمات اتصال</div>
+    
+    <div id="setupGhFields">
+      <div class="login-sub" style="margin-bottom:15px; font-size:12px;">اطلاعات گیت‌هاب خود را وارد کنید تا اتصال برقرار شود.</div>
+      <div class="login-field"><label>GitHub Username</label><input type="text" id="setupOwner" placeholder="ghandsenobar"></div>
+      <div class="login-field"><label>Repository</label><input type="text" id="setupRepo" placeholder="Warehouse"></div>
+      <div class="login-field"><label>GitHub Token</label><input type="password" id="setupToken" placeholder="github_pat_..."></div>
+      <div id="ghStatusMsg" style="font-size:12px; text-align:center; margin-bottom:10px; font-weight:bold;"></div>
+      <button type="button" class="login-btn" onclick="testDbConnection()" style="background:var(--primary);">🔗 تست و اتصال</button>
+    </div>
+
+    <div id="setupAdminFields" hidden style="border-top:1px dashed var(--border); margin-top:20px; padding-top:20px;">
+      <div class="login-sub" style="color:var(--warning); font-weight:bold; margin-bottom:15px; font-size:12px; background:rgba(245,158,11,.1); padding:10px; border-radius:8px;">
+        ✨ این دیتابیس جدید است. لطفاً اولین کاربر (مدیر سیستم) را بسازید.
+      </div>
+      <div class="login-field"><label>نام کاربری ادمین</label><input type="text" id="setupUser" placeholder="admin"></div>
+      <div class="login-field"><label>نام نمایشی</label><input type="text" id="setupDisplay" placeholder="مدیر سیستم"></div>
+      <div class="login-field"><label>رمز عبور (حداقل ۴ رقم/حرف)</label><input type="password" id="setupPass" placeholder="••••"></div>
+      <button type="button" class="login-btn" onclick="doFirstSetup()" style="background:var(--success);">✅ ایجاد ادمین و ورود</button>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a href="#" onclick="closeSetupScreen()" style="color:var(--muted); text-decoration:none; font-size:12px;">← بازگشت به صفحه ورود</a>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="mainApp" hidden>
+  <div class="app-header">
+    <div class="company-name" id="appHeaderCompany" onclick="editLetterhead('company')" style="cursor:pointer;" title="برای ویرایش کلیک کنید"></div>
+    <div class="factory-name" id="appHeaderFactory" onclick="editLetterhead('factory')" style="cursor:pointer;" title="برای ویرایش کلیک کنید"></div>
+    <div class="app-title">📦 سیستم مدیریت انبار</div>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" onclick="openDrawer()" title="تنظیمات">☰</button>
+    </div>
+  </div>
+
+  <div class="sync-bar" id="syncBar">
+    <div class="sync-bar-status noconfig" id="syncBarStatus">⚪ در حال آماده‌سازی...</div>
+    <div class="sync-bar-actions">
+      <button type="button" class="sync-btn pull" onclick="syncPull()" id="syncPullBtn">⬇️ دریافت</button>
+      <button type="button" class="sync-btn push" onclick="syncPush()" id="syncPushBtn">⬆️ ذخیره</button>
+    </div>
+  </div>
+
+  <div class="entry-buttons">
+    <button type="button" class="entry-btn in-btn" id="btnIn" onclick="switchType('in')">
+      <span class="entry-icon">📥</span>
+      <span class="entry-label">ورود کالا</span>
+    </button>
+    <button type="button" class="entry-btn out-btn" id="btnOut" onclick="switchType('out')">
+      <span class="entry-icon">📤</span>
+      <span class="entry-label">خروج کالا</span>
+    </button>
+  </div>
+
+  <div class="card" id="formCard" hidden>
+    <div class="form-head" id="formHead" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:2px solid var(--primary);padding-bottom:8px;">
+      <h2 id="formTitle" style="margin:0;border:none;padding:0;">ثبت</h2>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeForm()">✕ بستن فرم</button>
+    </div>
+    <div id="editBanner" class="edit-banner" hidden style="background:rgba(245,158,11,.12);border:1px solid var(--warning);color:var(--warning);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:10px;font-weight:bold;">
+      ✏️ در حال ویرایش رکورد
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label>تاریخ (شمسی)</label>
+        <div class="field-row">
+          <input id="f_date" type="text" class="date-input" readonly placeholder="انتخاب تاریخ">
+          <button type="button" class="btn-refresh" onclick="setNow()">⟳</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>ساعت</label>
+        <input id="f_time" type="text" class="time-input" readonly placeholder="انتخاب ساعت">
+      </div>
+      
+      <div class="field full">
+        <label>کالا</label>
+        <div class="searchable-select" id="ss_product">
+          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+          <input type="hidden" class="ss-value">
+          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+        </div>
+      </div>
+
+      <div class="field full" id="subtypeField" hidden>
+        <label>زیرمجموعه (اختیاری)</label>
+        <div class="searchable-select" id="ss_subtype">
+          <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+          <input type="hidden" class="ss-value">
+          <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label>تعداد</label>
+        <input id="f_quantity" type="number" step="any" min="0" placeholder="مثلاً: ۱۰۰">
+      </div>
+      
+      <div class="field">
+        <label id="f_party_label">طرف حساب</label>
+        <div class="field-row">
+          <div class="searchable-select" id="ss_party" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
+          <button type="button" class="btn-add" onclick="addParty()" title="افزودن سریع">+</button>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label>راننده</label>
+        <div class="field-row">
+          <div class="searchable-select" id="ss_driver" style="flex:1;">
+            <input type="text" class="ss-input" placeholder="جستجو یا انتخاب..." autocomplete="off">
+            <input type="hidden" class="ss-value">
+            <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+          </div>
+          <button type="button" class="btn-add" onclick="addDriver()" title="افزودن سریع">+</button>
+        </div>
+      </div>
+      
+      <div class="field full">
+        <label>شماره فاکتور</label>
+        <input id="f_invoice" placeholder="مثلاً: ۱۴۰۴۰۷۱۵-۰۰۱">
+      </div>
+      <div class="field">
+        <label>شماره باسکول</label>
+        <input id="f_basil" placeholder="مثلاً: ۱۲۳۴">
+      </div>
+      <div class="field">
+        <label>شماره بارنامه</label>
+        <input id="f_waybill" placeholder="مثلاً: ۵۶۷۸">
+      </div>
+      <div class="field full">
+        <label>توضیحات</label>
+        <textarea id="f_notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="saveBtn" onclick="saveRecord()">💾 ثبت اطلاعات</button>
+      <button class="btn btn-secondary" onclick="clearForm()">پاک کردن فرم</button>
+      <button class="btn btn-warning" id="cancelEditBtn" onclick="cancelEdit()" hidden>❌ لغو ویرایش</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;border-bottom:2px solid var(--primary);padding-bottom:8px;">
+      <h2 style="margin:0;border:none;padding:0;">📋 سوابق ثبت شده <span id="unsavedTitleBadge" class="badge" style="background:var(--warning);display:none;">۰</span></h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary" onclick="printDailySummaryReport()">📈 روند روزانه</button>
+        <button type="button" class="btn btn-primary" onclick="printFullReport()">🖨️ گزارش کامل</button>
+      </div>
+    </div>
+
+    <div class="quick-buttons">
+      <button type="button" class="qb-week" onclick="recordsThisWeek()">این هفته</button>
+      <button type="button" class="qb-month" onclick="recordsThisMonth()">این ماه</button>
+      <button type="button" class="qb-all" onclick="recordsAllDays()">همه</button>
+    </div>
+    <div class="quick-buttons">
+      <button type="button" class="qb-next" onclick="recordsNextDay()">روز بعد ▶️</button>
+      <button type="button" class="qb-today" onclick="recordsToday()">امروز</button>
+      <button type="button" class="qb-prev" onclick="recordsPrevDay()">◀️ روز قبل</button>
+    </div>
+
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleAccordion('searchSection', this)">
+        <span class="collapsible-title">🔍 جستجو و بازه تاریخ <span class="collapsible-badge" id="searchBadge" hidden>فعال</span></span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="collapsible-body collapsed" id="searchSection">
+        <div class="records-filter" style="margin-bottom:0;">
+          <div class="field">
+            <label>🔍 جستجو</label>
+            <div class="search-wrap">
+              <input id="search" placeholder="جستجو..." oninput="onSearchInput()">
+              <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+            </div>
+          </div>
+          <div class="field"><label>📅 از تاریخ</label><input id="records_from" type="text" class="date-input" readonly placeholder="همه"></div>
+          <div class="field"><label>📅 تا تاریخ</label><input id="records_to" type="text" class="date-input" readonly placeholder="همه"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleAccordion('advFilterSection', this)">
+        <span class="collapsible-title">⚙️ فیلتر پیشرفته <span class="collapsible-badge" id="advFilterBadge" hidden>۰</span></span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="collapsible-body collapsed" id="advFilterSection">
+        <div class="adv-filter-grid">
+          <div class="field">
+            <label>📦 کالا</label>
+            <div class="searchable-select" id="ss_adv_product">
+              <input type="text" class="ss-input" placeholder="همه..." autocomplete="off">
+              <input type="hidden" class="ss-value">
+              <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>🔀 زیرمجموعه</label>
+            <div class="searchable-select" id="ss_adv_subtype">
+              <input type="text" class="ss-input" placeholder="همه..." autocomplete="off">
+              <input type="hidden" class="ss-value">
+              <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>👤 طرف حساب</label>
+            <div class="searchable-select" id="ss_adv_party">
+              <input type="text" class="ss-input" placeholder="همه..." autocomplete="off">
+              <input type="hidden" class="ss-value">
+              <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>🚚 راننده</label>
+            <div class="searchable-select" id="ss_adv_driver">
+              <input type="text" class="ss-input" placeholder="همه..." autocomplete="off">
+              <input type="hidden" class="ss-value">
+              <div class="ss-dropdown" hidden><div class="ss-list"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="adv-filter-chips" id="advFilterChips"></div>
+      </div>
+    </div>
+
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleAccordion('summarySection', this)">
+        <span class="collapsible-title">📊 خلاصه ورود و خروج کالا</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="collapsible-body collapsed" id="summarySection">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <div class="summary-mode-toggle">
+            <button type="button" id="sumModeGrouped" class="active" onclick="setSummaryMode('grouped')">📦 کلی</button>
+            <button type="button" id="sumModeDetailed" onclick="setSummaryMode('detailed')">🔀 تفکیکی</button>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="printSummaryReport()">🖨️ چاپ خلاصه</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr><th style="width:8%">#</th><th style="width:42%">کالا</th><th class="col-in" style="width:25%">📥 مجموع ورود</th><th class="col-out" style="width:25%">📤 مجموع خروج</th></tr>
+            </thead>
+            <tbody id="summaryBody"></tbody>
+            <tfoot id="summaryFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;flex-wrap:wrap;">
+        <h3>📥 سابقه ورود کالا <span class="badge badge-in" id="inBadge">۰</span></h3>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="btn btn-sm btn-info" onclick="exportCSV('in')">📊 CSV</button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="printInReport()">🖨️ گزارش</button>
+        </div>
+      </div>
+      <div class="records-table-scroll" id="inTableScroll">
+        <table>
+          <thead><tr>
+            <th data-field="date">تاریخ</th><th data-field="time">ساعت</th>
+            <th data-field="product">کالا</th><th data-field="subtype">زیرمجموعه</th>
+            <th data-field="quantity">تعداد</th><th data-field="unit">واحد</th>
+            <th data-field="weight">وزن</th><th data-field="party">فروشنده</th>
+            <th data-field="driver">راننده</th><th data-field="invoice">فاکتور</th>
+            <th data-field="basil">باسکول</th><th data-field="waybill">بارنامه</th>
+            <th data-field="notes">توضیحات</th><th data-field="creator">ثبت‌کننده</th>
+            <th data-field="lastEditor">آخرین ویرایش</th><th></th>
+          </tr></thead>
+          <tbody id="inBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="inEmpty">موردی یافت نشد</div>
+    </div>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;flex-wrap:wrap;">
+        <h3>📤 سابقه خروج کالا <span class="badge badge-out" id="outBadge">۰</span></h3>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="btn btn-sm btn-info" onclick="exportCSV('out')">📊 CSV</button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="printOutReport()">🖨️ گزارش</button>
+        </div>
+      </div>
+      <div class="records-table-scroll" id="outTableScroll">
+        <table>
+          <thead><tr>
+            <th data-field="date">تاریخ</th><th data-field="time">ساعت</th>
+            <th data-field="product">کالا</th><th data-field="subtype">زیرمجموعه</th>
+            <th data-field="quantity">تعداد</th><th data-field="unit">واحد</th>
+            <th data-field="weight">وزن</th><th data-field="party">خریدار</th>
+            <th data-field="driver">راننده</th><th data-field="invoice">فاکتور</th>
+            <th data-field="basil">باسکول</th><th data-field="waybill">بارنامه</th>
+            <th data-field="notes">توضیحات</th><th data-field="creator">ثبت‌کننده</th>
+            <th data-field="lastEditor">آخرین ویرایش</th><th></th>
+          </tr></thead>
+          <tbody id="outBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="outEmpty">موردی یافت نشد</div>
+    </div>
+
+    <div class="collapsible-section" style="margin-top:16px;">
+      <div class="collapsible-header" onclick="toggleAccordion('deletedRecordsSection', this)">
+        <span class="collapsible-title">🗑️ رکوردهای حذف‌شده <span class="collapsible-badge" id="deletedRecordsBadge" hidden>۰</span></span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="collapsible-body collapsed" id="deletedRecordsSection">
+        <div class="records-table-scroll" id="deletedTableScroll">
+          <table>
+            <thead><tr>
+              <th data-field="date">تاریخ</th>
+              <th data-field="time">ساعت</th>
+              <th data-field="type">نوع</th>
+              <th data-field="product">کالا</th>
+              <th data-field="subtype">زیرمجموعه</th>
+              <th data-field="quantity">تعداد</th>
+              <th data-field="unit">واحد</th>
+              <th data-field="weight">وزن</th>
+              <th data-field="party">طرف</th>
+              <th data-field="driver">راننده</th>
+              <th data-field="notes">توضیحات</th>
+              <th data-field="creator">ثبت‌کننده</th>
+              <th data-field="lastEditor">آخرین ویرایش</th>
+              <th>حذف‌شده در</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="deletedBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="deletedEmpty" style="display:none;">رکورد حذف‌شده‌ای وجود ندارد</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cal-popup" id="calPopup"></div>
+<div class="time-popup" id="timePopup">
+  <div class="time-display" id="timeDisplay">۰۰:۰۰</div>
+  <div class="time-presets">
+    <button type="button" onclick="timeSetPreset(6,0)">۰۶:۰۰</button>
+    <button type="button" onclick="timeSetPreset(8,0)">۰۸:۰۰</button>
+    <button type="button" onclick="timeSetPreset(12,0)">۱۲:۰۰</button>
+    <button type="button" onclick="timeSetPreset(14,0)">۱۴:۰۰</button>
+    <button type="button" onclick="timeSetPreset(18,0)">۱۸:۰۰</button>
+  </div>
+  <div class="time-cols">
+    <div class="time-col" id="hourCol"></div>
+    <div class="time-col" id="minCol"></div>
+  </div>
+  <div class="time-footer">
+    <button type="button" class="tf-now" onclick="timeNowClick()">الان</button>
+    <button type="button" class="tf-confirm" onclick="timeConfirm()">تأیید</button>
+    <button type="button" class="tf-cancel" onclick="closeTimePicker()">بستن</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-msg" id="modalMsg"></div>
+    <input type="text" class="modal-input" id="modalInput" hidden>
+    <div class="modal-btns">
+      <button type="button" class="modal-btn modal-cancel" id="modalCancel">لغو</button>
+      <button type="button" class="modal-btn modal-third" id="modalThird" hidden>—</button>
+      <button type="button" class="modal-btn modal-ok" id="modalOk">تأیید</button>
+    </div>
+  </div>
+</div>
+
+<div class="receipt-preview-overlay" id="receiptPreviewOverlay" style="position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;z-index:2500;padding:16px;">
+  <div style="background:#fff;border-radius:16px;width:min(500px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;color:#000;">
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;">
+      <span style="font-weight:bold;">👁️ پیش‌نمایش رسید</span>
+      <button type="button" onclick="closeReceiptPreview()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px;background:#e2e8f0;">
+      <div id="receiptPreviewPaper" style="background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);max-width:440px;margin:0 auto;"></div>
+    </div>
+    <div style="padding:12px 16px;display:flex;gap:8px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+      <button type="button" onclick="closeReceiptPreview()" style="flex:1;padding:11px;border:none;border-radius:9px;background:#e2e8f0;color:#1e293b;font-weight:bold;cursor:pointer;">بستن</button>
+      <button type="button" onclick="printReceiptFromPreview()" style="flex:1;padding:11px;border:none;border-radius:9px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:bold;cursor:pointer;">🖨️ چاپ رسید</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<div id="printArea"></div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3>⚙️ تنظیمات</h3>
+    <button type="button" class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">
+      <label class="drawer-section-title">🌓 حالت نمایش</label>
+      <div class="toggle-row">
+        <span>🌙 حالت شب</span>
+        <label class="switch"><input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)"><span class="slider"></span></label>
+      </div>
+    </div>
+    
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('displaySettingsSection', this)">
+        <span class="title-text">📊 چاپ و نمایش</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="displaySettingsSection">
+        <div class="field" style="margin-bottom:10px;">
+          <label>🔤 درصد فونت چاپ</label>
+          <select id="fontScaleSelect" onchange="setPrintFontScale(parseInt(this.value,10))">
+            <option value="75">۷۵٪</option><option value="100" selected>۱۰۰٪</option><option value="150">۱۵۰٪</option><option value="200">۲۰۰٪</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>📊 حالت داده (واحد)</label>
+          <select id="dataModeSelect" onchange="setDataMode(this.value)">
+            <option value="">همه واحدها</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>🏢 نام شرکت (سربرگ)</label>
+          <input id="letterheadCompanyInput" type="text" onchange="updateLetterhead('company', this.value)">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>🏭 نام کارخانه (سربرگ)</label>
+          <input id="letterheadFactoryInput" type="text" onchange="updateLetterhead('factory', this.value)">
+        </div>
+        <div class="field">
+          <label>👁️ ستون‌های نمایش داده شده</label>
+          <div class="backup-desc" style="margin-bottom:6px;font-size:11px;">تاریخ و کالا همیشه نمایش داده می‌شوند.</div>
+          <div class="fields-list-wrap" id="fieldsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('productsSection', this)">
+        <span class="title-text">📦 کالاها و زیرمجموعه‌ها</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="productsSection">
+        <input type="text" id="searchProductList" placeholder="جستجوی کالا..." oninput="renderManageProducts()" style="margin-bottom:8px;">
+        <div id="manageProducts" class="list-scroll"></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="menuAddProductFull()">➕ افزودن کالای جدید</button>
+      </div>
+    </div>
+    
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('sellersSection', this)">
+        <span class="title-text">🏪 فروشندگان</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="sellersSection">
+        <input type="text" id="searchSellerList" placeholder="جستجوی فروشنده..." oninput="renderManageLists()" style="margin-bottom:8px;">
+        <div id="manageSellers" class="list-scroll"></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="menuAddSellerFromSettings()">➕ افزودن</button>
+      </div>
+    </div>
+    
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('buyersSection', this)">
+        <span class="title-text">🛒 خریداران</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="buyersSection">
+        <input type="text" id="searchBuyerList" placeholder="جستجوی خریدار..." oninput="renderManageLists()" style="margin-bottom:8px;">
+        <div id="manageBuyers" class="list-scroll"></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="menuAddBuyerFromSettings()">➕ افزودن</button>
+      </div>
+    </div>
+    
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('driversSection', this)">
+        <span class="title-text">🚚 رانندگان</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="driversSection">
+        <input type="text" id="searchDriverList" placeholder="جستجوی راننده..." oninput="renderManageLists()" style="margin-bottom:8px;">
+        <div id="manageDrivers" class="list-scroll"></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="menuAddDriverFromSettings()">➕ افزودن</button>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('ghSection', this)">
+        <span class="title-text">☁️ اتصال GitHub</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="ghSection">
+        <div id="ghCompactBox" class="gh-compact" hidden>
+          <span class="gh-compact-status" id="ghCompactStatus">✅ متصل</span>
+          <button type="button" class="btn-gh-edit" onclick="toggleGhEdit()">✏️ ویرایش</button>
+        </div>
+        <div id="ghFullFields">
+          <div class="field"><label>Username</label><input id="ghOwner" type="text"></div>
+          <div class="field"><label>Repository</label><input id="ghRepo" type="text"></div>
+          <div class="field"><label>Token</label><input id="ghToken" type="password"></div>
+          <button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="saveGhConfigFromUI()">💾 ذخیره و تست</button>
+          <div id="ghInfo" style="font-size:11px;color:var(--muted);text-align:center;padding:6px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title" onclick="toggleAccordion('backupSection', this)">
+        <span class="title-text">📁 پشتیبان فایلی</span>
+        <button type="button" class="collapsible-toggle">+</button>
+      </div>
+      <div class="drawer-section-body collapsed" id="backupSection">
+        <button type="button" class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="backupDownload()">💾 پشتیبان‌گیری</button>
+        <button type="button" class="btn btn-warning" style="width:100%;margin-bottom:8px;" onclick="document.getElementById('restoreFileInput').click()">📂 بارگذاری از فایل</button>
+        <input type="file" id="restoreFileInput" accept=".json" onchange="restoreFromFile(event)" style="display:none;">
+        <div id="backupInfo" style="font-size:11px;color:var(--muted);text-align:center;"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">🔄 به‌روزرسانی</div>
+      <button type="button" class="btn btn-primary" style="width:100%;" onclick="checkForUpdate()">🔄 بررسی نسخه جدید</button>
+      <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.7;">
+        سیستم به‌طور خودکار نسخه جدید را تشخیص می‌دهد. از این دکمه برای بررسی دستی استفاده کنید.
+      </div>
+    </div>
+    
+    <div class="drawer-section" style="border-top:1px dashed var(--border);padding-top:14px; margin-bottom:40px;">
+      <button type="button" class="btn btn-danger" style="width:100%;" onclick="logout()">🚪 خروج از حساب</button>
+      <button type="button" class="btn btn-primary" id="drawerAdminBtn" style="width:100%;margin-top:8px;display:none;" onclick="goToAdmin()">🔐 پنل مدیریت</button>
+    </div>
+  </div>
+</aside>
+
+<script src="./js/utils.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/main.js"></script>
+</body>
+</html>
