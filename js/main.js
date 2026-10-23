@@ -1,4 +1,4 @@
-/* main.js — main app logic (multi-user) */
+/* main.js — main app logic (multi-user) v4.2.0 */
 'use strict';
 
 let records = [];
@@ -17,13 +17,14 @@ let currentUser = null;
 let currentType = null, editingId = null;
 let dirty = false, lastSyncAt = null;
 let printFontScale = 100;
-let dataMode = 'weighted';
+let dataMode = '';
 let summaryMode = 'grouped';
 let advFilter = { product:'', subtype:'', party:'', driver:'' };
 let _searchTimer = null;
 let currentPreviewRecordId = null;
-let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null, ssSubtype = null;
+let ssProduct = null, ssParty = null, ssDriver = null, ssSubtype = null;
 let ssAdvProduct = null, ssAdvSubtype = null, ssAdvParty = null, ssAdvDriver = null;
+let currentUnit = 'kg';
 
 let letterheadCompany = '';
 let letterheadCompanyAt = 0;
@@ -60,10 +61,8 @@ function isWeightedRecord(r) {
   return f !== null && f !== undefined;
 }
 function matchesDataMode(r) {
-  const isW = isWeightedRecord(r);
-  if (dataMode === 'weighted') return isW;
-  if (dataMode === 'numeric') return !isW;
-  return true;
+  if (!dataMode) return true;
+  return r.unit === dataMode;
 }
 
 const ALL_FIELDS = [
@@ -81,15 +80,21 @@ const ALL_FIELDS = [
   { key: 'basil',   label: 'شماره باسکول',   mandatory: false },
   { key: 'waybill', label: 'شماره بارنامه',  mandatory: false },
   { key: 'notes',   label: 'توضیحات',       mandatory: false },
-  { key: 'creator', label: 'ثبت‌کننده',      mandatory: false }
+  { key: 'creator', label: 'ثبت‌کننده',      mandatory: false },
+  { key: 'lastEditor', label: 'آخرین ویرایش', mandatory: false }
 ];
 
 function initVisibleFieldsDefault(){const o={};ALL_FIELDS.forEach(f=>o[f.key]=true);return o;}
 function loadDisplaySettings(){
   const s = parseInt(localStorage.getItem('wh_print_font_scale')||'100', 10);
   printFontScale = [75,100,150,200].includes(s) ? s : 100;
-  const m = localStorage.getItem('wh_data_mode')||'weighted';
-  dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
+  
+  let m = localStorage.getItem('wh_data_mode');
+  if (m === null) m = '';
+  if (m === 'weighted') { dataMode = 'kg'; localStorage.setItem('wh_data_mode','kg'); }
+  else if (m === 'numeric') { dataMode = 'pcs'; localStorage.setItem('wh_data_mode','pcs'); }
+  else dataMode = m;
+  
   summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
   
   letterheadCompany = localStorage.getItem('wh_letterhead_company') || '';
@@ -113,8 +118,7 @@ function loadDisplaySettings(){
 
   applyPrintFontScale();
   const fs = document.getElementById('fontScaleSelect'); if(fs) fs.value = String(printFontScale);
-  const dm = document.getElementById('dataModeSelect'); if(dm) dm.value = dataMode;
-  
+  renderDataModeSelect();
   renderFieldsList();
   applyFieldVisibility();
   updateHeaderUI();
@@ -164,8 +168,21 @@ function setDataMode(mode){ dataMode = mode; localStorage.setItem('wh_data_mode'
 function applyDarkMode(){ document.body.classList.toggle('dark', localStorage.getItem('lab_darkmode')==='1'); }
 function toggleDarkMode(on){ localStorage.setItem('lab_darkmode', on?'1':'0'); applyDarkMode(); }
 
+function renderDataModeSelect() {
+  const sel = document.getElementById('dataModeSelect');
+  if (!sel) return;
+  const validCodes = (unitsList || []).map(u => u.v);
+  if (dataMode && validCodes.length > 0 && !validCodes.includes(dataMode)) {
+    dataMode = '';
+    localStorage.setItem('wh_data_mode', '');
+  }
+  sel.innerHTML = '<option value="">همه واحدها</option>' +
+    (unitsList || []).map(u => `<option value="${esc(u.v)}">${esc(u.l)}</option>`).join('');
+  sel.value = dataMode || '';
+}
+
 function isFieldVisible(key){
-  if(key === 'weight' && dataMode === 'numeric') return false;
+  if(key === 'weight' && dataMode && unitFactor(dataMode) === null) return false;
   const f = ALL_FIELDS.find(x=>x.key===key);
   if(f && f.mandatory) return true;
   return !!visibleFields[key];
@@ -206,7 +223,6 @@ function applyFieldVisibility(){
   });
 }
 
-/* ─── Bootstrap ─── */
 window.addEventListener('DOMContentLoaded', async ()=>{
   (function(){
     const splash = document.getElementById('splashScreen');
@@ -235,7 +251,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
   ssSubtype = new SearchableSelect(document.getElementById('ss_subtype'), { allowAdd: false, onChange: ()=>{} });
-  ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
   
   ssParty = new SearchableSelect(document.getElementById('ss_party'), {
     allowAdd: true,
@@ -248,8 +263,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
         else deletedBuyers = deletedBuyers.filter(x=>x!==name);
         markDirty(); refreshPartyOptions();
       }
-    },
-    onChange: ()=>updateAutoKg()
+    }
   });
   ssDriver = new SearchableSelect(document.getElementById('ss_driver'), {
     allowAdd: true,
@@ -280,9 +294,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     document.getElementById('autoLoginStatus').style.display = 'block';
     document.getElementById('loginBtn').style.opacity = '0.5';
     document.getElementById('loginBtn').style.pointerEvents = 'none';
-    
     await tryRestoreSession(sess);
-    
     if(!document.getElementById('loginScreen').hidden) {
       document.getElementById('autoLoginStatus').style.display = 'none';
       document.getElementById('loginBtn').style.opacity = '1';
@@ -519,13 +531,17 @@ async function enterApp(user, data){
   const pill = document.getElementById('userPill');
   pill.innerHTML = `<span>👤 ${esc(user.displayName||user.username)}</span>
     <span class="role-badge">${roleLabel(user.role)}</span>`;
+  
+  const adminBtn = document.getElementById('drawerAdminBtn');
+  if (adminBtn) adminBtn.style.display = user.role === 'admin' ? '' : 'none';
 
   const t = todayJalali();
   document.getElementById('records_from').value = t;
   document.getElementById('records_to').value = t;
 
   applyTypeUI();
-  fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
+  fillFormProducts(); refreshPartyOptions(); refreshDriverOptions();
+  renderDataModeSelect();
   renderRecords();
   renderManageLists(); renderManageProducts();
   setSummaryMode(summaryMode);
@@ -540,7 +556,6 @@ async function enterApp(user, data){
 
   if (!_isFormListenersAttached) {
     _isFormListenersAttached = true;
-    document.getElementById('f_quantity').addEventListener('input', updateAutoKg);
     document.getElementById('formCard').addEventListener('keydown', e => {
       if(e.key !== 'Enter') return;
       const tag = e.target?.tagName;
@@ -570,6 +585,10 @@ function logout(){
     document.getElementById('loginBtn').style.opacity = '1';
     document.getElementById('loginBtn').style.pointerEvents = 'auto';
   }
+}
+
+function goToAdmin() {
+  location.replace('./admin.html');
 }
 
 function openDrawer(){
@@ -612,7 +631,6 @@ function toggleAccordion(sectionId, headerEl){
     body.classList.remove('collapsed');
     const btn = headerEl.querySelector('.collapsible-toggle, .toggle-btn');
     if(btn) btn.textContent = '−';
-    
     if(sectionId === 'advFilterSection') buildAdvFilterOptions();
     if(sectionId === 'deletedRecordsSection') renderDeletedRecords();
   } else {
@@ -668,10 +686,10 @@ async function switchType(t){
     ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.value='';
     });
-    ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear(); ssSubtype.clear();
+    ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssSubtype.clear();
     document.getElementById('subtypeField').hidden = true;
-    if(unitsList.length) ssUnit.setValue(unitsList[0].v);
-    setNow(); updateAutoKg();
+    currentUnit = 'kg';
+    setNow();
   }
   applyTypeUI();
 }
@@ -699,17 +717,13 @@ function applyTypeUI(){
   document.getElementById('saveBtn').textContent = isEditing ? '💾 ذخیره تغییرات' : '💾 ثبت اطلاعات';
   document.getElementById('formTitle').textContent = (isEditing?'✏️ ویرایش ':'ثبت ') + (isIn?'ورود کالا 📥':'خروج کالا 📤');
   document.getElementById('f_party_label').textContent = isIn ? 'فروشنده' : 'خریدار';
-  fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
+  fillFormProducts(); refreshPartyOptions(); refreshDriverOptions();
   updateSubtypesForProduct(true);
   if(!isEditing) setNow();
-  updateAutoKg();
 }
 
 function fillFormProducts(){
   if(ssProduct) ssProduct.setOptions(products.map(p=>({value:p.name, label:p.name})));
-}
-function fillUnits(){
-  if(ssUnit) ssUnit.setOptions(unitsList.map(u=>({value:u.v, label:u.l})));
 }
 function refreshPartyOptions(){
   const list = currentType==='in' ? sellers : (currentType==='out' ? buyers : []);
@@ -741,31 +755,7 @@ function onProductChange(){
   updateSubtypesForProduct(false);
   const productName = ssProduct.getValue();
   const product = products.find(p=>p.name===productName);
-  if(product && product.unit){
-    ssUnit.setValue(product.unit);
-  }
-  updateAutoKg();
-}
-
-function updateAutoKg(){
-  const box = document.getElementById('autoKgBox');
-  const valEl = document.getElementById('autoKgValue');
-  const formulaEl = document.getElementById('autoKgFormula');
-  const qtyStr = document.getElementById('f_quantity').value.trim();
-  const unit = ssUnit.getValue();
-  const f = unitFactor(unit);
-  if(f===null||f===undefined){
-    box.classList.add('no-factor');
-    valEl.textContent = '۰';
-    formulaEl.textContent = 'واحد بدون ضریب تبدیل';
-    return;
-  }
-  box.classList.remove('no-factor');
-  const qty = parseFloat(toLatinDigits(qtyStr));
-  if(!qtyStr || isNaN(qty)){ valEl.textContent='۰'; formulaEl.textContent=`ضریب: ${toFa(f)}`; return; }
-  const kg = qty * f;
-  valEl.textContent = fmtKg(kg);
-  formulaEl.textContent = `${fmtQty(qty)} × ${toFa(f)} = ${fmtKg(kg)}`;
+  currentUnit = (product && product.unit) ? product.unit : 'kg';
 }
 
 async function addParty(){
@@ -810,7 +800,7 @@ async function saveRecord(){
   const product = ssProduct.getValue();
   const subtype = ssSubtype.getValue();
   const qty = document.getElementById('f_quantity').value.trim();
-  const unit = ssUnit.getValue();
+  const unit = currentUnit || 'kg';
   const party = ssParty.getValue();
   const driver = ssDriver.getValue();
 
@@ -820,7 +810,7 @@ async function saveRecord(){
   if(!qty){ showToast('تعداد را وارد کنید','warning'); return; }
   const q = parseFloat(toLatinDigits(qty));
   if(isNaN(q) || q<=0){ showToast('تعداد باید بزرگتر از صفر باشد','warning'); return; }
-  if(!unit){ showToast('واحد را انتخاب کنید','warning'); return; }
+  if(!unit || !unitsList.some(u=>u.v===unit)){ showToast('واحد کالا معتبر نیست — کالا را دوباره انتخاب کنید','warning'); return; }
 
   const saveBtn = document.getElementById('saveBtn');
   if(saveBtn.disabled) return;
@@ -891,10 +881,9 @@ function clearForm(){
   ['f_quantity','f_notes','f_invoice','f_basil','f_waybill'].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value='';
   });
-  ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssUnit.clear(); ssSubtype.clear();
+  ssProduct.clear(); ssParty.clear(); ssDriver.clear(); ssSubtype.clear();
   document.getElementById('subtypeField').hidden = true;
-  if(unitsList.length) ssUnit.setValue(unitsList[0].v);
-  updateAutoKg();
+  currentUnit = 'kg';
   if(editingId===null) setNow();
 }
 
@@ -921,12 +910,7 @@ function editRecord(id){
   }
 
   document.getElementById('f_quantity').value = r.quantity||'';
-  
-  if(r.unit){
-    ssUnit.setValue(r.unit);
-  } else {
-    ssUnit.clear();
-  }
+  currentUnit = r.unit || 'kg';
   
   updateSubtypesForProduct(false);
   if(r.subtype && ssSubtype){
@@ -936,7 +920,6 @@ function editRecord(id){
   
   if(r.party) ssParty.setValue(r.party);
   if(r.driver) ssDriver.setValue(r.driver);
-  updateAutoKg();
   document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'start'});
   renderRecords();
 }
@@ -972,7 +955,7 @@ function matchFilter(r){
   if(!matchesDataMode(r)) return false;
   if(q){
     const tokens = q.split(/\s+/).filter(Boolean);
-    const fields = [r.product, r.subtype, r.party, r.driver, r.invoiceNumber, r.basilNumber, r.waybillNumber, r.notes, r.date, r.time, r.createdByName].filter(Boolean).map(String);
+    const fields = [r.product, r.subtype, r.party, r.driver, r.invoiceNumber, r.basilNumber, r.waybillNumber, r.notes, r.date, r.time, r.createdByName, r.updatedByName].filter(Boolean).map(String);
     if(!tokens.every(tk=>{
       const tkL = toLatinDigits(tk).toLowerCase();
       return fields.some(f=>f.toLowerCase().includes(tk.toLowerCase()) || toLatinDigits(f).toLowerCase().includes(tkL));
@@ -1004,6 +987,9 @@ function renderRecords(){
       <button class="btn btn-warning btn-sm" onclick="editRecord(${r.id})" title="ویرایش">✏️</button>
       <button class="btn btn-danger btn-sm" onclick="delRecord(${r.id})" title="حذف">🗑️</button>
     ` : `<button class="btn btn-info btn-sm" onclick="viewRecord(${r.id})" title="مشاهده/چاپ">👁️</button>`;
+    const editorCell = (r.updatedBy && r.updatedBy !== r.createdBy)
+      ? `<span style="font-size:11px;">${esc(toFa(r.updatedByName||'-'))}</span><br><span style="font-size:9.5px;color:var(--muted);">${formatTime(r.updatedAt)}</span>`
+      : '<span style="color:var(--muted);">—</span>';
     return `<tr class="${rowCls}" ${isUnsaved?'title="ذخیره‌نشده"':''}>
       <td data-field="date">${esc(toFa(r.date))}</td>
       <td data-field="time">${esc(toFa(r.time))}</td>
@@ -1019,6 +1005,7 @@ function renderRecords(){
       <td data-field="waybill">${esc(toFa(r.waybillNumber||'-'))}</td>
       <td data-field="notes">${esc(toFa(r.notes||''))}</td>
       <td data-field="creator"><span class="audit-info" title="${esc(auditTitle)}">👤 ${esc(toFa(r.createdByName||'-'))}</span></td>
+      <td data-field="lastEditor">${editorCell}</td>
       <td><div style="display:flex;gap:4px;justify-content:flex-end;">${btns}</div></td>
     </tr>`;
   };
@@ -1196,6 +1183,7 @@ function renderDeletedRecords(){
       <td data-field="driver">${esc(toFa(r.driver||'-'))}</td>
       <td data-field="notes">${esc(toFa(r.notes||''))}</td>
       <td data-field="creator">${esc(toFa(r.createdByName||'-'))}</td>
+      <td data-field="lastEditor"><span style="font-size:11px;">${esc(toFa(r.updatedByName||'-'))}</span></td>
       <td style="font-size:11px;">${delStr}</td>
       <td><button class="btn btn-add btn-sm" onclick="restoreRecord(${r.id})">🔄</button></td>
     </tr>`;
@@ -1329,7 +1317,8 @@ async function syncPull(){
     
     dirty = false; lastSyncAt = Date.now();
     editingId = null; currentType = null;
-    applyTypeUI(); fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
+    applyTypeUI(); fillFormProducts(); refreshPartyOptions(); refreshDriverOptions();
+    renderDataModeSelect();
     renderRecords(); renderManageLists(); renderManageProducts(); updateGhUI();
     updateSyncBar('synced');
     showToast(`${toFa(records.filter(r=>!r.deleted).length)} رکورد دریافت شد`,'success');
@@ -1423,6 +1412,7 @@ async function syncPush(){
     await ghPut(payload);
     dirty = false; lastSyncAt = Date.now(); ghCanWrite = true;
     clearPendingState();
+    renderDataModeSelect();
     renderRecords(); renderManageLists(); renderManageProducts(); updateGhUI();
     updateSyncBar('synced');
     showToast('تغییرات روی سرور ذخیره شد','success');
@@ -1448,7 +1438,6 @@ async function saveGhConfigFromUI(){
     document.getElementById('ghInfo').textContent = raw ? '✅ اتصال برقرار شد' : '⚠️ فایل یافت نشد';
     const perm = await checkTokenPermissions();
     if(perm) ghCanWrite = perm.canWrite;
-    
     const ghHeader = document.getElementById('ghSection').previousElementSibling;
     if(!document.getElementById('ghSection').classList.contains('collapsed')){
        toggleAccordion('ghSection', ghHeader);
@@ -1460,7 +1449,6 @@ async function saveGhConfigFromUI(){
   updateSyncBar();
 }
 
-/* ─── Receipt / preview ─── */
 function viewRecord(id){
   const r = records.find(x=>x.id===id);
   if(!r || r.deleted){ showToast('یافت نشد','error'); return; }
@@ -1498,19 +1486,15 @@ function buildReceipt(r, showLetterhead){
     head = `<div class="p-receipt-company">${esc(letterheadCompany)}</div>
             <div class="p-receipt-factory">${esc(letterheadFactory)} — واحد انبار</div>`;
   }
-  
   const qtyRow = (r.quantity && String(r.quantity).trim()) ? 
     `<tr><td class="p-receipt-lbl">تعداد</td><td class="p-receipt-val" style="text-align:left;">${fmtQty(r.quantity)} ${esc(unit)}</td></tr>` : '';
   const kgRow = kg>0 ? `<tr><td class="p-receipt-lbl">مجموع وزنی</td><td class="p-receipt-val" style="text-align:left;">${fmtKg(kg)}</td></tr>` : '';
-  
   const partyRow = r.party ? `<tr><td class="p-receipt-lbl">${partyLabel}</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.party))}</td></tr>` : '';
   const driverRow = r.driver ? `<tr><td class="p-receipt-lbl">راننده</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.driver))}</td></tr>` : '';
   const invoiceRow = r.invoiceNumber ? `<tr><td class="p-receipt-lbl">شماره فاکتور</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.invoiceNumber))}</td></tr>` : '';
   const basilRow = r.basilNumber ? `<tr><td class="p-receipt-lbl">شماره باسکول</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.basilNumber))}</td></tr>` : '';
   const waybillRow = r.waybillNumber ? `<tr><td class="p-receipt-lbl">شماره بارنامه</td><td class="p-receipt-val" style="text-align:left;">${esc(toFa(r.waybillNumber))}</td></tr>` : '';
-  
   const notesBlock = r.notes ? `<div class="p-receipt-notes-block" style="padding:10px 0;"><div style="font-weight:bold;font-size:0.9rem;color:#555;margin-bottom:3px;">توضیحات</div><div style="white-space:pre-wrap;font-size:0.9rem;line-height:1.6;">${esc(toFa(r.notes))}</div></div>` : '';
-  
   let sig = '';
   if(showLetterhead){
     sig = `<div class="p-receipt-signatures">
@@ -1530,19 +1514,15 @@ function buildReceipt(r, showLetterhead){
     <hr class="p-receipt-hr">
     <div class="p-receipt-meta"><span>${esc(toFa(r.date)||'-')}</span><span>${esc(toFa(r.time)||'-')}</span></div>
     <hr class="p-receipt-hr-dash">
-    
     <div style="text-align:center; margin-bottom:10px;">
       <div style="font-size:0.85rem;color:#666;">${productLabel}</div>
       <div style="font-size:1.3rem; font-weight:900;">${esc(fullProduct)||'-'}</div>
     </div>
-
     <table class="p-receipt-table">
       ${qtyRow}
       ${kgRow}
     </table>
-    
     <hr class="p-receipt-hr-dash">
-    
     <table class="p-receipt-table">
       ${partyRow}
       ${driverRow}
@@ -1550,13 +1530,11 @@ function buildReceipt(r, showLetterhead){
       ${basilRow}
       ${waybillRow}
     </table>
-    
     ${notesBlock}
     ${sig}
   </div>`;
 }
 
-/* ─── Print ─── */
 function setPrintPageRule(rule){
   const old = document.getElementById('__dyn_page_style__');
   if(old) old.remove();
@@ -1586,7 +1564,6 @@ function buildSignature(){
   <div class="p-footer-note">توجه: تمامی مقادیر وزنی بر حسب کیلوگرم — این گزارش به‌صورت خودکار تهیه شده است.</div>`;
 }
 
-/* ─── Build filter note for printed reports ─── */
 function getFilterInfoText(){
   const parts = [];
   const from = (document.getElementById('records_from')?.value || '').trim();
@@ -1605,8 +1582,10 @@ function getFilterInfoText(){
   if(advFilter.subtype) parts.push(`زیرمجموعه: ${advFilter.subtype}`);
   if(advFilter.party) parts.push(`طرف حساب: ${advFilter.party}`);
   if(advFilter.driver) parts.push(`راننده: ${advFilter.driver}`);
-  if(dataMode === 'weighted') parts.push('حالت داده: فقط وزنی');
-  else if(dataMode === 'numeric') parts.push('حالت داده: فقط عددی');
+  if(dataMode) {
+    const u = unitsList.find(x => x.v === dataMode);
+    parts.push(`واحد: ${u ? u.l : dataMode}`);
+  }
   if(summaryMode === 'detailed') parts.push('نمایش خلاصه: تفکیکی');
   else parts.push('نمایش خلاصه: کلی');
   return parts.join(' • ');
@@ -1879,17 +1858,14 @@ function buildDailySummaryPrintBlock(data){
   dates.forEach(d=>{
     let rowInTotal = 0, rowOutTotal = 0;
     let row = `<tr><td style="border:1px solid #666;background:#f0f0f0!important;font-weight:900;">${esc(toFa(d))}</td>`;
-    
     weightedIn.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.in||0; totals.wIn[k]+=v; rowInTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
     weightedOut.forEach(k=>{ const v = weightedMatrix[d]?.[k]?.out||0; totals.wOut[k]+=v; rowOutTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtKg(v):'—'}</td>`; });
     nonWeightedIn.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.in||0; totals.nIn[k]+=v; rowInTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
     nonWeightedOut.forEach(k=>{ const v = nonWeightedMatrix[d]?.[k]?.out||0; totals.nOut[k]+=v; rowOutTotal+=v; row += `<td style="border:1px solid #666;">${v>0?fmtQty(v):'—'}</td>`; });
-    
     totals.in += rowInTotal;
     totals.out += rowOutTotal;
     row += `<td style="border:1px solid #666;font-weight:900;background:#f0f0f0!important;">${rowInTotal>0?fmtKg(rowInTotal):'—'}</td>`;
     row += `<td style="border:1px solid #666;font-weight:900;background:#f0f0f0!important;">${rowOutTotal>0?fmtKg(rowOutTotal):'—'}</td>`;
-    
     row += '</tr>';
     body += row;
   });
@@ -1916,11 +1892,11 @@ function exportCSV(type){
   const list = getVisibleRecords().filter(r=>r.type===type).filter(matchFilter).sort(sortFn);
   if(!list.length){ showToast('داده‌ای نیست','info'); return; }
   const party = type==='in' ? 'فروشنده' : 'خریدار';
-  const rows = [['#','تاریخ','ساعت','کالا','زیرمجموعه','تعداد','واحد','وزن',party,'راننده','فاکتور','باسکول','بارنامه','توضیحات','ثبت‌کننده']];
+  const rows = [['#','تاریخ','ساعت','کالا','زیرمجموعه','تعداد','واحد','وزن',party,'راننده','فاکتور','باسکول','بارنامه','توضیحات','ثبت‌کننده','آخرین ویرایش']];
   list.forEach((r,i)=>{
     const p = products.find(x=>x.name===r.product);
     const u = r.unit ? unitLabel(r.unit) : (p ? unitLabel(p.unit) : '');
-    rows.push([i+1, toLatinDigits(r.date||''), toLatinDigits(r.time||''), r.product||'', r.subtype||'', toLatinDigits(r.quantity||''), u, getRecordKg(r), r.party||'', r.driver||'', r.invoiceNumber||'', r.basilNumber||'', r.waybillNumber||'', r.notes||'', r.createdByName||'']);
+    rows.push([i+1, toLatinDigits(r.date||''), toLatinDigits(r.time||''), r.product||'', r.subtype||'', toLatinDigits(r.quantity||''), u, getRecordKg(r), r.party||'', r.driver||'', r.invoiceNumber||'', r.basilNumber||'', r.waybillNumber||'', r.notes||'', r.createdByName||'', r.updatedByName||'']);
   });
   const csv = rows.map(r=>r.map(c=>{ const s = String(c==null?'':c); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',')).join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
@@ -1952,33 +1928,26 @@ async function editProductInSettings(index){
   if(!canEditRecord(currentRole())) return;
   const p = products[index]; if(!p) return;
   const oldName = p.name;
-  
   const n = await customPrompt('نام کالا:', p.name);
   if(!n || !n.trim()) return;
   const newName = n.trim();
-  
   if(newName !== oldName && products.some(x=>x.name === newName)) {
     showToast('نام کالای دیگریست', 'warning'); return;
   }
-
   const unitListStr = unitsList.map((u,i)=>`${i+1}. ${u.v} (${u.l})`).join('\n');
   const currentUnitIdx = unitsList.findIndex(u=>u.v===p.unit) + 1;
   const idxStr = await customPrompt('شماره واحد پیش‌فرض:\n'+unitListStr, String(currentUnitIdx||1));
   if(!idxStr) return;
   const idx2 = parseInt(toLatinDigits(idxStr)) - 1;
   const newUnit = unitsList[idx2]?.v || unitsList[0]?.v || 'kg';
-
   const currentSubsStr = (p.subtypes || []).join(', ');
   const subsStr = await customPrompt('زیرمجموعه‌ها (با کاما):', currentSubsStr);
   const newSubs = subsStr ? subsStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
-
   products[index] = { name: newName, unit: newUnit, subtypes: newSubs, updatedAt: Date.now() };
   deletedProducts = deletedProducts.filter(x => x !== newName);
-
   if(oldName !== newName) {
     records.forEach(r => { if(r.product === oldName) r.product = newName; });
   }
-
   markDirty();
   fillFormProducts();
   renderManageProducts();
@@ -1996,14 +1965,11 @@ async function deleteProductFromSettings(index){
 function renderManageProducts(){
   const el = document.getElementById('manageProducts'); if(!el) return;
   if(!products.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">خالی</div>'; return; }
-  
   const q = (document.getElementById('searchProductList')?.value || '').trim().toLowerCase();
   const filtered = products.map((p, i) => ({p, originalIndex: i})).filter(item => 
     !q || item.p.name.toLowerCase().includes(q)
   );
-
   if(!filtered.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">یافت نشد</div>'; return; }
-
   el.innerHTML = filtered.map(({p, originalIndex}) => {
     const subs = (p.subtypes||[]).filter(s=>s&&s.trim());
     const subHtml = subs.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">${subs.map(s=>`<span style="font-size:10.5px;background:var(--card);color:var(--primary-dark);padding:2px 8px;border-radius:10px;border:1px solid var(--border);font-weight:bold;">${esc(s)}</span>`).join('')}</div>` : '';
@@ -2016,58 +1982,22 @@ function renderManageProducts(){
     </div>`;
   }).join('');
 }
-async function menuAddUnit(){
-  if(!canEditRecord(currentRole())) return;
-  const v = await customPrompt('کد واحد (مثلاً kg, pcs, m):','');
-  if(!v || !v.trim()) return;
-  const code = v.trim();
-  if(unitsList.some(u=>u.v===code)){ showToast('تکراری','warning'); return; }
-  const l = await customPrompt('نام نمایشی:', code);
-  if(!l) return;
-  const fStr = await customPrompt('ضریب تبدیل به کیلوگرم (خالی = بدون ضریب):','');
-  let factor = null;
-  if(fStr && String(fStr).trim()){
-    const n = parseFloat(toLatinDigits(String(fStr)));
-    if(!isNaN(n)) factor = n;
-  }
-  deletedUnits = deletedUnits.filter(x=>x!==code);
-  unitsList.push({ v:code, l:l.trim()||code, factor, updatedAt: Date.now() });
-  markDirty(); renderManageLists(); fillUnits(); updateAutoKg();
-}
 
 function renderManageLists(){
-  renderUnitsList();
-  
   const qS = (document.getElementById('searchSellerList')?.value || '').trim().toLowerCase();
   const qB = (document.getElementById('searchBuyerList')?.value || '').trim().toLowerCase();
   const qD = (document.getElementById('searchDriverList')?.value || '').trim().toLowerCase();
-
   renderPartyList('manageSellers', sellers, 'seller', qS);
   renderPartyList('manageBuyers', buyers, 'buyer', qB);
   renderPartyList('manageDrivers', drivers, 'driver', qD);
 }
-function renderUnitsList(){
-  const uc = document.getElementById('manageUnits'); if(!uc) return;
-  if(!unitsList.length){ uc.innerHTML = '<div style="text-align:center;color:var(--muted);padding:8px;">خالی</div>'; return; }
-  uc.innerHTML = unitsList.map((u,i)=>{
-    const f = (u.factor===null||u.factor===undefined)?'':u.factor;
-    return `<div style="display:grid;grid-template-columns:60px 1fr 80px;gap:4px;margin-bottom:4px;align-items:center;">
-      <input type="text" value="${esc(u.v)}" style="padding:6px;font-size:11px;text-align:center;font-family:monospace;" readonly>
-      <input type="text" value="${esc(u.l)}" style="padding:6px;font-size:11px;" readonly>
-      <input type="number" value="${f}" placeholder="—" style="padding:6px;font-size:11px;text-align:center;" readonly>
-    </div>`;
-  }).join('') + '<div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;">برای ویرایش واحدها به پنل مدیریت بروید</div>';
-}
 function renderPartyList(id, list, kind, query){
   const el = document.getElementById(id); if(!el) return;
   if(!list.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px;">خالی</div>'; return; }
-  
   const filtered = list.map((name, i) => ({name, originalIndex: i})).filter(item => 
     !query || item.name.toLowerCase().includes(query)
   );
-  
   if(!filtered.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px;">یافت نشد</div>'; return; }
-
   el.innerHTML = filtered.map(({name, originalIndex})=>`
     <div style="display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:4px;">
       <input type="text" value="${esc(name)}" style="padding:6px;font-size:11.5px;" readonly>
@@ -2131,53 +2061,137 @@ async function restoreFromFile(ev){
   const file = ev.target.files?.[0]; 
   ev.target.value='';
   if(!file) return;
-
   try {
     const text = await file.text();
     let data;
-    
     try {
       data = JSON.parse(text);
     } catch (parseError) {
       await customAlert('❌ فایل انتخاب شده یک فایل متنی JSON معتبر نیست.\n\nمطمئن شو فایلی که دانلود کردی پسوند .json داره.');
       return;
     }
-
     if(!data || (!data.records && !data.products && !data.units && !data.unitsList)) {
       await customAlert('⚠️ این فایل ساختار یک فایل پشتیبان انبار را ندارد.\n\n(احتمالاً فایل اشتباهی رو انتخاب کردی)');
       return;
     }
-
     const ok = await customConfirm('⚠️ آیا از ادغام این فایل با داده‌های فعلی مطمئن هستی؟', {okText:'بله، ادغام کن'});
     if(!ok) return;
-
     const parsed = deserializeState(data);
-    
     records = mergeRecordsById(records, parsed.records, permanentlyDeletedIds);
     products = mergeProductsList(products, parsed.products);
     sellers = mergeUnique(sellers, parsed.sellers || []);
     buyers = mergeUnique(buyers, parsed.buyers || []);
     drivers = mergeUnique(drivers, parsed.drivers || []);
-    
     const unitMap = new Map();
     [...unitsList, ...(parsed.unitsList || [])].forEach(u => {
       if(u && u.v && !unitMap.has(u.v)) unitMap.set(u.v, u);
     });
     unitsList = Array.from(unitMap.values());
-
     markDirty();
+    renderDataModeSelect();
     renderRecords(); 
     renderManageLists(); 
     renderManageProducts();
     refreshPartyOptions(); 
     refreshDriverOptions();
-    
     showToast('✅ فایل با موفقیت ادغام شد', 'success');
-    
   } catch(err) {
     console.error('Restore Error:', err);
     await customAlert('❌ خطا در بازیابی فایل:\n\n' + (err.message || 'نامشخص'));
   }
+}
+
+/* ═══════════════════════════════════════════════
+   Version Check & Update
+   ═══════════════════════════════════════════════ */
+async function checkRemoteVersion() {
+  try {
+    if (!ghConfig || !ghConfig.owner || !ghConfig.repo) return;
+    const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/commits?per_page=1&_=${Date.now()}`;
+    const headers = { 'Accept': 'application/vnd.github+json' };
+    if (ghConfig.token) headers['Authorization'] = 'Bearer ' + ghConfig.token;
+    const res = await fetch(url, { headers, cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || !data[0] || !data[0].sha) return;
+    const remoteSha = data[0].sha;
+    const stored = localStorage.getItem('wh_remote_sha');
+    if (stored && stored !== remoteSha) {
+      showUpdateBanner();
+    } else if (!stored) {
+      localStorage.setItem('wh_remote_sha', remoteSha);
+    }
+  } catch(e) { console.warn('Version check failed:', e); }
+}
+
+function showUpdateBanner() {
+  const b = document.getElementById('updateBanner');
+  if (b) b.hidden = false;
+}
+
+function dismissUpdateBanner() {
+  const b = document.getElementById('updateBanner');
+  if (b) b.hidden = true;
+}
+
+async function checkForUpdate() {
+  showToast('⏳ در حال بررسی نسخه جدید...', 'info', 1500);
+  try {
+    if (!ghConfig || !ghConfig.owner || !ghConfig.repo) {
+      await customAlert('❌ ابتدا تنظیمات اتصال به GitHub را انجام دهید.');
+      return;
+    }
+    const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/commits?per_page=1&_=${Date.now()}`;
+    const headers = { 'Accept': 'application/vnd.github+json' };
+    if (ghConfig.token) headers['Authorization'] = 'Bearer ' + ghConfig.token;
+    const res = await fetch(url, { headers, cache: 'no-store' });
+    if (!res.ok) {
+      await customAlert('❌ خطا در ارتباط با GitHub: ' + res.status);
+      return;
+    }
+    const data = await res.json();
+    if (!Array.isArray(data) || !data[0] || !data[0].sha) {
+      await customAlert('❌ اطلاعات commit دریافت نشد.');
+      return;
+    }
+    const remoteSha = data[0].sha;
+    const stored = localStorage.getItem('wh_remote_sha');
+    if (!stored) {
+      localStorage.setItem('wh_remote_sha', remoteSha);
+      await customAlert('✅ شما از آخرین نسخه استفاده می‌کنید.');
+      return;
+    }
+    if (stored === remoteSha) {
+      await customAlert('✅ شما از آخرین نسخه استفاده می‌کنید.');
+      dismissUpdateBanner();
+    } else {
+      const ok = await customConfirm(
+        '🔔 نسخه جدید برنامه در دسترس است.\n\nآیا همین حالا به‌روزرسانی شود؟\n\n(برنامه یک‌بار بسته و باز می‌شود — داده‌های شما حفظ می‌شوند)',
+        { okText: '🔄 به‌روزرسانی', cancelText: 'بعداً' }
+      );
+      if (ok) applyUpdate();
+    }
+  } catch(e) {
+    await customAlert('❌ خطا: ' + (e.message || 'نامشخص'));
+  }
+}
+
+async function applyUpdate() {
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        try { await reg.update(); } catch(e) {}
+      }
+    }
+    localStorage.removeItem('wh_remote_sha');
+  } catch(e) {}
+  showToast('🔄 در حال به‌روزرسانی...', 'success', 900);
+  setTimeout(() => location.reload(true), 600);
 }
 
 (function initSplash(){
@@ -2192,11 +2206,19 @@ async function restoreFromFile(ev){
 })();
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load', async ()=>{
+  window.addEventListener('load', async () => {
     try {
-      const head = await fetch('./sw.js',{method:'HEAD'}).catch(()=>null);
-      if(!head || !head.ok) return;
       await navigator.serviceWorker.register('./sw.js');
-    } catch(e){ console.warn('SW registration failed', e); }
+    } catch(e) { console.warn('SW registration failed', e); }
+    setTimeout(checkRemoteVersion, 2000);
+    setInterval(checkRemoteVersion, 30 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkRemoteVersion();
+    });
+  });
+} else {
+  window.addEventListener('load', () => {
+    setTimeout(checkRemoteVersion, 2000);
+    setInterval(checkRemoteVersion, 30 * 60 * 1000);
   });
 }

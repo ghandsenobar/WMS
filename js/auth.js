@@ -25,7 +25,6 @@ function saveSession(userId, username, role){
 }
 function clearSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
 
-/* Permission check based on role */
 function canCreateRecord(role){ return role==='admin' || role==='operator'; }
 function canEditRecord(role){ return role==='admin' || role==='operator'; }
 function canDeleteRecord(role){ return role==='admin' || role==='operator'; }
@@ -33,7 +32,6 @@ function canManageUsers(role){ return role==='admin'; }
 function canManageDB(role){ return role==='admin'; }
 function canPush(role){ return role==='admin' || role==='operator'; }
 
-/* Verify login against users list */
 async function verifyLogin(username, password, users){
   const user = (users||[]).find(u => u.username === username);
   if(!user) return {ok:false, reason:'نام کاربری یافت نشد'};
@@ -43,7 +41,6 @@ async function verifyLogin(username, password, users){
   return {ok:true, user};
 }
 
-/* Create a new user object (returns the user data with hashed password) */
 async function createUserObject({username, password, displayName, role, currentUserId}){
   const salt = generateSalt();
   const hash = await hashPassword(password, salt);

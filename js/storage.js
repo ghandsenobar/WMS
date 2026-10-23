@@ -356,7 +356,6 @@ async function checkTokenPermissions(){
   }catch(e){ return null; }
 }
 
-/* ─── Merge helpers ─── */
 function mergeRecordsById(local, remote, tombstones){
   const stones = new Set(tombstones||[]);
   const map = new Map();

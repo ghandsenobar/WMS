@@ -64,7 +64,6 @@ function formatTime(ts){
          toFa(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'));
 }
 
-/* Unique ID (session-unique) */
 let _lastIdCounter = 0;
 function generateId(){
   const now = Date.now();
@@ -76,7 +75,6 @@ function generateUserId(){
   return 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
 }
 
-/* Password hashing (PBKDF2 + SHA-256) */
 async function hashPassword(password, salt){
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(

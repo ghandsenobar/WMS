@@ -116,7 +116,10 @@ class SearchableSelect{
   }
   clear(){ this.hidden.value=''; this.input.value=''; }
   _bind(){
-    this.input.addEventListener('focus', () => this._open());
+    this.input.addEventListener('focus', () => {
+      try { this.input.select(); } catch(e) {}
+      this._open();
+    });
     this.input.addEventListener('input', () => { this._filter(); this._open(); });
     document.addEventListener('click', e => { if(!this.el.contains(e.target)) this._close(); });
     this.input.addEventListener('keydown', e => this._onKey(e));
@@ -135,7 +138,6 @@ class SearchableSelect{
     if(typeof closeCalendar === 'function') closeCalendar();
     if(typeof closeTimePicker === 'function') closeTimePicker();
     document.querySelectorAll('.ss-dropdown').forEach(d => { if(d !== this.dropdown) d.hidden = true; });
-    
     this._filter();
     this.dropdown.hidden = false;
     this.selectedIndex = this.filtered.findIndex(o => o.value === this.hidden.value);
@@ -212,7 +214,6 @@ let _calTarget = null, _calYear, _calMonth;
 function openCalendarFor(input){
   closeTimePicker();
   document.querySelectorAll('.ss-dropdown').forEach(d => d.hidden = true);
-  
   _calTarget = input;
   const raw = toLatinDigits(input.value||'').trim();
   if(raw){
@@ -309,7 +310,6 @@ let _timeTarget=null, _tempH=0, _tempM=0;
 function openTimeFor(input){
   closeCalendar();
   document.querySelectorAll('.ss-dropdown').forEach(d => d.hidden = true);
-  
   _timeTarget = input;
   const raw = toLatinDigits(input.value||'').trim();
   if(raw && /^\d{1,2}:\d{1,2}$/.test(raw)){
