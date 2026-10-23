@@ -1,12 +1,10 @@
 /* admin.css — Admin panel specific styles */
 
-/* اطمینان از اینکه hidden واقعاً مخفی می‌کند حتی در برابر inline display */
 [hidden] { display: none !important; }
 
-/* ─── قواعد پایه (اول) ─── */
 .admin-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px minmax(0, 1fr);
   gap: 16px;
   min-height: calc(100vh - 100px);
 }
@@ -49,8 +47,10 @@
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow);
+  min-width: 0;
+  overflow: hidden;
 }
-.admin-panel { display: none; }
+.admin-panel { display: none; min-width: 0; }
 .admin-panel.active { display: block; }
 .admin-panel-title {
   font-size: 16px;
@@ -67,6 +67,7 @@
   background: var(--subtle-bg);
   border-radius: 10px;
   border: 1px solid var(--border);
+  min-width: 0;
 }
 .admin-section-title {
   font-size: 14px;
@@ -75,6 +76,14 @@
   color: var(--primary-dark);
 }
 
+.admin-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-table-wrap::-webkit-scrollbar { height: 8px; }
+.admin-table-wrap::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -82,6 +91,7 @@
   background: var(--card);
   border-radius: 8px;
   overflow: hidden;
+  min-width: 500px;
 }
 .admin-table th {
   background: var(--subtle-bg);
@@ -91,6 +101,7 @@
   color: var(--muted);
   border-bottom: 2px solid var(--border);
   text-align: right;
+  white-space: nowrap;
 }
 .admin-table td {
   padding: 10px 8px;
@@ -99,12 +110,12 @@
 }
 .admin-table tr:last-child td { border-bottom: none; }
 
-.role-chip { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.role-chip { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
 .role-chip.admin { background: var(--danger); color: #fff; }
 .role-chip.operator { background: var(--success); color: #fff; }
 .role-chip.viewer { background: var(--muted); color: #fff; }
 
-.status-chip { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.status-chip { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
 .status-chip.active { background: rgba(22, 163, 74, 0.15); color: var(--success); }
 .status-chip.inactive { background: rgba(220, 38, 38, 0.15); color: var(--danger); }
 
@@ -124,21 +135,20 @@
 .audit-action.delete { background: var(--danger); }
 .audit-action.login { background: var(--primary); }
 .audit-action.user { background: #8b5cf6; }
-.audit-detail { flex: 1; }
+.audit-detail { flex: 1; min-width: 0; word-break: break-word; }
 .audit-user { color: var(--primary-dark); font-weight: bold; }
 
 .danger-zone { border: 2px solid var(--danger); border-radius: 10px; padding: 16px; background: rgba(220, 38, 38, 0.05); }
 .danger-zone-title { color: var(--danger); font-weight: 900; font-size: 14px; margin-bottom: 10px; }
 
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
 .stat-card { background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.02)); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
 .stat-label { font-size: 11.5px; color: var(--muted); font-weight: bold; margin-bottom: 6px; }
 .stat-value { font-size: 22px; font-weight: 900; color: var(--primary); }
 
-/* ─── مدیا کوئری‌ها (باید آخر بیایند تا بر قواعد پایه غالب شوند) ─── */
 @media(max-width: 900px) {
-  .admin-layout { 
-    grid-template-columns: 1fr; 
+  .admin-layout {
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
   }
   .admin-sidebar {
@@ -156,12 +166,10 @@
     text-align: center;
     gap: 4px;
   }
-  .admin-nav-icon {
-    font-size: 20px;
-  }
+  .admin-nav-icon { font-size: 20px; }
 }
 @media(max-width: 500px) {
-  .admin-sidebar {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .admin-sidebar { grid-template-columns: repeat(2, 1fr); }
+  .admin-content { padding: 14px; }
+  .admin-section { padding: 12px; }
 }
