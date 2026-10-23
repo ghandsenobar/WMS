@@ -10,47 +10,32 @@ let currentUser = null;
 let dirty = false;
 let lastSyncAt = null;
 let _editingCreatorRecordId = null;
+let letterheadCompany = '', letterheadCompanyAt = 0;
+let letterheadFactory = '', letterheadFactoryAt = 0;
+let visibleFields = {}, visibleFieldsAt = 0;
 
 window.addEventListener('DOMContentLoaded', () => {
-  // هر مرحله جدا محافظت شده تا یک خطا بقیه init را قطع نکند
-  try { initUIBindings(); } catch (e) { console.error('initUIBindings failed:', e); }
-  try { loadGhConfig(); } catch (e) { console.error('loadGhConfig failed:', e); }
-  try { applyDarkMode(); } catch (e) { console.error('applyDarkMode failed:', e); }
-  try {
-    const sess = loadSession();
-    if (sess) {
-      adminTryRestore(sess);
-    }
-  } catch (e) { console.error('loadSession failed:', e); }
+  initUIBindings();
+  loadGhConfig();
+  applyDarkMode();
+  const sess = loadSession();
+  if (sess) {
+    adminTryRestore(sess);
+  }
 });
 
 async function adminTryRestore(sess) {
-  const errEl = document.getElementById('loginError');
   try {
-    if (!hasGhConfig()) {
-      errEl.hidden = false;
-      errEl.textContent = 'تنظیمات دیتابیس یافت نشد';
-      return;
-    }
+    if (!hasGhConfig()) { document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'تنظیمات دیتابیس یافت نشد'; return; }
     const raw = await ghGet();
-    if (!raw) {
-      errEl.hidden = false;
-      errEl.textContent = 'داده‌ای روی سرور نیست';
-      return;
-    }
+    if (!raw) { document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'داده‌ای روی سرور نیست'; return; }
     const data = deserializeState(raw);
     const user = data.users.find(u => u.id === sess.userId);
-    if (!user || user.role !== 'admin' || !user.active) {
-      clearSession();
-      errEl.hidden = false;
-      errEl.textContent = 'دسترسی مدیریت لازم است';
-      return;
-    }
+    if (!user || user.role !== 'admin' || !user.active) { clearSession(); document.getElementById('loginError').hidden = false; document.getElementById('loginError').textContent = 'دسترسی مدیریت لازم است'; return; }
     enterAdmin(user, data);
   } catch (e) {
-    // خطای شبکه/پارس — Session حفظ می‌شود تا رفرش بعدی دوباره تلاش کند
-    errEl.hidden = false;
-    errEl.textContent = 'خطا: ' + (e.message || '');
+    document.getElementById('loginError').hidden = false;
+    document.getElementById('loginError').textContent = 'خطا: ' + (e.message || '');
   }
 }
 
@@ -94,6 +79,14 @@ function enterAdmin(user, data) {
   deletedDrivers = data.deletedDrivers || [];
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
+  
+  letterheadCompany = data.letterheadCompany || '';
+  letterheadCompanyAt = data.letterheadCompanyAt || 0;
+  letterheadFactory = data.letterheadFactory || '';
+  letterheadFactoryAt = data.letterheadFactoryAt || 0;
+  visibleFields = data.visibleFields || {};
+  visibleFieldsAt = data.visibleFieldsAt || 0;
+  
   dirty = false; lastSyncAt = Date.now();
 
   document.getElementById('loginScreen').hidden = true;
@@ -120,7 +113,6 @@ function showPanel(name) {
   document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
 }
 
-/* ─── Dashboard ─── */
 function renderDashboard() {
   const grid = document.getElementById('statGrid');
   const vis = records.filter(r => !r.deleted);
@@ -137,7 +129,6 @@ function renderDashboard() {
   `;
 }
 
-/* ─── Users ─── */
 function renderUsers() {
   const body = document.getElementById('usersBody');
   body.innerHTML = users.map((u, i) => {
@@ -238,7 +229,6 @@ async function deleteUser(id) {
   showToast('حذف شد', 'success');
 }
 
-/* ─── Records panel (Bulk Edit & Individual Edit) ─── */
 function renderRecordsPanel() {
   const vis = records.filter(r => !r.deleted);
   document.getElementById('recordsStats').innerHTML = `
@@ -248,7 +238,6 @@ function renderRecordsPanel() {
       <div>🗑️ حذف‌شده: <b>${toFa(records.length - vis.length)}</b></div>
     </div>`;
   
-  // Populate Bulk Change Selects
   const uniqueCreators = [...new Set(records.map(r => r.createdByName).filter(Boolean))].sort();
   const oldSel = document.getElementById('bulkOldCreator');
   const newSel = document.getElementById('bulkNewCreator');
@@ -312,7 +301,6 @@ function saveCreatorChange() {
     r.updatedByName = currentUser.displayName || currentUser.username;
     r.updatedAt = Date.now();
     
-    // Also update the createdBy ID if the user exists in the users list
     const targetUser = users.find(u => (u.displayName || u.username) === newName);
     if (targetUser) r.createdBy = targetUser.id;
 
@@ -357,7 +345,6 @@ async function bulkChangeCreator() {
   showToast(`ثبت‌کننده ${toFa(count)} رکورد تغییر کرد`, 'success');
 }
 
-/* ─── Audit ─── */
 function renderAudit() {
   const filter = document.getElementById('auditFilter').value;
   const list = document.getElementById('auditList');
@@ -377,7 +364,6 @@ function auditActionLabel(a) {
   return { create: 'ثبت', update: 'ویرایش', delete: 'حذف', login: 'ورود', user: 'کاربر' }[a] || a;
 }
 
-/* ─── DB info ─── */
 function renderDBInfo() {
   const size = ghFileSize || 0;
   document.getElementById('dbInfo').innerHTML = `
@@ -390,7 +376,6 @@ function renderDBInfo() {
     </div>`;
 }
 
-/* ─── System info ─── */
 function renderSystemInfo() {
   document.getElementById('systemInfo').innerHTML = `
     <div style="font-size:12.5px;line-height:2;">
@@ -402,7 +387,6 @@ function renderSystemInfo() {
     </div>`;
 }
 
-/* ─── GitHub config ─── */
 async function saveGh() {
   ghConfig.owner = document.getElementById('ghOwner').value.trim();
   ghConfig.repo = document.getElementById('ghRepo').value.trim();
@@ -423,12 +407,14 @@ async function saveGh() {
   }
 }
 
-/* ─── Backup/Restore ─── */
 function adminBackup() {
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser
+    dataEpoch, currentUser,
+    letterheadCompany, letterheadCompanyAt,
+    letterheadFactory, letterheadFactoryAt,
+    visibleFields, visibleFieldsAt
   });
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -481,7 +467,6 @@ async function adminRestore(ev) {
   }
 }
 
-/* ─── Danger zone ─── */
 async function resetEpoch() {
   const ok = await customConfirm('⚠️ نسل (Epoch) یک عدد افزایش می‌یابد.\n\nهمه دستگاه‌ها باید دوباره دریافت کنند.', { okText: 'ادامه', danger: true });
   if (!ok) return;
@@ -503,7 +488,6 @@ async function clearAllRecords() {
   showToast('همه رکوردها حذف شدند', 'warning');
 }
 
-/* ─── Sync ─── */
 async function adminPull() {
   if (!hasGhConfig()) { showToast('تنظیمات پیکربندی نشده', 'warning'); return; }
   if (dirty) {
@@ -523,6 +507,14 @@ async function adminPull() {
     deletedProducts = data.deletedProducts; deletedSellers = data.deletedSellers;
     deletedBuyers = data.deletedBuyers; deletedDrivers = data.deletedDrivers;
     deletedUnits = data.deletedUnits; dataEpoch = data.dataEpoch;
+    
+    letterheadCompany = data.letterheadCompany || '';
+    letterheadCompanyAt = data.letterheadCompanyAt || 0;
+    letterheadFactory = data.letterheadFactory || '';
+    letterheadFactoryAt = data.letterheadFactoryAt || 0;
+    visibleFields = data.visibleFields || {};
+    visibleFieldsAt = data.visibleFieldsAt || 0;
+    
     dirty = false; lastSyncAt = Date.now();
     renderDashboard(); renderUsers(); renderRecordsPanel(); renderAudit(); renderDBInfo();
     updateAdminSyncStatus();
@@ -539,11 +531,22 @@ async function adminPush() {
     const remote = rawRemote ? deserializeState(rawRemote) : null;
     if (remote) {
       records = mergeRecordsById(records, remote.records, permanentlyDeletedIds);
+      // Preserve server's letterhead and visibleFields (admin doesn't manage them)
+      letterheadCompany = remote.letterheadCompany || '';
+      letterheadCompanyAt = remote.letterheadCompanyAt || 0;
+      letterheadFactory = remote.letterheadFactory || '';
+      letterheadFactoryAt = remote.letterheadFactoryAt || 0;
+      visibleFields = remote.visibleFields || {};
+      visibleFieldsAt = remote.visibleFieldsAt || 0;
     }
+    
     const payload = serializeState({
       records, products, sellers, buyers, drivers, unitsList, users, auditLog,
       permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-      dataEpoch, currentUser
+      dataEpoch, currentUser,
+      letterheadCompany, letterheadCompanyAt,
+      letterheadFactory, letterheadFactoryAt,
+      visibleFields, visibleFieldsAt
     });
     await ghPut(payload);
     dirty = false; lastSyncAt = Date.now();

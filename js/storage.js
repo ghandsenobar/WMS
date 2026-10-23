@@ -7,15 +7,14 @@ const GH_CONFIG_KEY = 'wh_github_config_v7';
 const STORAGE_MODE_KEY = 'wh_storage_mode_v7';
 const LOCAL_DATA_KEY = 'wh_local_data_v7';
 
-const DEFAULT_UNITS = [{v:'kg',l:'کیلوگرم',factor:1}];
-const DEFAULT_PRODUCTS = [{name:'شکر',unit:'kg',subtypes:[]}];
+const DEFAULT_UNITS = [{v:'kg',l:'کیلوگرم',factor:1,updatedAt:0}];
+const DEFAULT_PRODUCTS = [{name:'شکر',unit:'kg',subtypes:[],updatedAt:0}];
 
 let ghConfig = {owner:'ghandsenobar',repo:'Warehouse',token:''};
 let ghFileSha = null;
 let ghFileSize = 0;
 let ghCanWrite = null;
 
-/* ─── Storage mode ─── */
 function getStorageMode(){ return localStorage.getItem(STORAGE_MODE_KEY) || 'github'; }
 function setStorageMode(mode){ localStorage.setItem(STORAGE_MODE_KEY, mode); }
 function isLocalMode(){ return getStorageMode() === 'local'; }
@@ -36,7 +35,6 @@ function hasGhConfig(){
   return !!(ghConfig.token && ghConfig.owner && ghConfig.repo);
 }
 
-/* Base64 UTF-8 helpers */
 function utf8ToBase64(str){
   const utf8 = new TextEncoder().encode(str);
   let bin = ''; const chunk = 0x8000;
@@ -53,15 +51,14 @@ function base64ToUtf8(b64){
   return new TextDecoder('utf-8').decode(bytes);
 }
 
-/* === Serialize v7 === */
 function serializeState(state){
   const allUnits = new Map();
-  (state.unitsList||[]).forEach(u=>allUnits.set(u.v,{label:u.l,factor:u.factor}));
-  (state.products||[]).forEach(p=>{if(p.unit&&!allUnits.has(p.unit))allUnits.set(p.unit,{label:p.unit,factor:null});});
-  (state.records||[]).forEach(r=>{if(r.unit&&!allUnits.has(r.unit))allUnits.set(r.unit,{label:r.unit,factor:null});});
+  (state.unitsList||[]).forEach(u=>allUnits.set(u.v,{label:u.l,factor:u.factor,updatedAt:u.updatedAt||0}));
+  (state.products||[]).forEach(p=>{if(p.unit&&!allUnits.has(p.unit))allUnits.set(p.unit,{label:p.unit,factor:null,updatedAt:0});});
+  (state.records||[]).forEach(r=>{if(r.unit&&!allUnits.has(r.unit))allUnits.set(r.unit,{label:r.unit,factor:null,updatedAt:0});});
   const units=[], unitId=new Map(); let uId=0;
   allUnits.forEach((v,code)=>{ uId++; unitId.set(code,uId);
-    const o={i:uId,c:code,n:v.label};
+    const o={i:uId,c:code,n:v.label,uAt:v.updatedAt||0};
     if(v.factor!==null&&v.factor!==undefined) o.f=v.factor;
     units.push(o);
   });
@@ -132,7 +129,11 @@ function serializeState(state){
     ts: new Date().toISOString(),
     by: state.currentUser?.username || '',
     lhc: state.letterheadCompany || "",
+    lhcAt: state.letterheadCompanyAt || 0,
     lhf: state.letterheadFactory || "",
+    lhfAt: state.letterheadFactoryAt || 0,
+    vf: state.visibleFields || {},
+    vfAt: state.visibleFieldsAt || 0,
     units, products, sellers, buyers, drivers,
     records: outRecords,
     users,
@@ -152,14 +153,16 @@ function deserializeState(raw){
     unitsList:[...DEFAULT_UNITS], users:[], auditLog:[],
     permanentlyDeletedIds:[], deletedProducts:[], deletedSellers:[],
     deletedBuyers:[], deletedDrivers:[], deletedUnits:[], dataEpoch:1,
-    letterheadCompany: "", letterheadFactory: ""
+    letterheadCompany:"", letterheadCompanyAt:0,
+    letterheadFactory:"", letterheadFactoryAt:0,
+    visibleFields:{}, visibleFieldsAt:0
   };
   if(!raw||typeof raw!=='object') return empty;
 
   if(!raw.v || raw.v<7){
     const rawUnits = raw.units||[];
     const unitsList = rawUnits.length
-      ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null}))
+      ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null,updatedAt:u.uAt||0}))
       : [...DEFAULT_UNITS];
     const unitIdToCode = new Map(); rawUnits.forEach(u=>unitIdToCode.set(u.i,u.c));
     const rawProducts = raw.products||[];
@@ -209,7 +212,7 @@ function deserializeState(raw){
 
   const rawUnits=raw.units||[];
   const unitsList=rawUnits.length
-    ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null}))
+    ? rawUnits.map(u=>({v:u.c,l:u.n||u.c,factor:u.f!==undefined?u.f:null,updatedAt:u.uAt||0}))
     : [...DEFAULT_UNITS];
   const unitIdToCode=new Map(); rawUnits.forEach(u=>unitIdToCode.set(u.i,u.c));
   const rawProducts=raw.products||[];
@@ -266,11 +269,14 @@ function deserializeState(raw){
     deletedUnits:Array.isArray(raw.tomb?.u)?raw.tomb.u.slice():[],
     dataEpoch: typeof raw.epoch==='number'?raw.epoch:1,
     letterheadCompany: raw.lhc || "",
-    letterheadFactory: raw.lhf || ""
+    letterheadCompanyAt: raw.lhcAt || 0,
+    letterheadFactory: raw.lhf || "",
+    letterheadFactoryAt: raw.lhfAt || 0,
+    visibleFields: (raw.vf && typeof raw.vf==='object') ? raw.vf : {},
+    visibleFieldsAt: raw.vfAt || 0
   };
 }
 
-/* === Data API — GitHub or Local === */
 async function ghGet(){
   if(isLocalMode()){
     try {
@@ -350,7 +356,7 @@ async function checkTokenPermissions(){
   }catch(e){ return null; }
 }
 
-/* === Merge helpers === */
+/* ─── Merge helpers ─── */
 function mergeRecordsById(local, remote, tombstones){
   const stones = new Set(tombstones||[]);
   const map = new Map();
@@ -412,11 +418,37 @@ function mergeUnitsRespectingTombstones(localUnits, remoteUnits, tombstones){
   const stones=new Set((tombstones||[]).map(x=>String(x||'').trim()).filter(Boolean));
   const map=new Map();
   (remoteUnits||[]).forEach(u=>{ if(!u||!u.v||stones.has(u.v))return; map.set(u.v,{...u}); });
-  (localUnits||[]).forEach(u=>{ if(!u||!u.v||stones.has(u.v))return; map.set(u.v,{...u}); });
+  (localUnits||[]).forEach(u=>{
+    if(!u||!u.v||stones.has(u.v))return;
+    const ex=map.get(u.v);
+    if(!ex){ map.set(u.v,{...u}); return; }
+    const lt = u.updatedAt||0;
+    const rt = ex.updatedAt||0;
+    if(lt >= rt) map.set(u.v,{...u});
+  });
   return Array.from(map.values());
 }
+function mergeUsers(localUsers, remoteUsers){
+  const map = new Map();
+  (remoteUsers || []).forEach(u => { if (u && u.id) map.set(u.id, { ...u }); });
+  (localUsers || []).forEach(u => { if (u && u.id && !map.has(u.id)) map.set(u.id, { ...u }); });
+  return Array.from(map.values());
+}
+function mergeLetterheadValue(localVal, localAt, remoteVal, remoteAt) {
+  const lat = localAt || 0;
+  const rat = remoteAt || 0;
+  if (rat === 0) return { val: localVal || '', at: lat };
+  if (lat === 0) return { val: remoteVal || '', at: rat };
+  return lat >= rat ? { val: localVal, at: lat } : { val: remoteVal, at: rat };
+}
+function mergeVisibleFieldsValue(localFields, localAt, remoteFields, remoteAt) {
+  const lat = localAt || 0;
+  const rat = remoteAt || 0;
+  if (rat === 0) return { fields: localFields || {}, at: lat };
+  if (lat === 0) return { fields: remoteFields || {}, at: rat };
+  return lat >= rat ? { fields: localFields, at: lat } : { fields: remoteFields, at: rat };
+}
 
-/* === Pending state === */
 function savePendingState(state){
   try{
     const payload = serializeState(state);

@@ -26,9 +26,12 @@ let ssProduct = null, ssParty = null, ssDriver = null, ssUnit = null, ssSubtype 
 let ssAdvProduct = null, ssAdvSubtype = null, ssAdvParty = null, ssAdvDriver = null;
 
 let letterheadCompany = '';
+let letterheadCompanyAt = 0;
 let letterheadFactory = '';
+let letterheadFactoryAt = 0;
 let visibleFields = {};
-let _isFormListenersAttached = false; // Flag to prevent duplicate listeners
+let visibleFieldsAt = 0;
+let _isFormListenersAttached = false;
 
 function unitLabel(v){ const u = unitsList.find(x=>x.v===v); return u ? u.l : v || '—'; }
 function unitFactor(v){ const u = unitsList.find(x=>x.v===v); return u ? u.factor : null; }
@@ -52,7 +55,6 @@ function productFullName(r){
 }
 function currentRole(){ return currentUser?.role || 'viewer'; }
 
-/* ─── Filter by DataMode ─── */
 function isWeightedRecord(r) {
   const f = unitFactor(r.unit);
   return f !== null && f !== undefined;
@@ -89,8 +91,11 @@ function loadDisplaySettings(){
   const m = localStorage.getItem('wh_data_mode')||'weighted';
   dataMode = ['numeric','weighted'].includes(m) ? m : 'weighted';
   summaryMode = localStorage.getItem('wh_summary_mode') || 'grouped';
+  
   letterheadCompany = localStorage.getItem('wh_letterhead_company') || '';
+  letterheadCompanyAt = parseInt(localStorage.getItem('wh_letterhead_company_at') || '0', 10);
   letterheadFactory = localStorage.getItem('wh_letterhead_factory') || '';
+  letterheadFactoryAt = parseInt(localStorage.getItem('wh_letterhead_factory_at') || '0', 10);
   
   try{
     const raw = localStorage.getItem('wh_visible_fields');
@@ -103,7 +108,8 @@ function loadDisplaySettings(){
       });
       visibleFields=def;
     }else{visibleFields=initVisibleFieldsDefault();}
-  }catch(e){visibleFields=initVisibleFieldsDefault();}
+    visibleFieldsAt = parseInt(localStorage.getItem('wh_visible_fields_at') || '0', 10);
+  }catch(e){visibleFields=initVisibleFieldsDefault(); visibleFieldsAt = 0;}
 
   applyPrintFontScale();
   const fs = document.getElementById('fontScaleSelect'); if(fs) fs.value = String(printFontScale);
@@ -136,12 +142,17 @@ async function editLetterhead(type) {
 }
 
 function updateLetterhead(type, val) {
+  const now = Date.now();
   if (type === 'company') {
     letterheadCompany = val.trim();
+    letterheadCompanyAt = now;
     localStorage.setItem('wh_letterhead_company', letterheadCompany);
+    localStorage.setItem('wh_letterhead_company_at', String(now));
   } else {
     letterheadFactory = val.trim();
+    letterheadFactoryAt = now;
     localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+    localStorage.setItem('wh_letterhead_factory_at', String(now));
   }
   updateHeaderUI();
   markDirty();
@@ -163,9 +174,12 @@ function toggleFieldVisibility(key, checked){
   const f = ALL_FIELDS.find(x=>x.key===key);
   if(f && f.mandatory) return;
   visibleFields[key] = !!checked;
+  visibleFieldsAt = Date.now();
   localStorage.setItem('wh_visible_fields',JSON.stringify(visibleFields));
+  localStorage.setItem('wh_visible_fields_at', String(visibleFieldsAt));
   applyFieldVisibility();
   renderRecords();
+  markDirty();
 }
 function renderFieldsList(){
   const container = document.getElementById('fieldsList');
@@ -219,7 +233,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     inp.addEventListener('click', e=>{ e.stopPropagation(); openTimeFor(inp); });
   });
 
-  // Initialize Searchable Selects
   ssProduct = new SearchableSelect(document.getElementById('ss_product'), { allowAdd: false, onChange: onProductChange });
   ssSubtype = new SearchableSelect(document.getElementById('ss_subtype'), { allowAdd: false, onChange: ()=>{} });
   ssUnit = new SearchableSelect(document.getElementById('ss_unit'), { allowAdd: false, onChange: ()=>updateAutoKg() });
@@ -249,13 +262,11 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     }
   });
 
-  // Advanced Filters Searchable Selects
   ssAdvProduct = new SearchableSelect(document.getElementById('ss_adv_product'), { allowAdd: false, onChange: onAdvProductChange });
   ssAdvSubtype = new SearchableSelect(document.getElementById('ss_adv_subtype'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvParty = new SearchableSelect(document.getElementById('ss_adv_party'), { allowAdd: false, onChange: applyAdvFilterChange });
   ssAdvDriver = new SearchableSelect(document.getElementById('ss_adv_driver'), { allowAdd: false, onChange: applyAdvFilterChange });
 
-  // Search Clear logic
   const searchInput = document.getElementById('search');
   const searchClear = document.getElementById('searchClear');
   searchInput.addEventListener('input', ()=>{
@@ -413,7 +424,9 @@ async function doFirstSetup(){
       permanentlyDeletedIds:[], deletedProducts:[], deletedSellers:[],
       deletedBuyers:[], deletedDrivers:[], deletedUnits:[],
       dataEpoch:1, currentUser:userObj,
-      letterheadCompany: "", letterheadFactory: ""
+      letterheadCompany:"", letterheadCompanyAt:0,
+      letterheadFactory:"", letterheadFactoryAt:0,
+      visibleFields:{}, visibleFieldsAt:0
     };
     const payload = serializeState(newState);
     await ghPut(payload);
@@ -470,11 +483,33 @@ async function enterApp(user, data){
   deletedUnits = data.deletedUnits || [];
   dataEpoch = data.dataEpoch || 1;
   
-  letterheadCompany = data.letterheadCompany || localStorage.getItem('wh_letterhead_company') || '';
-  letterheadFactory = data.letterheadFactory || localStorage.getItem('wh_letterhead_factory') || '';
+  // --- Merge letterhead (server vs local) ---
+  const mc = mergeLetterheadValue(letterheadCompany, letterheadCompanyAt, data.letterheadCompany || '', data.letterheadCompanyAt || 0);
+  letterheadCompany = mc.val; letterheadCompanyAt = mc.at;
+  const mf = mergeLetterheadValue(letterheadFactory, letterheadFactoryAt, data.letterheadFactory || '', data.letterheadFactoryAt || 0);
+  letterheadFactory = mf.val; letterheadFactoryAt = mf.at;
+  
   localStorage.setItem('wh_letterhead_company', letterheadCompany);
+  localStorage.setItem('wh_letterhead_company_at', String(letterheadCompanyAt));
   localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+  localStorage.setItem('wh_letterhead_factory_at', String(letterheadFactoryAt));
+  
+  // --- Merge visibleFields ---
+  const mvf = mergeVisibleFieldsValue(visibleFields, visibleFieldsAt, data.visibleFields || {}, data.visibleFieldsAt || 0);
+  const mergedFields = mvf.fields;
+  const def = initVisibleFieldsDefault();
+  ALL_FIELDS.forEach(f=>{
+    if(f.mandatory){ def[f.key] = true; }
+    else if(mergedFields && typeof mergedFields[f.key] === 'boolean'){ def[f.key] = mergedFields[f.key]; }
+  });
+  visibleFields = def;
+  visibleFieldsAt = mvf.at;
+  localStorage.setItem('wh_visible_fields', JSON.stringify(visibleFields));
+  localStorage.setItem('wh_visible_fields_at', String(visibleFieldsAt));
+  
   updateHeaderUI();
+  renderFieldsList();
+  applyFieldVisibility();
   
   dirty = false; lastSyncAt = Date.now();
 
@@ -539,7 +574,6 @@ function logout(){
   }
 }
 
-/* ─── Drawer & Accordion ─── */
 function openDrawer(){
   document.getElementById('drawer').classList.add('show');
   document.getElementById('drawerOverlay').classList.add('show');
@@ -590,7 +624,6 @@ function toggleAccordion(sectionId, headerEl){
   }
 }
 
-/* ─── GitHub UI ─── */
 function updateGhUI(){
   const box = document.getElementById('ghCompactBox');
   const fields = document.getElementById('ghFullFields');
@@ -621,7 +654,6 @@ function toggleGhEdit(){
   }
 }
 
-/* ─── Form ─── */
 function setNow(){
   document.getElementById('f_date').value = todayJalali();
   document.getElementById('f_time').value = nowTime();
@@ -768,7 +800,6 @@ async function menuAddDriver(){
   drivers.push(v);markDirty();refreshDriverOptions();renderManageLists();
 }
 
-/* ─── Save ─── */
 async function saveRecord(){
   if(!canCreateRecord(currentRole())){ showToast('دسترسی ثبت ندارید','warning'); return; }
   if(!currentType){ showToast('اول ورود/خروج را انتخاب کنید','warning'); return; }
@@ -869,7 +900,6 @@ function clearForm(){
   if(editingId===null) setNow();
 }
 
-/* ─── Edit ─── */
 function editRecord(id){
   if(!canEditRecord(currentRole())){ showToast('دسترسی ویرایش ندارید','warning'); return; }
   const r = records.find(x=>x.id===id);
@@ -928,7 +958,6 @@ async function delRecord(id){
   renderRecords();
 }
 
-/* ─── Records rendering ─── */
 function getVisibleRecords(){ return records.filter(r=>!r.deleted); }
 
 function matchFilter(r){
@@ -1039,7 +1068,6 @@ function updateFilterBadges(){
   }
 }
 
-/* ─── Filters ─── */
 function onSearchInput(){
   updateFilterBadges();
   clearTimeout(_searchTimer);
@@ -1116,7 +1144,6 @@ function updateAdvFilterChips(){
   }).join('');
 }
 
-/* ─── Quick date filters ─── */
 function recordsToday(){ const t = todayJalali(); document.getElementById('records_from').value=t; document.getElementById('records_to').value=t; renderRecords(); }
 function recordsThisWeek(){
   const d = new Date(); const ds = (d.getDay()+1)%7;
@@ -1135,7 +1162,6 @@ function recordsAllDays(){ document.getElementById('records_from').value=''; doc
 function recordsPrevDay(){ const c = document.getElementById('records_from').value; const t = addDaysToJalali(c, -1); document.getElementById('records_from').value=t; document.getElementById('records_to').value=t; renderRecords(); }
 function recordsNextDay(){ const c = document.getElementById('records_from').value; const t = addDaysToJalali(c, 1); document.getElementById('records_from').value=t; document.getElementById('records_to').value=t; renderRecords(); }
 
-/* ─── Deleted records ─── */
 function updateDeletedUI(){
   const b = document.getElementById('deletedRecordsBadge');
   const cnt = records.filter(r=>r.deleted).length;
@@ -1190,13 +1216,15 @@ async function restoreRecord(id){
   renderRecords();
 }
 
-/* ─── Save state (dirty) ─── */
 function markDirty(){
   dirty = true;
   const statePayload = {
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser, letterheadCompany, letterheadFactory
+    dataEpoch, currentUser,
+    letterheadCompany, letterheadCompanyAt,
+    letterheadFactory, letterheadFactoryAt,
+    visibleFields, visibleFieldsAt
   };
 
   if (typeof isLocalMode === 'function' && isLocalMode()) {
@@ -1252,7 +1280,6 @@ function updateSyncBar(state, msg){
   if(pullBtn) pullBtn.disabled = false;
 }
 
-/* ─── Sync ─── */
 async function syncPull(){
   if(!hasGhConfig()){ showToast('تنظیمات پیکربندی نشده','warning'); return; }
   if(dirty){
@@ -1278,10 +1305,30 @@ async function syncPull(){
     deletedBuyers = data.deletedBuyers; deletedDrivers = data.deletedDrivers;
     deletedUnits = data.deletedUnits; dataEpoch = data.dataEpoch;
     letterheadCompany = data.letterheadCompany || '';
+    letterheadCompanyAt = data.letterheadCompanyAt || 0;
     letterheadFactory = data.letterheadFactory || '';
+    letterheadFactoryAt = data.letterheadFactoryAt || 0;
+    
     localStorage.setItem('wh_letterhead_company', letterheadCompany);
+    localStorage.setItem('wh_letterhead_company_at', String(letterheadCompanyAt));
     localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+    localStorage.setItem('wh_letterhead_factory_at', String(letterheadFactoryAt));
+    
+    const def = initVisibleFieldsDefault();
+    const vfFromServer = data.visibleFields || {};
+    ALL_FIELDS.forEach(f=>{
+      if(f.mandatory){ def[f.key] = true; }
+      else if(vfFromServer && typeof vfFromServer[f.key] === 'boolean'){ def[f.key] = vfFromServer[f.key]; }
+    });
+    visibleFields = def;
+    visibleFieldsAt = data.visibleFieldsAt || 0;
+    localStorage.setItem('wh_visible_fields', JSON.stringify(visibleFields));
+    localStorage.setItem('wh_visible_fields_at', String(visibleFieldsAt));
+    
     updateHeaderUI();
+    renderFieldsList();
+    applyFieldVisibility();
+    
     dirty = false; lastSyncAt = Date.now();
     editingId = null; currentType = null;
     applyTypeUI(); fillFormProducts(); fillUnits(); refreshPartyOptions(); refreshDriverOptions();
@@ -1320,6 +1367,8 @@ async function syncPush(){
     deletedDrivers = Array.from(new Set([...deletedDrivers, ...remote.deletedDrivers]));
     deletedUnits = Array.from(new Set([...deletedUnits, ...remote.deletedUnits]));
   }
+  
+  // Merge all data
   records = mergeRecordsById(records, remote?remote.records:[], permanentlyDeletedIds);
   products = mergeProductsRespectingTombstones(products, remote?remote.products:[], deletedProducts);
   sellers = mergeWithTombstones(sellers, remote?remote.sellers:[], deletedSellers);
@@ -1327,7 +1376,40 @@ async function syncPush(){
   drivers = mergeWithTombstones(drivers, remote?remote.drivers:[], deletedDrivers);
   unitsList = mergeUnitsRespectingTombstones(unitsList, remote?remote.unitsList:[], deletedUnits);
   
-  if(remote && remote.users && remote.users.length && !users.length) users = remote.users;
+  // Merge users (remote is authoritative for existing IDs)
+  if(remote && remote.users && remote.users.length) {
+    users = mergeUsers(users, remote.users);
+  }
+  
+  // Merge letterhead with timestamps
+  if (remote) {
+    const mc = mergeLetterheadValue(letterheadCompany, letterheadCompanyAt, remote.letterheadCompany || '', remote.letterheadCompanyAt || 0);
+    letterheadCompany = mc.val; letterheadCompanyAt = mc.at;
+    const mf = mergeLetterheadValue(letterheadFactory, letterheadFactoryAt, remote.letterheadFactory || '', remote.letterheadFactoryAt || 0);
+    letterheadFactory = mf.val; letterheadFactoryAt = mf.at;
+    
+    localStorage.setItem('wh_letterhead_company', letterheadCompany);
+    localStorage.setItem('wh_letterhead_company_at', String(letterheadCompanyAt));
+    localStorage.setItem('wh_letterhead_factory', letterheadFactory);
+    localStorage.setItem('wh_letterhead_factory_at', String(letterheadFactoryAt));
+    updateHeaderUI();
+    
+    const mvf = mergeVisibleFieldsValue(visibleFields, visibleFieldsAt, remote.visibleFields || {}, remote.visibleFieldsAt || 0);
+    const mergedFields = mvf.fields;
+    const def = initVisibleFieldsDefault();
+    ALL_FIELDS.forEach(f=>{
+      if(f.mandatory){ def[f.key] = true; }
+      else if(mergedFields && typeof mergedFields[f.key] === 'boolean'){ def[f.key] = mergedFields[f.key]; }
+    });
+    visibleFields = def;
+    visibleFieldsAt = mvf.at;
+    localStorage.setItem('wh_visible_fields', JSON.stringify(visibleFields));
+    localStorage.setItem('wh_visible_fields_at', String(visibleFieldsAt));
+    renderFieldsList();
+    applyFieldVisibility();
+  }
+  
+  // Merge auditLog
   if(remote && remote.auditLog){
     const key = a=>a.t+'|'+a.action+'|'+a.userId+'|'+(a.detail||'');
     const seen = new Set(auditLog.map(key));
@@ -1338,7 +1420,10 @@ async function syncPush(){
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser, letterheadCompany, letterheadFactory
+    dataEpoch, currentUser,
+    letterheadCompany, letterheadCompanyAt,
+    letterheadFactory, letterheadFactoryAt,
+    visibleFields, visibleFieldsAt
   });
   try {
     await ghPut(payload);
@@ -1623,7 +1708,6 @@ async function printDailySummaryReport(){
   runPrint(h + buildDailySummaryPrintBlock(data) + s, '@page{size:A4 portrait;margin:6mm;}');
 }
 
-/* ─── Summary computation ─── */
 function buildSummaryData(){
   const visible = getVisibleRecords().filter(matchFilter);
   const map = new Map();
@@ -1683,7 +1767,6 @@ function setSummaryMode(mode){
   renderSummary();
 }
 
-/* ─── Daily summary ─── */
 function buildDailySummaryData(){
   const visible = getVisibleRecords().filter(matchFilter);
   const dateSet = new Set(), weightedSet = new Set(), nonWeightedSet = new Set();
@@ -1795,7 +1878,6 @@ function buildDailySummaryPrintBlock(data){
   </div>`;
 }
 
-/* ─── CSV ─── */
 function exportCSV(type){
   const list = getVisibleRecords().filter(r=>r.type===type).filter(matchFilter).sort(sortFn);
   if(!list.length){ showToast('داده‌ای نیست','info'); return; }
@@ -1814,7 +1896,6 @@ function exportCSV(type){
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
 }
 
-/* ─── CRUD helpers ─── */
 async function menuAddProductFull(){
   if(!canEditRecord(currentRole())) return;
   const n = await customPrompt('نام کالای جدید:','');
@@ -1916,7 +1997,7 @@ async function menuAddUnit(){
     if(!isNaN(n)) factor = n;
   }
   deletedUnits = deletedUnits.filter(x=>x!==code);
-  unitsList.push({ v:code, l:l.trim()||code, factor });
+  unitsList.push({ v:code, l:l.trim()||code, factor, updatedAt: Date.now() });
   markDirty(); renderManageLists(); fillUnits(); updateAutoKg();
 }
 
@@ -1994,12 +2075,14 @@ async function menuAddDriverFromSettings(){
   if(!drivers.includes(v)){ drivers.push(v); markDirty(); renderManageLists(); refreshDriverOptions(); }
 }
 
-/* ─── Backup (SMART RESTORE) ─── */
 function backupDownload(){
   const payload = serializeState({
     records, products, sellers, buyers, drivers, unitsList, users, auditLog,
     permanentlyDeletedIds, deletedProducts, deletedSellers, deletedBuyers, deletedDrivers, deletedUnits,
-    dataEpoch, currentUser, letterheadCompany, letterheadFactory
+    dataEpoch, currentUser,
+    letterheadCompany, letterheadCompanyAt,
+    letterheadFactory, letterheadFactoryAt,
+    visibleFields, visibleFieldsAt
   });
   payload.exportedAt = new Date().toISOString();
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
@@ -2063,7 +2146,6 @@ async function restoreFromFile(ev){
   }
 }
 
-/* ─── Splash helper ─── */
 (function initSplash(){
   const splash = document.getElementById('splashScreen');
   if(!splash) return;
@@ -2075,7 +2157,6 @@ async function restoreFromFile(ev){
   }
 })();
 
-/* ─── PWA ─── */
 if('serviceWorker' in navigator){
   window.addEventListener('load', async ()=>{
     try {
